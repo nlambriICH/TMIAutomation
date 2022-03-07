@@ -1,0 +1,144 @@
+﻿<UserControl x:Class="TMIAutomation.UserInterface"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" Height="450" Width="650">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="Theme/ButtonTheme.xaml"/>
+                <ResourceDictionary Source="Theme/ComboBoxTheme.xaml"/>
+                <ResourceDictionary Source="Theme/TextBlockTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+	<Grid Background="#272537">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="75"/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+
+		<TextBlock Text="TMIAutomation"
+				   VerticalAlignment="Center"
+				   Margin="10"
+				   Style="{StaticResource TextBlockTheme}"/>
+
+		<TextBlock Text="Select Body Plan"
+				   Grid.Row="1"
+					Width="130"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Margin="15,30,0,0"
+                    Style="{StaticResource TextBlockTheme}"/>
+
+		<ComboBox Grid.Row="1"
+				  HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Margin="150,30,0,0"
+					x:Name="BodyPlanComboBox"
+					Style="{StaticResource ComboBoxTheme}"
+					Loaded="BodyPlanComboBox_Loaded"
+					SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
+
+		<TextBlock Grid.Row="1"
+				   Text="Select Body PTV"
+					VerticalAlignment="Top"
+					Margin="15,65,0,0"
+					Style="{StaticResource TextBlockTheme}"/>
+
+		<ComboBox Grid.Row="1"
+				  HorizontalAlignment="Left"
+					VerticalAlignment="Top"
+					Margin="150,65,0,0"
+					x:Name="BodyPTVComboBox"
+					Style="{StaticResource ComboBoxTheme}"
+					Loaded="BodyPTVComboBox_Loaded"
+                  ItemsSource="{Binding BodyPlanPTVs}"/>
+
+		<TextBlock Grid.Row="1"
+				   Text="Select Legs Plan"
+					VerticalAlignment="Top"
+					HorizontalAlignment="Right"
+					Margin="0,30,200,0"
+					Style="{StaticResource TextBlockTheme}"/>
+
+		<ComboBox Grid.Row="1"
+				  HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					Margin="0,30,25,0"
+					Style="{StaticResource ComboBoxTheme}"
+				  Loaded="LegsPlanComboBox_Loaded"
+					SelectionChanged="LegsPlanComboBox_SelectionChanged"
+				  x:Name="LegsPlanComboBox"/>
+
+		<TextBlock Grid.Row="1"
+				   Text="Select Legs PTV"
+					VerticalAlignment="Top"
+					HorizontalAlignment="Right"
+					Margin="0,65,200,0"
+					Style="{StaticResource TextBlockTheme}"/>
+
+		<ComboBox Grid.Row="1"
+				  HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					Margin="0,65,25,0"
+					Style="{StaticResource ComboBoxTheme}"
+				  x:Name="LegsPTVComboBox"
+				  Loaded="LegsPTVComboBox_Loaded"/>
+
+
+		<TextBlock Grid.Row="1"
+				   Text="Select Registration"
+					VerticalAlignment="Top"
+					HorizontalAlignment="Right"
+					Margin="0,100,200,0"
+					Style="{StaticResource TextBlockTheme}"/>
+
+		<ComboBox Grid.Row="1"
+				  HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					Margin="0,100,25,0"
+					Style="{StaticResource ComboBoxTheme}"
+				  x:Name="RegistrationComboBox"
+				  Loaded="RegistrationComboBox_Loaded"
+				  SelectionChanged="RegistrationComboBox_SelectionChanged"/>
+
+
+		<Button Grid.Row="1"
+				Grid.Column="1"
+                HorizontalAlignment="Left"
+                Margin="60,0,0,0"
+                x:Name="BodyJunctionButton"
+                Content="Generate Body Junction Structures"
+                Click="BodyJunctionButton_Click"/>
+
+		<Button Grid.Row="1"
+				Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="60,200,0,0"
+                x:Name="BodyControlButton"
+                Content="Generate Body Control Structures"
+                Click="BodyControlButton_Click"/>
+
+		<Button Grid.Row="1"
+				Grid.Column="1"
+                HorizontalAlignment="Right"
+                Margin="0,0,60,0"
+                x:Name="LegsJunctionButton"
+                Content="Generate Legs Junction Structures"
+				Click="LegsJunctionButton_Click"/>
+
+		<Button Grid.Row="1"
+				Grid.Column="1"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,200,60,0"
+                x:Name="LegsControlButton"
+                Content="Generate Legs Control Structures"
+				Click="LegsControlButton_Click"/>
+	</Grid>
+</UserControl>
