@@ -54,6 +54,34 @@ namespace TMIAutomation
             Structure ptvTotNoJunctionBody = bodySS.AddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION);
             ptvTotNoJunctionBody.SegmentVolume = ptvBodyWithJunction.Sub(bodyJunction);
 
+            Structure ptvLegsBody = bodySS.Structures.FirstOrDefault(s =>
+            {
+                string structureIdLower = s.Id.ToLower();
+                return s.DicomType == "PTV" && (structureIdLower.Contains("legs") || structureIdLower.Contains("gambe"));
+            });
+            Structure ptvLegsBodyNoJunction = bodySS.AddStructure(ptvLegsBody.DicomType, StructureHelper.PTV_LEGS_NO_JUNCTION);
+            ptvLegsBodyNoJunction.SegmentVolume = ptvLegsBody.Sub(bodyJunction);
+
+
+            Structure rem = bodySS.AddStructure("AVOIDANCE", StructureHelper.REM);
+            IEnumerable<int> slicesIsodose25 = StructureHelper.GetStructureSlices(junctionSubStructures[0], bodySS);
+            int topSliceIsodose25 = slicesIsodose25.LastOrDefault();
+            int bottomSliceRem = slicesIsodose25.FirstOrDefault() - 2;
+
+            foreach (int slice in Enumerable.Range(bottomSliceRem, topSliceIsodose25 - bottomSliceRem))
+            {
+                Structure body = bodySS.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY);
+                Structure bodyShrunk = bodySS.AddStructure("AVOIDANCE", "tempBody");
+                bodyShrunk.SegmentVolume = body.Margin(-20);
+                VVector[][] contours = bodyShrunk.GetContoursOnImagePlane(slice);
+                foreach (VVector[] contour in contours)
+                {
+                    rem.AddContourOnImagePlane(contour, slice);
+                }
+                bodySS.RemoveStructure(bodyShrunk);
+            }
+            rem.SegmentVolume = rem.Sub(bodyJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
+
         }
     }
 }

@@ -14,6 +14,7 @@ namespace TMIAutomation
         public const string PTV_JUNCTION50 = "PTV_Junction50%";
         public const string PTV_JUNCTION75 = "PTV_Junction75%";
         public const string PTV_JUNCTION100 = "PTV_Junction100%";
+        public const string PTV_LEGS_NO_JUNCTION = "PTVLegsNoJunc";
         public const string DOSE_25 = "Dose_25%";
         public const string DOSE_50 = "Dose_50%";
         public const string DOSE_75 = "Dose_75%";
