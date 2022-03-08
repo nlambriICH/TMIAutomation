@@ -118,12 +118,16 @@ namespace TMIAutomation
 
         private void UpdateLegsPTVIds(string selectedLegsPlanId)
         {
-            ((UserInterfaceModel)DataContext).LegsPlanPTVs = new ObservableCollection<string>(context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId).StructureSet.Structures
+            var selectedLegsPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId);
+            if (selectedLegsPlan != null)
+            {
+                ((UserInterfaceModel)DataContext).LegsPlanPTVs = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
                             .Where(s => s.DicomType == "PTV")
                             .OrderByDescending(s => s.Volume)
                             .Select(p => p.Id));
-            LegsPTVComboBox.ItemsSource = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
-            LegsPTVComboBox.SelectedIndex = 0;
+                LegsPTVComboBox.ItemsSource = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
+                LegsPTVComboBox.SelectedIndex = 0;
+            }
         }
 
 		private void RegistrationComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -139,17 +143,17 @@ namespace TMIAutomation
             string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
             string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs.FirstOrDefault();
             string selectedRegistration = ((UserInterfaceModel)DataContext).Registration;
-			try
-			{
-				IStructure legsJunction = new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration);
-				Mouse.OverrideCursor = Cursors.Wait;
-				//WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
-				legsJunction.Create(context);
-				UpdateLegsPTVIds(selectedLegsPlanId);
+            try
+            {
+                IStructure legsJunction = new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration);
+                Mouse.OverrideCursor = Cursors.Wait;
+                //WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                legsJunction.Create(context);
+                UpdateLegsPTVIds(selectedLegsPlanId);
                 MessageBox.Show("Done!", "Info");
-			}
-			finally
-			{
+            }
+            finally
+            {
                 Mouse.OverrideCursor = Cursors.Arrow;
             }
         }
@@ -158,16 +162,16 @@ namespace TMIAutomation
 		{
             string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
             string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs.FirstOrDefault();
-			try
-			{
-				IStructure legscontrol = new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId);
-				Mouse.OverrideCursor = Cursors.Wait;
-				//WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
-				legscontrol.Create(context);
+            try
+            {
+                IStructure legscontrol = new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId);
+                Mouse.OverrideCursor = Cursors.Wait;
+                //WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                legscontrol.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
-			finally
-			{
+            finally
+            {
                 Mouse.OverrideCursor = null;
             }
         }

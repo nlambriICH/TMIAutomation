@@ -155,7 +155,7 @@ namespace TMIAutomation
 			return MessageBox.Show($"Image Z-resolution between body and legs CTs does not match: {bodyZRes} mm vs {legsZRes} mm." +
 									"\n\nThe script-generated isodose structures will not match those created from within Eclipse. This will also affect the legs junction." +
 									"\n\nContinue anyway?" +
-									"\n\n[In order to generate a more accurate legs junction, please create manually the isodose structures]", "Warning", MessageBoxButton.YesNo);
+									"\n\n[In order to generate a more accurate legs junction, please create manually the isodose structures with names Dose_25%, Dose_50%, Dose_75%, Dose_100%]", "Warning", MessageBoxButton.YesNo);
 		}
 
 		private void CreateJunctionSubstructures(StructureSet legsSS)
