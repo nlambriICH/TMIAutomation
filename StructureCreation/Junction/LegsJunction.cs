@@ -120,7 +120,24 @@ namespace TMIAutomation
 
 				CreateJunctionSubstructures(legsSS);
 				CreateREMStructure(legsSS);
+				CropIsodose100(legsSS);
 			}
+		}
+
+		private void CropIsodose100(StructureSet legsSS)
+        {
+			Structure ptvTotal = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
+			Structure isodose100 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100);
+
+			int bottomSlicePTVtotal = StructureHelper.GetStructureSlices(ptvTotal, legsSS).LastOrDefault();
+			int bottomSliceIsodose100 = StructureHelper.GetStructureSlices(isodose100, legsSS).LastOrDefault();
+			int cropOffset = 5;
+
+			foreach (int slice in Enumerable.Range(bottomSlicePTVtotal + cropOffset, bottomSliceIsodose100 - bottomSlicePTVtotal - cropOffset + 1))
+            {
+				isodose100.ClearAllContoursOnImagePlane(slice);
+            }
+
 		}
 
 		private void CreateREMStructure(StructureSet legsSS)
@@ -128,17 +145,17 @@ namespace TMIAutomation
 			/*
 			 * Create "REM" structure
 			 */
-			Structure junction50 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_JUNCTION50);
+			Structure junction25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_JUNCTION25);
 
-			int topSliceJunction50 = StructureHelper.GetStructureSlices(junction50, legsSS).FirstOrDefault();
+			int topSliceJunction25 = StructureHelper.GetStructureSlices(junction25, legsSS).FirstOrDefault();
 
-			Structure ptv = legsSS.Structures.FirstOrDefault(s => s.Id == legsPTVId);
-			int bottomSlicePTVWithJunction = StructureHelper.GetStructureSlices(ptv, legsSS).LastOrDefault();
+			Structure ptvTotal = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
+			int bottomSlicePTVtotal = StructureHelper.GetStructureSlices(ptvTotal, legsSS).LastOrDefault();
 
 			Structure rem = legsSS.AddStructure("AVOIDANCE", StructureHelper.REM);
 			Structure isodose25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_25);
 
-			foreach (int slice in Enumerable.Range(topSliceJunction50, bottomSlicePTVWithJunction - topSliceJunction50 + 3))
+			foreach (int slice in Enumerable.Range(topSliceJunction25, bottomSlicePTVtotal - topSliceJunction25 + 3))
 			{
 				foreach (VVector[] contour in isodose25.GetContoursOnImagePlane(slice))
 				{

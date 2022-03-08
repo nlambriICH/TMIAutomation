@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using TMIAutomation.Model;
 using VMS.TPS.Common.Model.API;
 
@@ -53,18 +43,18 @@ namespace TMIAutomation
 
 		private void UpdateBodyPTVIds(string selectedBodyPlanId)
 		{
-			((UserInterfaceModel)DataContext).BodyPlanPTVs = new ObservableCollection<string>(context.PlansInScope.FirstOrDefault(p => p.Id == selectedBodyPlanId).StructureSet.Structures
-							.Where(s => s.DicomType == "PTV")
-							.OrderByDescending(s => s.Volume)
-							.Select(p => p.Id));
-            BodyPTVComboBox.ItemsSource = ((UserInterfaceModel)DataContext).BodyPlanPTVs;
+            BodyPTVComboBox.ItemsSource = new ObservableCollection<string>(context.PlansInScope.FirstOrDefault(p => p.Id == selectedBodyPlanId).StructureSet.Structures
+                            .Where(s => s.DicomType == "PTV")
+                            .OrderByDescending(s => s.Volume)
+                            .Select(p => p.Id));
             BodyPTVComboBox.SelectedIndex = 0;
+            ((UserInterfaceModel)DataContext).BodyPlanPTVs = BodyPTVComboBox.SelectedItem as string;
         }
 
 		private void BodyJunctionButton_Click(object sender, RoutedEventArgs e)
         {
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
-            string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs.FirstOrDefault();
+            string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs;
             IStructure bodyJunction = new BodyJunction(selectedBodyPlanId, selectedBodyPTVId);
 			try
 			{
@@ -82,12 +72,12 @@ namespace TMIAutomation
         private void BodyControlButton_Click(object sender, RoutedEventArgs e)
         {
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
-            string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs.FirstOrDefault();
+            string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs;
             try
             {
                 Mouse.OverrideCursor = Cursors.Wait;
                 IStructure bodyControl = new BodyControlStructures(selectedBodyPlanId, selectedBodyPTVId);
-                //WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
                 bodyControl.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
@@ -121,12 +111,12 @@ namespace TMIAutomation
             var selectedLegsPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId);
             if (selectedLegsPlan != null)
             {
-                ((UserInterfaceModel)DataContext).LegsPlanPTVs = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
+                LegsPTVComboBox.ItemsSource = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
                             .Where(s => s.DicomType == "PTV")
                             .OrderByDescending(s => s.Volume)
                             .Select(p => p.Id));
-                LegsPTVComboBox.ItemsSource = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
                 LegsPTVComboBox.SelectedIndex = 0;
+                ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
             }
         }
 
@@ -141,13 +131,13 @@ namespace TMIAutomation
 		{
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
             string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
-            string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs.FirstOrDefault();
+            string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
             string selectedRegistration = ((UserInterfaceModel)DataContext).Registration;
             try
             {
                 IStructure legsJunction = new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration);
                 Mouse.OverrideCursor = Cursors.Wait;
-                //WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
                 legsJunction.Create(context);
                 UpdateLegsPTVIds(selectedLegsPlanId);
                 MessageBox.Show("Done!", "Info");
@@ -161,12 +151,12 @@ namespace TMIAutomation
 		private void LegsControlButton_Click(object sender, RoutedEventArgs e)
 		{
             string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
-            string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs.FirstOrDefault();
+            string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
             try
             {
                 IStructure legscontrol = new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId);
                 Mouse.OverrideCursor = Cursors.Wait;
-                //WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
                 legscontrol.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
@@ -180,5 +170,15 @@ namespace TMIAutomation
 		{
             ((UserInterfaceModel)DataContext).Registration = ((ComboBox)sender).SelectedItem as string;
         }
-	}
+
+        private void BodyPTVComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ((UserInterfaceModel)DataContext).BodyPlanPTVs = BodyPTVComboBox.SelectedItem as string;
+        }
+
+        private void LegsPTVComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
+        }
+    }
 }

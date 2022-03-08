@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace TMIAutomation.Model
 {
@@ -36,12 +34,12 @@ namespace TMIAutomation.Model
         }
 
 
-        private ObservableCollection<string> legsPlanPTVs;
-        private ObservableCollection<string> bodyPlanPTVs;
+        private string legsPlanPTVs;
+        private string bodyPlanPTVs;
        
 		public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCollection<string> BodyPlanPTVs
+        public string BodyPlanPTVs
         {
             get { return bodyPlanPTVs; }
             set
@@ -51,7 +49,7 @@ namespace TMIAutomation.Model
             }
         }
 
-        public ObservableCollection<string> LegsPlanPTVs
+        public string LegsPlanPTVs
         {
             get { return legsPlanPTVs; }
             set

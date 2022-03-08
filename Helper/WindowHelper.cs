@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 
 namespace TMIAutomation
@@ -20,14 +17,15 @@ namespace TMIAutomation
 
         public static void ShowAutoClosingMessageBox(string message, string caption)
         {
-            var timer = new System.Timers.Timer(10000) { AutoReset = false };
+            System.Timers.Timer timer = new System.Timers.Timer(10000) { AutoReset = false };
             timer.Elapsed += delegate
             {
                 IntPtr hWnd = FindWindowByCaption(IntPtr.Zero, caption);
                 if (hWnd.ToInt32() != 0) PostMessage(hWnd, WM_CLOSE, 0, 0);
             };
             timer.Enabled = true;
-            MessageBox.Show(message, caption);
+            Thread thread = new Thread(() => MessageBox.Show(message, caption));
+            thread.Start();
         }
     }
 }
