@@ -4,8 +4,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using VMS.TPS.Common.Model.API;
 using TMIAutomation.Model;
+using Serilog;
+using System.IO;
 using System;
-using System.Linq;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.3")]
@@ -20,35 +21,42 @@ namespace VMS.TPS
     public class Script
     {
 
+        private readonly ILogger logger;
+
         public Script()
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIAutomation.log"),
+                              rollingInterval: RollingInterval.Day,
+                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            this.logger = Log.ForContext<Script>();
+
+            logger.Information("TMIAutomation script instance created");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void Execute(ScriptContext context, Window window /*, ScriptEnvironment environment*/)
         {
-            try
+            UserInterface ui = new UserInterface(context)
             {
-                if (context.PlansInScope == null && context.PlansInScope.Any())
-                {
-                    MessageBox.Show("No plans opened in Eclipse.");
-                    return;
-                }
+                DataContext = new UserInterfaceModel()
+            };
 
-                UserInterface ui = new UserInterface(context)
-                {
-                    DataContext = new UserInterfaceModel()
-                };
-                window.Content = ui;
-                window.SizeToContent = SizeToContent.WidthAndHeight;
-                window.ResizeMode = ResizeMode.NoResize;
-                window.Title = "ESAPI";
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            window.Content = ui;
+            window.SizeToContent = SizeToContent.WidthAndHeight;
+            window.ResizeMode = ResizeMode.NoResize;
+            window.Title = "ESAPI";
 
+            logger.Information("Window content set to the user interface");
+
+            window.Closed += CloseAndFlushLogger;
+
+        }
+        public void CloseAndFlushLogger(object sender, EventArgs e)
+        {
+            Log.CloseAndFlush();
         }
     }
 }

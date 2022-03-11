@@ -17,124 +17,158 @@
 
     <Grid Background="#272537">
         <Grid.RowDefinitions>
-            <RowDefinition Height="75"/>
+            <RowDefinition Height="60"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="TMIAutomation"
 				   VerticalAlignment="Center"
-				   Margin="10"
+				   Margin="10,5,5,10"
+                   FontSize="22"
 				   Style="{StaticResource TextBlockTheme}"/>
 
-        <TextBlock Text="Select Body Plan"
-				   Grid.Row="1"
-					Width="130"
-					HorizontalAlignment="Left"
-					VerticalAlignment="Top"
-					Margin="15,30,0,0"
-                    Style="{StaticResource TextBlockTheme}"/>
+        <TabControl Grid.Row="1"
+                    Background="#272537">
 
-        <ComboBox Grid.Row="1"
-				  HorizontalAlignment="Left"
-					VerticalAlignment="Top"
-					Margin="150,30,0,0"
-					x:Name="BodyPlanComboBox"
-					Style="{StaticResource ComboBoxTheme}"
-					Loaded="BodyPlanComboBox_Loaded"
-					SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
+            <TabItem Width="100"
+                     Background="#FDFDFD">
+                <TabItem.Header>
+                    <TextBlock Text="Body"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
 
-        <TextBlock Grid.Row="1"
-				   Text="Select Body PTV"
-					VerticalAlignment="Top"
-					Margin="15,65,0,0"
-					Style="{StaticResource TextBlockTheme}"/>
+                <Grid>
 
-        <ComboBox Grid.Row="1"
-				  HorizontalAlignment="Left"
-					VerticalAlignment="Top"
-					Margin="150,65,0,0"
-					x:Name="BodyPTVComboBox"
-					Style="{StaticResource ComboBoxTheme}"
-					Loaded="BodyPTVComboBox_Loaded"
-                  ItemsSource="{Binding BodyPlanPTVs}" SelectionChanged="BodyPTVComboBox_SelectionChanged"/>
+                    <TextBlock Text="Select Body Plan"
+					            Width="130"
+					            HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="150,30,0,0"
+                                Style="{StaticResource TextBlockTheme}"/>
 
-        <TextBlock Grid.Row="1"
-				   Text="Select Legs Plan"
-					VerticalAlignment="Top"
-					HorizontalAlignment="Right"
-					Margin="0,30,200,0"
-					Style="{StaticResource TextBlockTheme}"/>
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,30,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+					            Loaded="BodyPlanComboBox_Loaded"
+					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
 
-        <ComboBox Grid.Row="1"
-				  HorizontalAlignment="Right"
-					VerticalAlignment="Top"
-					Margin="0,30,25,0"
-					Style="{StaticResource ComboBoxTheme}"
-				  Loaded="LegsPlanComboBox_Loaded"
-					SelectionChanged="LegsPlanComboBox_SelectionChanged"
-				  x:Name="LegsPlanComboBox"/>
+                    <TextBlock Text="Select Body PTV"
+					            VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+					            Margin="150,80,0,0"
+					            Style="{StaticResource TextBlockTheme}"/>
 
-        <TextBlock Grid.Row="1"
-				   Text="Select Legs PTV"
-					VerticalAlignment="Top"
-					HorizontalAlignment="Right"
-					Margin="0,65,200,0"
-					Style="{StaticResource TextBlockTheme}"/>
+                    <ComboBox  HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,80,0,0"
+					            x:Name="BodyPTVComboBox"
+					            Style="{StaticResource ComboBoxTheme}"
+					            Loaded="BodyPTVComboBox_Loaded"
+                                SelectionChanged="BodyPTVComboBox_SelectionChanged" Grid.Column="1"/>
 
-        <ComboBox Grid.Row="1"
-				  HorizontalAlignment="Right"
-					VerticalAlignment="Top"
-					Margin="0,65,25,0"
-					Style="{StaticResource ComboBoxTheme}"
-				  x:Name="LegsPTVComboBox"
-				  Loaded="LegsPTVComboBox_Loaded" SelectionChanged="LegsPTVComboBox_SelectionChanged"/>
+                    <Button HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,150,0,0"
+                            Content="Generate Body Junction Structures"
+                            Click="BodyJunctionButton_Click"/>
+
+                    <Button HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,230,0,0"
+                            Content="Generate Body Control Structures"
+                            Click="BodyControlButton_Click"/>
+
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Width="100"
+                     Background="#FDFDFD">
+
+                <TabItem.Header>
+                    <TextBlock Text="Legs"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
+
+                <Grid>
+
+                    <TextBlock Text="Select Body Plan"
+					            Width="130"
+					            HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="150,22,0,0"
+                                Style="{StaticResource TextBlockTheme}"/>
+
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,22,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+					            Loaded="BodyPlanComboBox_Loaded"
+					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
+
+                    <TextBlock Text="Select Legs Plan"
+					            VerticalAlignment="Top"
+					            HorizontalAlignment="Left"
+					            Margin="150,59,0,0"
+					            Style="{StaticResource TextBlockTheme}"/>
+
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,59,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+				                Loaded="LegsPlanComboBox_Loaded"
+					            SelectionChanged="LegsPlanComboBox_SelectionChanged"/>
+
+                    <TextBlock Text="Select Legs PTV"
+					            VerticalAlignment="Top"
+					            HorizontalAlignment="Left"
+					            Margin="150,96,0,0"
+					            Style="{StaticResource TextBlockTheme}"/>
+
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,96,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+				              x:Name="LegsPTVComboBox"
+				              Loaded="LegsPTVComboBox_Loaded"
+                              SelectionChanged="LegsPTVComboBox_SelectionChanged"/>
 
 
-        <TextBlock Grid.Row="1"
-				   Text="Select Registration"
-					VerticalAlignment="Top"
-					HorizontalAlignment="Right"
-					Margin="0,100,200,0"
-					Style="{StaticResource TextBlockTheme}"/>
+                    <TextBlock Text="Select Registration"
+					            VerticalAlignment="Top"
+					            HorizontalAlignment="Left"
+					            Margin="150,133,0,0"
+					            Style="{StaticResource TextBlockTheme}"/>
 
-        <ComboBox Grid.Row="1"
-				  HorizontalAlignment="Right"
-					VerticalAlignment="Top"
-					Margin="0,100,25,0"
-					Style="{StaticResource ComboBoxTheme}"
-				  x:Name="RegistrationComboBox"
-				  Loaded="RegistrationComboBox_Loaded"
-				  SelectionChanged="RegistrationComboBox_SelectionChanged"/>
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,133,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+				              Loaded="RegistrationComboBox_Loaded"
+				              SelectionChanged="RegistrationComboBox_SelectionChanged"/>
+
+                    <Button HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,195,0,0"
+                            Content="Generate Legs Junction Structures"
+				            Click="LegsJunctionButton_Click"/>
+
+                    <Button HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,270,0,0"
+                            Content="Generate Legs Control Structures"
+				            Click="LegsControlButton_Click"/>
+
+                </Grid>
+
+            </TabItem>
+        </TabControl>
 
 
-        <Button Grid.Row="1"
-                HorizontalAlignment="Left"
-                Margin="60,174,0,156"
-                x:Name="BodyJunctionButton"
-                Content="Generate Body Junction Structures"
-                Click="BodyJunctionButton_Click"/>
-
-        <Button Grid.Row="1"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Margin="60,250,0,80"
-                x:Name="BodyControlButton"
-                Content="Generate Body Control Structures"
-                Click="BodyControlButton_Click"/>
-
-        <Button Grid.Row="1"
-                HorizontalAlignment="Right"
-                Margin="0,174,60,156"
-                x:Name="LegsJunctionButton"
-                Content="Generate Legs Junction Structures"
-				Click="LegsJunctionButton_Click"/>
-
-        <Button Grid.Row="1"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Margin="0,250,60,80"
-                x:Name="LegsControlButton"
-                Content="Generate Legs Control Structures"
-				Click="LegsControlButton_Click"/>
     </Grid>
 </UserControl>

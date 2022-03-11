@@ -102,7 +102,6 @@ namespace TMIAutomation
             Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
             Structure healthyTissue = ss.AddStructure("CONTROL", HEALTHY_TISSUE);
             Structure healthyTissue2 = ss.AddStructure("CONTROL", HEALTHY_TISSUE2);
-
             healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
             healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
         }

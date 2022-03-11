@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,11 +60,16 @@ namespace TMIAutomation
 			try
 			{
 				Mouse.OverrideCursor = Cursors.Wait;
-				bodyJunction.Create(context);
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                bodyJunction.Create(context);
 				UpdateBodyPTVIds(selectedBodyPlanId);
                 MessageBox.Show("Done!", "Info");
             }
-			finally
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
+            }
+            finally
 			{
                 Mouse.OverrideCursor = null;
             }
@@ -81,11 +87,16 @@ namespace TMIAutomation
                 bodyControl.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
+            }
             finally
             {
                 Mouse.OverrideCursor = null;
             }
         }
+
 
         private void LegsPlanComboBox_Loaded(object sender, RoutedEventArgs e)
         {
@@ -142,6 +153,10 @@ namespace TMIAutomation
                 UpdateLegsPTVIds(selectedLegsPlanId);
                 MessageBox.Show("Done!", "Info");
             }
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
+            }
             finally
             {
                 Mouse.OverrideCursor = Cursors.Arrow;
@@ -159,6 +174,10 @@ namespace TMIAutomation
                 WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
                 legscontrol.Create(context);
                 MessageBox.Show("Done!", "Info");
+            }
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
             }
             finally
             {

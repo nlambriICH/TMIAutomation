@@ -17,7 +17,7 @@ namespace TMIAutomation
 
         public static void ShowAutoClosingMessageBox(string message, string caption)
         {
-            System.Timers.Timer timer = new System.Timers.Timer(10000) { AutoReset = false };
+            System.Timers.Timer timer = new System.Timers.Timer(8000) { AutoReset = false };
             timer.Elapsed += delegate
             {
                 IntPtr hWnd = FindWindowByCaption(IntPtr.Zero, caption);

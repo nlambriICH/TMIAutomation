@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
@@ -13,6 +13,7 @@ namespace TMIAutomation
         private readonly string legsPlanId;
         private readonly string legsPTVId;
         private readonly string imageRegId;
+		private readonly ILogger logger;
 
         public LegsJunction(string bodyPlanId, string legsPlanId, string legsPTVId, string imageRegId)
         {
@@ -20,33 +21,22 @@ namespace TMIAutomation
             this.legsPlanId = legsPlanId;
             this.legsPTVId = legsPTVId;
             this.imageRegId = imageRegId;
+			this.logger = Log.ForContext<LegsJunction>();
         }
 
         public void Create(ScriptContext context)
 		{
+
+			logger.Information("Create legs junction context: {@context}", new List<string> { bodyPlanId, legsPlanId, legsPTVId, imageRegId } );
+
 			PlanSetup bodyPlan = context.PlansInScope.FirstOrDefault(p => p.Id == bodyPlanId);
 			StructureSet bodySS = bodyPlan.StructureSet;
 			StructureSet legsSS = context.PlansInScope.FirstOrDefault(p => p.Id == legsPlanId).StructureSet;
 
 			List<string> isoStructuresId = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
 
-			if (isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
+			if (!isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
 			{
-				CreateJunctionSubstructures(legsSS);
-			}
-			else
-			{
-				if (bodySS.Image.ZRes != legsSS.Image.ZRes)
-				{
-					MessageBoxResult msgBoxResult = ShowWarning(bodySS.Image.ZRes, legsSS.Image.ZRes);
-
-					if (msgBoxResult == MessageBoxResult.No || msgBoxResult == MessageBoxResult.None)
-					{
-						return;
-					}
-
-				}
-
 				context.Patient.BeginModifications();
 
 				/*
@@ -81,6 +71,8 @@ namespace TMIAutomation
 					bodyIsodoseStructures[i].ConvertDoseLevelToStructure(bodyPlan.Dose, new DoseValue(doseValues[i], doseUnit));
 				}
 
+				logger.Information("Structures created: {@bodyIsodoseStructures}", bodyIsodoseStructures.Select(s => s.Id));
+
 				/*
 				 * Copy structures to legs RTSTRUCT
 				 */
@@ -102,6 +94,8 @@ namespace TMIAutomation
 					}
 				});
 
+				logger.Information("Isodose structures copied to legs CT using registration: {registration}", registration.Id);
+
 				if (bodySS.Image.ZRes != legsSS.Image.ZRes)
 				{
 					List<Structure> legsIsoDoseStructures = new List<Structure>
@@ -117,11 +111,11 @@ namespace TMIAutomation
 						legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, legsSS.Image.ZRes));
 					}
 				}
-
-				CreateJunctionSubstructures(legsSS);
-				CreateREMStructure(legsSS);
-				CropIsodose100(legsSS);
 			}
+
+			CreateJunctionSubstructures(legsSS);
+			CreateREMStructure(legsSS);
+			CropIsodose100(legsSS);
 		}
 
 		private void CropIsodose100(StructureSet legsSS)
@@ -137,6 +131,8 @@ namespace TMIAutomation
             {
 				isodose100.ClearAllContoursOnImagePlane(slice);
             }
+
+			logger.Information("Cropped structure: {isodose100}", isodose100.Id);
 
 		}
 
@@ -165,14 +161,8 @@ namespace TMIAutomation
 
 			Structure legsJunction = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_JUNCTION);
 			rem.SegmentVolume = rem.Sub(legsJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
-		}
 
-		private static MessageBoxResult ShowWarning(double bodyZRes, double legsZRes)
-		{
-			return MessageBox.Show($"Image Z-resolution between body and legs CTs does not match: {bodyZRes} mm vs {legsZRes} mm." +
-									"\n\nThe script-generated isodose structures will not match those created from within Eclipse. This will also affect the legs junction." +
-									"\n\nContinue anyway?" +
-									"\n\n[In order to generate a more accurate legs junction, please create manually the isodose structures with names Dose_25%, Dose_50%, Dose_75%, Dose_100%]", "Warning", MessageBoxButton.YesNo);
+			logger.Information("Structure created: {rem}", rem.Id);
 		}
 
 		private void CreateJunctionSubstructures(StructureSet legsSS)
@@ -196,12 +186,15 @@ namespace TMIAutomation
 
 			Structure isodose75 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_75);
 			Structure junction25 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION25, legsSS, ptvLegsWithJunction, isodose75);
+			logger.Information("Structure created: {junction25}", junction25.Id);
 
 			Structure isodose50 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_50);
 			Structure junction50 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION50, legsSS, ptvLegsWithJunction, isodose50);
+			logger.Information("Structure created: {junction50}", junction50.Id);
 
 			Structure isodose25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_25);
 			Structure junction75 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION75, legsSS, ptvLegsWithJunction, isodose25);
+			logger.Information("Structure created: {junction75}", junction75.Id);
 
 			junction75.SegmentVolume = junction75.Sub(junction50.SegmentVolume);
 			junction50.SegmentVolume = junction50.Sub(junction25.SegmentVolume);
@@ -216,12 +209,15 @@ namespace TMIAutomation
 					junction100.AddContourOnImagePlane(contour, topSliceJunction75 - i);
 				}
 			}
+			logger.Information("Structure created: {junction100}", junction100.Id);
 
 			Structure legsJunction = legsSS.AddStructure("PTV", StructureHelper.PTV_JUNCTION);
 			legsJunction.SegmentVolume = junction25.Or(junction50).Or(junction75).Or(junction100);
+			logger.Information("Structure created: {legsJunction}", legsJunction.Id);
 
 			Structure ptvTotNoJunctionLegs = legsSS.AddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION);
 			ptvTotNoJunctionLegs.SegmentVolume = ptvLegsWithJunction.Sub(legsJunction);
+			logger.Information("Structure created: {ptvTotNoJunctionLegs}", ptvTotNoJunctionLegs.Id);
 		}
 	}
 }
