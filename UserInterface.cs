@@ -44,12 +44,23 @@ namespace TMIAutomation
 
 		private void UpdateBodyPTVIds(string selectedBodyPlanId)
 		{
-            BodyPTVComboBox.ItemsSource = new ObservableCollection<string>(context.PlansInScope.FirstOrDefault(p => p.Id == selectedBodyPlanId).StructureSet.Structures
-                            .Where(s => s.DicomType == "PTV")
-                            .OrderByDescending(s => s.Volume)
-                            .Select(p => p.Id));
-            BodyPTVComboBox.SelectedIndex = 0;
-            ((UserInterfaceModel)DataContext).BodyPlanPTVs = BodyPTVComboBox.SelectedItem as string;
+            PlanSetup selectedBodyPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedBodyPlanId);
+            try
+            {
+                if (selectedBodyPlan != null)
+                {
+                    BodyPTVComboBox.ItemsSource = new ObservableCollection<string>(selectedBodyPlan.StructureSet.Structures
+                                .Where(s => s.DicomType == "PTV")
+                                .OrderByDescending(s => s.Volume)
+                                .Select(p => p.Id));
+                    BodyPTVComboBox.SelectedIndex = 0;
+                    ((UserInterfaceModel)DataContext).BodyPlanPTVs = BodyPTVComboBox.SelectedItem as string;
+                }
+            }
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
+            }
         }
 
 		private void BodyJunctionButton_Click(object sender, RoutedEventArgs e)
@@ -97,7 +108,6 @@ namespace TMIAutomation
             }
         }
 
-
         private void LegsPlanComboBox_Loaded(object sender, RoutedEventArgs e)
         {
             ((ComboBox)sender).ItemsSource = context.PlansInScope.Where(p => p.Id.Contains("down")).OrderByDescending(p => p.CreationDateTime).Select(p => p.Id);
@@ -119,15 +129,22 @@ namespace TMIAutomation
 
         private void UpdateLegsPTVIds(string selectedLegsPlanId)
         {
-            var selectedLegsPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId);
-            if (selectedLegsPlan != null)
+            PlanSetup selectedLegsPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId);
+            try
             {
-                LegsPTVComboBox.ItemsSource = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
-                            .Where(s => s.DicomType == "PTV")
-                            .OrderByDescending(s => s.Volume)
-                            .Select(p => p.Id));
-                LegsPTVComboBox.SelectedIndex = 0;
-                ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
+                if (selectedLegsPlan != null)
+                {
+                    LegsPTVComboBox.ItemsSource = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
+                                .Where(s => s.DicomType == "PTV")
+                                .OrderByDescending(s => s.Volume)
+                                .Select(p => p.Id));
+                    LegsPTVComboBox.SelectedIndex = 0;
+                    ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
+                }
+            }
+            catch (Exception exc)
+            {
+                LoggerHelper.LogAndWarnException(exc);
             }
         }
 
