@@ -21,7 +21,7 @@ namespace TMIAutomation
         public void Create(ScriptContext context)
         {
 
-            logger.Information("Create body control structures context: {@context}", new List<string> { bodyPlanId, bodyPTVId });
+            logger.Information("BodyControlStructures context: {@context}", new List<string> { bodyPlanId, bodyPTVId });
 
             context.Patient.BeginModifications();
 
@@ -30,14 +30,14 @@ namespace TMIAutomation
              */
             StructureSet bodySS = context.PlansInScope.FirstOrDefault(p => p.Id == bodyPlanId).StructureSet;
             Structure ptv = bodySS.Structures.FirstOrDefault(s => s.Id == bodyPTVId);
-            int bottomSlicePTVWithJunction = StructureHelper.GetStructureSlices(ptv, bodySS).FirstOrDefault();
+            int bottomSlicePTVWithJunction = bodySS.GetStructureSlices(ptv).FirstOrDefault();
             int clearBodyFreeOffset = 3;
             int bodyFreeSliceRemove = bottomSlicePTVWithJunction - clearBodyFreeOffset;
-            
-            StructureHelper.CreateHealthyTissue(bodySS, ptv);
+
+            bodySS.CreateHealthyTissue(ptv, logger);
             logger.Information("Structures created: {healthyTissue} {healthyTissue2}", StructureHelper.HEALTHY_TISSUE, StructureHelper.HEALTHY_TISSUE2);
 
-            StructureHelper.CreateBodyFree(bodySS, ptv, 0, bodyFreeSliceRemove);
+            bodySS.CreateBodyFree(ptv, 0, bodyFreeSliceRemove, logger);
             logger.Information("Structure created: {bodyFree}", StructureHelper.BODY_FREE);
         }
     }

@@ -17,10 +17,10 @@ namespace TMIAutomation
             }
         }
 
-        public static void LogAndWarnException(Exception exc)
+        public static void LogAndWarnException(this ILogger logger, Exception exc)
         {
-            Log.Error(exc.Message);
-            MessageBox.Show($"Something went wrong... see traces at {LogDirectory}", "Error");
+            logger.Error("{@Exception}", exc);
+            MessageBox.Show($"Something went wrong... see the log traces at {LogDirectory}", "Error");
         }
     }
 }

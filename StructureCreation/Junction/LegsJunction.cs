@@ -27,7 +27,7 @@ namespace TMIAutomation
         public void Create(ScriptContext context)
 		{
 
-			logger.Information("Create legs junction context: {@context}", new List<string> { bodyPlanId, legsPlanId, legsPTVId, imageRegId } );
+			logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlanId, legsPlanId, legsPTVId, imageRegId } );
 
 			PlanSetup bodyPlan = context.PlansInScope.FirstOrDefault(p => p.Id == bodyPlanId);
 			StructureSet bodySS = bodyPlan.StructureSet;
@@ -35,10 +35,10 @@ namespace TMIAutomation
 
 			List<string> isoStructuresId = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
 
+			context.Patient.BeginModifications();
+
 			if (!isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
 			{
-				context.Patient.BeginModifications();
-
 				/*
 				 * Isodose levels body CT
 				 */
@@ -60,10 +60,10 @@ namespace TMIAutomation
 
 				List<Structure> bodyIsodoseStructures = new List<Structure>
 				{
-					bodySS.AddStructure("CONTROL", StructureHelper.DOSE_25),
-					bodySS.AddStructure("CONTROL", StructureHelper.DOSE_50),
-					bodySS.AddStructure("CONTROL", StructureHelper.DOSE_75),
-					bodySS.AddStructure("CONTROL", StructureHelper.DOSE_100)
+					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_25, logger),
+					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_50, logger),
+					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_75, logger),
+					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_100, logger)
 				};
 
 				for (int i = 0; i < bodyIsodoseStructures.Count; ++i)
@@ -80,8 +80,8 @@ namespace TMIAutomation
 
 				bodyIsodoseStructures.ForEach(isoStructure =>
 				{
-					Structure legIsoDose = legsSS.AddStructure(isoStructure.DicomType, isoStructure.Id);
-					foreach (int slice in StructureHelper.GetStructureSlices(isoStructure, bodySS))
+					Structure legIsoDose = legsSS.TryAddStructure(isoStructure.DicomType, isoStructure.Id, logger);
+					foreach (int slice in bodySS.GetStructureSlices(isoStructure))
 					{
 						VVector[][] contours = isoStructure.GetContoursOnImagePlane(slice);
 						foreach (VVector[] contour in contours)
@@ -89,12 +89,12 @@ namespace TMIAutomation
 							IEnumerable<VVector> transformedContour = contour.Select(vv => bodySS.Image.FOR == registration.SourceFOR ? registration.TransformPoint(vv) : registration.InverseTransformPoint(vv));
 							double z = transformedContour.FirstOrDefault().z;
 
-							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), StructureHelper.GetSlice(z, legsSS));
+							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), legsSS.GetSlice(z));
 						}
 					}
 				});
 
-				logger.Information("Isodose structures copied to legs CT using registration: {registration}", registration.Id);
+				logger.Information("Isodose structures copied to legs StructureSet {ss} using registration: {registration}", legsSS.Id, registration.Id);
 
 				if (bodySS.Image.ZRes != legsSS.Image.ZRes)
 				{
@@ -123,8 +123,8 @@ namespace TMIAutomation
 			Structure ptvTotal = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
 			Structure isodose100 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100);
 
-			int bottomSlicePTVtotal = StructureHelper.GetStructureSlices(ptvTotal, legsSS).LastOrDefault();
-			int bottomSliceIsodose100 = StructureHelper.GetStructureSlices(isodose100, legsSS).LastOrDefault();
+			int bottomSlicePTVtotal = legsSS.GetStructureSlices(ptvTotal).LastOrDefault();
+			int bottomSliceIsodose100 = legsSS.GetStructureSlices(isodose100).LastOrDefault();
 			int cropOffset = 5;
 
 			foreach (int slice in Enumerable.Range(bottomSlicePTVtotal + cropOffset, bottomSliceIsodose100 - bottomSlicePTVtotal - cropOffset + 1))
@@ -143,12 +143,12 @@ namespace TMIAutomation
 			 */
 			Structure junction25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_JUNCTION25);
 
-			int topSliceJunction25 = StructureHelper.GetStructureSlices(junction25, legsSS).FirstOrDefault();
+			int topSliceJunction25 = legsSS.GetStructureSlices(junction25).FirstOrDefault();
 
 			Structure ptvTotal = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
-			int bottomSlicePTVtotal = StructureHelper.GetStructureSlices(ptvTotal, legsSS).LastOrDefault();
+			int bottomSlicePTVtotal = legsSS.GetStructureSlices(ptvTotal).LastOrDefault();
 
-			Structure rem = legsSS.AddStructure("AVOIDANCE", StructureHelper.REM);
+			Structure rem = legsSS.TryAddStructure("AVOIDANCE", StructureHelper.REM, logger);
 			Structure isodose25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_25);
 
 			foreach (int slice in Enumerable.Range(topSliceJunction25, bottomSlicePTVtotal - topSliceJunction25 + 3))
@@ -171,12 +171,12 @@ namespace TMIAutomation
 			* Create junction substructures for legs starting from isodoses
 			*/
 			Structure ptv = legsSS.Structures.FirstOrDefault(s => s.Id == legsPTVId);
-			Structure ptvLegsWithJunction = legsSS.AddStructure(ptv.DicomType, StructureHelper.PTV_TOTAL);
+			Structure ptvLegsWithJunction = legsSS.TryAddStructure(ptv.DicomType, StructureHelper.PTV_TOTAL, logger);
 			ptvLegsWithJunction.SegmentVolume = ptv.SegmentVolume;
-			IEnumerable<int> juncSlices = StructureHelper.GetStructureSlices(ptv, legsSS);
+			IEnumerable<int> juncSlices = legsSS.GetStructureSlices(ptv);
 
 			Structure isodose100 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100);
-			IEnumerable<int> isoSlices = StructureHelper.GetStructureSlices(isodose100, legsSS);
+			IEnumerable<int> isoSlices = legsSS.GetStructureSlices(isodose100);
 
 			// clear contours of ptv on slices where isodose100% is present
 			foreach (int slice in juncSlices.Intersect(isoSlices))
@@ -185,23 +185,23 @@ namespace TMIAutomation
 			}
 
 			Structure isodose75 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_75);
-			Structure junction25 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION25, legsSS, ptvLegsWithJunction, isodose75);
+			Structure junction25 = legsSS.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION25, ptvLegsWithJunction, isodose75, logger);
 			logger.Information("Structure created: {junction25}", junction25.Id);
 
 			Structure isodose50 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_50);
-			Structure junction50 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION50, legsSS, ptvLegsWithJunction, isodose50);
+			Structure junction50 = legsSS.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION50, ptvLegsWithJunction, isodose50, logger);
 			logger.Information("Structure created: {junction50}", junction50.Id);
 
 			Structure isodose25 = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_25);
-			Structure junction75 = StructureHelper.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION75, legsSS, ptvLegsWithJunction, isodose25);
+			Structure junction75 = legsSS.CreateStructureFromIsodose(StructureHelper.PTV_JUNCTION75, ptvLegsWithJunction, isodose25, logger);
 			logger.Information("Structure created: {junction75}", junction75.Id);
 
 			junction75.SegmentVolume = junction75.Sub(junction50.SegmentVolume);
 			junction50.SegmentVolume = junction50.Sub(junction25.SegmentVolume);
 
-			Structure junction100 = legsSS.AddStructure("PTV", StructureHelper.PTV_JUNCTION100);
+			Structure junction100 = legsSS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION100, logger);
 			// Z-axis points towards the gantry: the first slice is the uppermost when patient is in FFS
-			int topSliceJunction75 = StructureHelper.GetStructureSlices(junction75, legsSS).FirstOrDefault();
+			int topSliceJunction75 = legsSS.GetStructureSlices(junction75).FirstOrDefault();
 			for (int i = 1; i <= 2; ++i)
 			{
 				foreach (VVector[] contour in ptvLegsWithJunction.GetContoursOnImagePlane(topSliceJunction75 - i))
@@ -211,11 +211,11 @@ namespace TMIAutomation
 			}
 			logger.Information("Structure created: {junction100}", junction100.Id);
 
-			Structure legsJunction = legsSS.AddStructure("PTV", StructureHelper.PTV_JUNCTION);
+			Structure legsJunction = legsSS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION, logger);
 			legsJunction.SegmentVolume = junction25.Or(junction50).Or(junction75).Or(junction100);
 			logger.Information("Structure created: {legsJunction}", legsJunction.Id);
 
-			Structure ptvTotNoJunctionLegs = legsSS.AddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION);
+			Structure ptvTotNoJunctionLegs = legsSS.TryAddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION, logger);
 			ptvTotNoJunctionLegs.SegmentVolume = ptvLegsWithJunction.Sub(legsJunction);
 			logger.Information("Structure created: {ptvTotNoJunctionLegs}", ptvTotNoJunctionLegs.Id);
 		}

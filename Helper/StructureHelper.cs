@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
@@ -28,22 +29,23 @@ namespace TMIAutomation
         public const string HEALTHY_TISSUE2 = "HT2_AUTO";
         public const string BODY_FREE = "Body_Free_AUTO";
 
-        public static Structure CreateStructureFromIsodose(string junctionId, StructureSet ss, Structure ptvWithJunction, Structure isodose)
+        public static Structure CreateStructureFromIsodose(this StructureSet ss, string junctionId,
+            Structure ptvWithJunction, Structure isodose, ILogger logger)
         {
-            IEnumerable<int> juncSlices = GetStructureSlices(ptvWithJunction, ss);
-            IEnumerable<int> isoSlices = GetStructureSlices(isodose, ss);
-            Structure junction = ss.AddStructure("PTV", junctionId);
-            AddJunctionContoursFromIsodose(ss, ptvWithJunction, juncSlices, isoSlices, isodose, junction);
+            IEnumerable<int> juncSlices = ss.GetStructureSlices(ptvWithJunction);
+            IEnumerable<int> isoSlices = ss.GetStructureSlices(isodose);
+            Structure junction = ss.TryAddStructure("PTV", junctionId, logger);
+            ss.AddJunctionContoursFromIsodose(ptvWithJunction, juncSlices, isoSlices, isodose, junction);
 
             return junction;
         }
 
-        public static void AddJunctionContoursFromIsodose(StructureSet ss, Structure wholeJunction,
+        public static void AddJunctionContoursFromIsodose(this StructureSet ss, Structure wholeJunction,
             IEnumerable<int> juncSlices, IEnumerable<int> isoSlices, Structure isodose, Structure subJunction)
         {
             foreach (int slice in juncSlices.Intersect(isoSlices))
             {
-                if (!IsEmptyContourIntersection(ss, wholeJunction, isodose, slice))
+                if (!ss.IsEmptyContourIntersection(wholeJunction, isodose, slice))
                 {
                     foreach (VVector[] contour in wholeJunction.GetContoursOnImagePlane(slice))
                     {
@@ -53,7 +55,7 @@ namespace TMIAutomation
             }
         }
 
-        public static bool IsEmptyContourIntersection(StructureSet ss, Structure structure, Structure other, int slice)
+        public static bool IsEmptyContourIntersection(this StructureSet ss, Structure structure, Structure other, int slice)
         {
             Structure ptvSlice = ss.AddStructure("PTV", "tempPTV");
             foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
@@ -83,33 +85,33 @@ namespace TMIAutomation
             return isEmptyIntersection;
         }
 
-        public static IEnumerable<int> GetStructureSlices(Structure structure, StructureSet ss)
+        public static IEnumerable<int> GetStructureSlices(this StructureSet ss, Structure structure)
         {
             Rect3D rect = structure.MeshGeometry.Bounds;
-            int firstSlice = GetSlice(rect.Z, ss);
-            int lastSlice = GetSlice(rect.Z + rect.SizeZ, ss);
+            int firstSlice = ss.GetSlice(rect.Z);
+            int lastSlice = ss.GetSlice(rect.Z + rect.SizeZ);
             return Enumerable.Range(firstSlice, lastSlice - firstSlice + 1);
         }
 
-        public static int GetSlice(double z, StructureSet ss)
+        public static int GetSlice(this StructureSet ss, double z)
         {
             double imageRes = ss.Image.ZRes;
             return Convert.ToInt32((z - ss.Image.Origin.z) / imageRes);
         }
 
-        public static void CreateHealthyTissue(StructureSet ss, Structure ptv)
+        public static void CreateHealthyTissue(this StructureSet ss, Structure ptv, ILogger logger)
         {
             Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
-            Structure healthyTissue = ss.AddStructure("CONTROL", HEALTHY_TISSUE);
-            Structure healthyTissue2 = ss.AddStructure("CONTROL", HEALTHY_TISSUE2);
+            Structure healthyTissue = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE, logger);
+            Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
             healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
             healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
         }
 
-        public static void CreateBodyFree(StructureSet ss, Structure ptv, int bodyFreeSliceStart, int bodyFreeSliceRemove)
+        public static void CreateBodyFree(this StructureSet ss, Structure ptv, int bodyFreeSliceStart, int bodyFreeSliceRemove, ILogger logger)
         {
             Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
-            Structure bodyFree = ss.AddStructure("CONTROL", BODY_FREE);
+            Structure bodyFree = ss.TryAddStructure("CONTROL", BODY_FREE, logger);
             
             bodyFree.SegmentVolume = body.Margin(-3).Sub(ptv.Margin(35));
 
@@ -118,5 +120,19 @@ namespace TMIAutomation
                 bodyFree.ClearAllContoursOnImagePlane(slice);
             }
         }
+
+        public static Structure TryAddStructure(this StructureSet ss, string dicomType, string id, ILogger logger)
+        {
+            if (ss.CanAddStructure(dicomType, id))
+            {
+                return ss.AddStructure(dicomType, id);
+            }
+            else
+            {
+                logger.Warning("Using already existing Sructure {Id} in current StructureSet {ssId}", id, ss.Id);
+                return ss.Structures.FirstOrDefault(s => s.Id == id);
+            }
+        }
+
     }
 }

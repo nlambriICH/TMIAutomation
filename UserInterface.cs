@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -15,11 +16,13 @@ namespace TMIAutomation
     public partial class UserInterface : UserControl
     {
         private readonly ScriptContext context;
+        private readonly ILogger logger;
 
         public UserInterface(ScriptContext context)
         {
             InitializeComponent();
             this.context = context;
+            this.logger = Log.ForContext<UserInterface>();
         }
 
         private void BodyPlanComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -59,7 +62,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
         }
 
@@ -78,7 +81,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
             finally
 			{
@@ -100,7 +103,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
             finally
             {
@@ -144,7 +147,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
         }
 
@@ -172,7 +175,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
             finally
             {
@@ -194,7 +197,7 @@ namespace TMIAutomation
             }
             catch (Exception exc)
             {
-                LoggerHelper.LogAndWarnException(exc);
+                logger.LogAndWarnException(exc);
             }
             finally
             {
