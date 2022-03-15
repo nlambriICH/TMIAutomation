@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
     static class WindowHelper
     {

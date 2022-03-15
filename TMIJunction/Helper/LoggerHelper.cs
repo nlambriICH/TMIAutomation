@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Windows;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
     static class LoggerHelper
     {

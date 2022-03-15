@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
     class LegsControlStructures : IStructure
     {

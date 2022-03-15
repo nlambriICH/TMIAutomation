@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace TMIAutomation.Model
+namespace TMIJunction
 {
     class UserInterfaceModel : INotifyPropertyChanged
     {

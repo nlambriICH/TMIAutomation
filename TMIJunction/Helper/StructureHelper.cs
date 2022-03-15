@@ -6,7 +6,7 @@ using System.Windows.Media.Media3D;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
 
     static class StructureHelper
@@ -106,6 +106,10 @@ namespace TMIAutomation
             Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
             healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
             healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
+
+            logger.Information("RemoveSmallContoursFromStructure: {HT} {HT2}", HEALTHY_TISSUE, HEALTHY_TISSUE2);
+            ss.RemoveSmallContoursFromStructure(healthyTissue);
+            ss.RemoveSmallContoursFromStructure(healthyTissue2);
         }
 
         public static void CreateBodyFree(this StructureSet ss, Structure ptv, int bodyFreeSliceStart, int bodyFreeSliceRemove, ILogger logger)
@@ -118,6 +122,26 @@ namespace TMIAutomation
             foreach (int slice in Enumerable.Range(bodyFreeSliceStart, bodyFreeSliceRemove))
             {
                 bodyFree.ClearAllContoursOnImagePlane(slice);
+            }
+
+            logger.Information("RemoveSmallContoursFromStructure: {BodyFree}", BODY_FREE);
+            ss.RemoveSmallContoursFromStructure(bodyFree);
+        }
+
+        private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure)
+        {
+            foreach (int slice in ss.GetStructureSlices(structure))
+            {
+                foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
+                {
+                    Structure removeSmall = ss.AddStructure("CONTROL", "tempRemoveSmall");
+                    removeSmall.AddContourOnImagePlane(contour, slice);
+                    if (removeSmall.Volume < 0.5 * (ss.Image.ZRes / 10))
+                    {
+                        structure.SubtractContourOnImagePlane(contour, slice);
+                    }
+                    ss.RemoveStructure(removeSmall);
+                }
             }
         }
 

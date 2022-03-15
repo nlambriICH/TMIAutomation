@@ -1,16 +1,15 @@
-using TMIAutomation;
+using TMIJunction;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using VMS.TPS.Common.Model.API;
-using TMIAutomation.Model;
 using Serilog;
 using System.IO;
 using System;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.3")]
-[assembly: AssemblyFileVersion("1.0.0.3")]
+[assembly: AssemblyVersion("1.0.0.5")]
+[assembly: AssemblyFileVersion("1.0.0.5")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -26,14 +25,14 @@ namespace VMS.TPS
         public Script()
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIAutomation.log"),
+                .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             this.logger = Log.ForContext<Script>();
 
-            logger.Information("TMIAutomation script instance created");
+            logger.Information("TMIJunction script instance created");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

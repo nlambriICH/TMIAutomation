@@ -1,6 +1,6 @@
 ﻿using VMS.TPS.Common.Model.API;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
     interface IStructure
     {

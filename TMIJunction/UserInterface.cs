@@ -5,10 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using TMIAutomation.Model;
 using VMS.TPS.Common.Model.API;
 
-namespace TMIAutomation
+namespace TMIJunction
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -74,7 +73,7 @@ namespace TMIAutomation
 			try
 			{
 				Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
                 bodyJunction.Create(context);
 				UpdateBodyPTVIds(selectedBodyPlanId);
                 MessageBox.Show("Done!", "Info");
@@ -97,7 +96,7 @@ namespace TMIAutomation
             {
                 Mouse.OverrideCursor = Cursors.Wait;
                 IStructure bodyControl = new BodyControlStructures(selectedBodyPlanId, selectedBodyPTVId);
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
                 bodyControl.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
@@ -168,7 +167,7 @@ namespace TMIAutomation
             {
                 IStructure legsJunction = new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration);
                 Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
                 legsJunction.Create(context);
                 UpdateLegsPTVIds(selectedLegsPlanId);
                 MessageBox.Show("Done!", "Info");
@@ -191,7 +190,7 @@ namespace TMIAutomation
             {
                 IStructure legscontrol = new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId);
                 Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIAutomation");
+                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
                 legscontrol.Create(context);
                 MessageBox.Show("Done!", "Info");
             }
