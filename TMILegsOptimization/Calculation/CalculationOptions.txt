@@ -1,0 +1,4 @@
+﻿# Move this file into the same folder where the executable runs. OptimizerModel, DoseAlgorithm, and MLCID must be tab separated
+### DO NOT DELETE THIS LINE ###
+OptimizationAlgorithm	DoseAlgorithm	MLCID
+PO_15.6.06	AAA_15.6.06	MLC0010

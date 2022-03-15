@@ -1,0 +1,4 @@
+﻿# Move this file into the same folder where the executable runs. Id, Course, and Plan must be tab separated
+### DO NOT DELETE THIS LINE ###
+Id	Course	Plan
+TestId	TestCourse	TestPlan
