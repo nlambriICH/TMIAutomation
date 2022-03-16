@@ -81,36 +81,55 @@ namespace TMIJunction
 				bodyIsodoseStructures.ForEach(isoStructure =>
 				{
 					Structure legIsoDose = legsSS.TryAddStructure(isoStructure.DicomType, isoStructure.Id, logger);
+
+					// do not modify already existing structure (not empty)
+					if (!legIsoDose.IsEmpty)
+					{
+						logger.Information("Isodose structure {isodoseId} is not empty. Skip copying contours", isoStructure.Id);
+						return;
+					}
+
+					logger.Information("Transform contours of {isodoseId}", isoStructure.Id);
+
+					bool stopCopyContour = false;
 					foreach (int slice in bodySS.GetStructureSlices(isoStructure))
 					{
 						VVector[][] contours = isoStructure.GetContoursOnImagePlane(slice);
+						logger.Debug("Found {numContours} contours on body slice {slice}", contours.Length, slice);
+
 						foreach (VVector[] contour in contours)
 						{
 							IEnumerable<VVector> transformedContour = contour.Select(vv => bodySS.Image.FOR == registration.SourceFOR ? registration.TransformPoint(vv) : registration.InverseTransformPoint(vv));
-							double z = transformedContour.FirstOrDefault().z;
 
-							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), legsSS.GetSlice(z));
+							double dicomZ = transformedContour.FirstOrDefault().z;
+							var sliceZ = legsSS.GetSlice(dicomZ);
+
+							if (sliceZ > legsSS.Image.ZSize)
+                            {
+								logger.Information("Slice {slice} exceeding Legs CT ZSize ({zSize}). Stop copying contours", sliceZ, legsSS.Image.ZSize);
+								stopCopyContour = true;
+								break;
+                            }
+
+                            VVector vvUser = legsSS.Image.DicomToUser(transformedContour.FirstOrDefault(), context.PlansInScope.FirstOrDefault(p => p.Id == legsPlanId));
+
+							logger.Debug("Transformed contour at DICOM={dicomZ}, User={userZ}mm, slice={slice}", Math.Round(dicomZ, 2), Math.Round(vvUser.z, 2), sliceZ);
+
+							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), sliceZ);
 						}
+
+						if (stopCopyContour) break;
 					}
+
+					/*
+					 * in some patients, possibly due to the registration, contours were missing in one or more isolated slices
+					 * applying an asymmetric margin to cover those slices (this also avoids issues when Body CT and Legs CT have different ZRes)
+					*/
+					legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, legsSS.Image.ZRes, 0, 0, 0));
 				});
 
 				logger.Information("Isodose structures copied to legs StructureSet {ss} using registration: {registration}", legsSS.Id, registration.Id);
 
-				if (bodySS.Image.ZRes != legsSS.Image.ZRes)
-				{
-					List<Structure> legsIsoDoseStructures = new List<Structure>
-					{
-						legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_25),
-						legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_50),
-						legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_75),
-						legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100)
-					};
-
-					foreach (Structure legIsoDose in legsIsoDoseStructures)
-					{
-						legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, legsSS.Image.ZRes));
-					}
-				}
 			}
 
 			CreateJunctionSubstructures(legsSS);
@@ -125,7 +144,7 @@ namespace TMIJunction
 
 			int bottomSlicePTVtotal = legsSS.GetStructureSlices(ptvTotal).LastOrDefault();
 			int bottomSliceIsodose100 = legsSS.GetStructureSlices(isodose100).LastOrDefault();
-			int cropOffset = 5;
+			int cropOffset = 7;
 
 			foreach (int slice in Enumerable.Range(bottomSlicePTVtotal + cropOffset, bottomSliceIsodose100 - bottomSlicePTVtotal - cropOffset + 1))
             {
@@ -202,7 +221,7 @@ namespace TMIJunction
 			Structure junction100 = legsSS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION100, logger);
 			// Z-axis points towards the gantry: the first slice is the uppermost when patient is in FFS
 			int topSliceJunction75 = legsSS.GetStructureSlices(junction75).FirstOrDefault();
-			for (int i = 1; i <= 2; ++i)
+			for (int i = 1; i <= 4; ++i) // generate PTV_Junction100% with 4 slices
 			{
 				foreach (VVector[] contour in ptvLegsWithJunction.GetContoursOnImagePlane(topSliceJunction75 - i))
 				{
