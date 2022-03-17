@@ -21,11 +21,11 @@ namespace TMILegsOptimization
         private static void Init()
         {
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(desktopPath, "TMIAutomation", "LegsOptimization"));
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(desktopPath, "TMIAutomation"));
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
-                .WriteTo.File(Path.Combine(directory.FullName, "MainExecution.log"),
+                .WriteTo.File(Path.Combine(directory.FullName, "TMILegsOptimization.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
                 .WriteTo.Console(theme: AnsiConsoleTheme.Literate)
@@ -84,10 +84,10 @@ namespace TMILegsOptimization
 
                 ExternalPlanSetup externalPlanSetup = patient.Courses.FirstOrDefault(c => c.Id == courseId).ExternalPlanSetups.FirstOrDefault(ps => ps.Id == planId);
 
-                Calculation.SetupOptimizationAndCalculationOptions();
-                externalPlanSetup.OptimizePlan(patientId, planSetup);
+                externalPlanSetup.SetupModels();
+                externalPlanSetup.OptimizePlan(patientId);
                 externalPlanSetup.AdjustYJawToMLCShape();
-                externalPlanSetup.CalculateDose(patientId, planSetup);
+                externalPlanSetup.CalculateDose(patientId);
 
                 app.SaveModifications();
                 app.ClosePatient();

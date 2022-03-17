@@ -13,7 +13,7 @@ namespace TMILegsOptimization
         private static string DOSE_CALCULATION_ALGORITHM;
         private static string MLCID;
 
-        public static void SetupOptimizationAndCalculationOptions()
+        public static void SetupModels(this ExternalPlanSetup externalPlanSetup)
         {
             foreach (var line in File.ReadLines("CalculationOptions.txt").Skip(3))
             {
@@ -22,18 +22,21 @@ namespace TMILegsOptimization
                 DOSE_CALCULATION_ALGORITHM = calcOptions[1];
                 MLCID = calcOptions[2];
             }
+
+            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, OPTIMIZATION_ALGORITHM);
+            externalPlanSetup.SetCalculationOption(OPTIMIZATION_ALGORITHM, "/PhotonOptCalculationOptions/@MRLevelAtRestart", "MR3"); // Calculation options: \\machinename\dcf$\client
+            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, DOSE_CALCULATION_ALGORITHM);
         }
 
-        public static void OptimizePlan(this ExternalPlanSetup externalPlanSetup, string patientId, PlanSetup planSetup)
+        public static void OptimizePlan(this ExternalPlanSetup externalPlanSetup, string patientId)
         {
-            planSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, OPTIMIZATION_ALGORITHM);
             Log.Information("Start optimization for patient {patientId}", patientId);
 
             OptimizerResult optimizerResult;
             using (var serilogListener = new SerilogTraceListener.SerilogTraceListener())
             {
                 Trace.Listeners.Add(serilogListener);
-                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationOption.RestartOptimization, MLCID));
+                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationIntermediateDoseOption.UseIntermediateDose, MLCID));
             }
 
             if (!optimizerResult.Success)
@@ -43,9 +46,8 @@ namespace TMILegsOptimization
             }
             Log.Information("Optimization completed!");
         }
-        public static void CalculateDose(this ExternalPlanSetup externalPlanSetup, string patientId, PlanSetup planSetup)
+        public static void CalculateDose(this ExternalPlanSetup externalPlanSetup, string patientId)
         {
-            planSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, DOSE_CALCULATION_ALGORITHM);
             Log.Information("Start dose calculation for patient {patientId}", patientId);
 
             CalculationResult calculationResult;
