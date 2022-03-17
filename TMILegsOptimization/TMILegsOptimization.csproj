@@ -61,6 +61,9 @@
     <Reference Include="Serilog.Sinks.File, Version=5.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>packages\Serilog.Sinks.File.5.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
     </Reference>
+    <Reference Include="SerilogTraceListener, Version=0.0.0.0, Culture=neutral, PublicKeyToken=9398e41289d9b801, processorArchitecture=MSIL">
+      <HintPath>packages\SerilogTraceListener.3.2.0\lib\net45\SerilogTraceListener.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -82,13 +85,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calculation\Calculation.cs" />
+    <Compile Include="Calculation\PostOptimization.cs" />
+    <Compile Include="Objectives\ObjectivesSetup.cs" />
     <Compile Include="TMILegsOptimization.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Calculation\CalculationOptions.txt" />
-    <Content Include="Objectives\EUDOptimizationObjectives.txt" />
-    <Content Include="Objectives\PointOptimizationObjectives.txt" />
-    <Content Include="Patients\PatientsInfo.txt" />
+    <Content Include="Resources\CalculationOptions.txt" />
+    <Content Include="Resources\EUDOptimizationObjectives.txt" />
+    <Content Include="Resources\PointOptimizationObjectives.txt" />
+    <Content Include="Resources\PatientsInfo.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
