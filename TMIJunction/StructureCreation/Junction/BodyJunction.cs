@@ -70,10 +70,18 @@ namespace TMIJunction
                 string structureIdLower = s.Id.ToLower();
                 return s.DicomType == "PTV" && (structureIdLower.Contains("legs") || structureIdLower.Contains("gambe"));
             });
-            Structure ptvLegsBodyNoJunction = bodySS.TryAddStructure(ptvLegsBody.DicomType, StructureHelper.PTV_LEGS_NO_JUNCTION, logger);
-            ptvLegsBodyNoJunction.SegmentVolume = ptvLegsBody.Sub(bodyJunction);
 
-            logger.Information("Structure created: {ptvLegsBodyNoJunction}", ptvLegsBodyNoJunction.Id);
+            if (ptvLegsBody != null)
+            {
+                Structure ptvLegsBodyNoJunction = bodySS.TryAddStructure(ptvLegsBody.DicomType, StructureHelper.PTV_LEGS_NO_JUNCTION, logger);
+                ptvLegsBodyNoJunction.SegmentVolume = ptvLegsBody.Sub(bodyJunction);
+                logger.Information("Structure created: {ptvLegsBodyNoJunction}", ptvLegsBodyNoJunction.Id);
+            }
+            else
+            {
+                logger.Warning("Structure {ptvLegsBodyNoJunction} could not be created. " +
+                    "The script needs a PTV structure containing \"legs\" in its name (e.g., \"PTV_legs\")", StructureHelper.PTV_LEGS_NO_JUNCTION);
+            }
 
             Structure rem = bodySS.TryAddStructure("AVOIDANCE", StructureHelper.REM, logger);
             IEnumerable<int> slicesIsodose25 = bodySS.GetStructureSlices(junctionSubStructures[0]);
