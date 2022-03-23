@@ -125,7 +125,7 @@ namespace TMIJunction
 					 * in some patients, possibly due to the registration, contours were missing in one or more isolated slices
 					 * applying an asymmetric margin to cover those slices (this also avoids issues when Body CT and Legs CT have different ZRes)
 					*/
-					legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, legsSS.Image.ZRes, 0, 0, 0));
+					legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, legsSS.Image.ZRes));
 				});
 
 				logger.Information("Isodose structures copied to legs StructureSet {ss} using registration: {registration}", legsSS.Id, registration.Id);
