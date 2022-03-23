@@ -88,6 +88,7 @@ namespace TMILegsOptimization
                 externalPlanSetup.OptimizePlan(patientId);
                 externalPlanSetup.AdjustYJawToMLCShape();
                 externalPlanSetup.CalculateDose(patientId);
+                externalPlanSetup.Normalize();
 
                 app.SaveModifications();
                 app.ClosePatient();

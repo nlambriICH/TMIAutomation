@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculation\Calculation.cs" />
+    <Compile Include="Calculation\PostCalculation.cs" />
     <Compile Include="Calculation\PostOptimization.cs" />
     <Compile Include="Objectives\ObjectivesSetup.cs" />
     <Compile Include="TMILegsOptimization.cs" />
