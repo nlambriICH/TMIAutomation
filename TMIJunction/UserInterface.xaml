@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="Theme/ButtonTheme.xaml"/>
                 <ResourceDictionary Source="Theme/ComboBoxTheme.xaml"/>
                 <ResourceDictionary Source="Theme/TextBlockTheme.xaml"/>
+                <ResourceDictionary Source="Theme/CheckBoxTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -33,7 +34,7 @@
             <TabItem Width="100"
                      Background="#FDFDFD">
                 <TabItem.Header>
-                    <TextBlock Text="Body"
+                    <TextBlock Text="Upper"
                                FontSize="16"
                                FontFamily="Serif"
                                Foreground="#272537"/>
@@ -41,12 +42,12 @@
 
                 <Grid>
 
-                    <TextBlock Text="Select Body Plan"
+                    <TextBlock
 					            Width="130"
 					            HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
 					            Margin="150,30,0,0"
-                                Style="{StaticResource TextBlockTheme}"/>
+                                Style="{StaticResource TextBlockTheme}"><Run Text="Select "/><Run Text="Upper "/><Run Text="Plan"/></TextBlock>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
@@ -55,11 +56,11 @@
 					            Loaded="BodyPlanComboBox_Loaded"
 					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
 
-                    <TextBlock Text="Select Body PTV"
+                    <TextBlock
 					            VerticalAlignment="Top"
                                 HorizontalAlignment="Left"
 					            Margin="150,80,0,0"
-					            Style="{StaticResource TextBlockTheme}"/>
+					            Style="{StaticResource TextBlockTheme}"><Run Text="Select "/><Run Text="Upper "/><Run Text="PTV"/></TextBlock>
 
                     <ComboBox  HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
@@ -69,17 +70,29 @@
 					            Loaded="BodyPTVComboBox_Loaded"
                                 SelectionChanged="BodyPTVComboBox_SelectionChanged" Grid.Column="1"/>
 
-                    <Button HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Margin="0,150,0,0"
-                            Content="Generate Body Junction Structures"
-                            Click="BodyJunctionButton_Click"/>
+                    <CheckBox HorizontalAlignment="Left"
+                              VerticalAlignment="Top"
+                              Margin="150,160,0,0"
+                              Content="Junction Structures"
+                              Style="{StaticResource CheckBoxTheme}"
+                              IsChecked="True"
+                              x:Name="UpperJunction"/>
+
+                    <CheckBox HorizontalAlignment="Right"
+                              VerticalAlignment="Top"
+                              Margin="0,160,150,0"
+                              Content="Control Structures"
+                              Style="{StaticResource CheckBoxTheme}"
+                              IsChecked="True"
+                              x:Name="UpperControl"/>
 
                     <Button HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,230,0,0"
-                            Content="Generate Body Control Structures"
-                            Click="BodyControlButton_Click"/>
+                            Margin="0,240,0,0"
+                            Content="Generate"
+                            FontSize="20"
+                            Click="UpperButton_Click"
+                            Width="150"/>
 
                 </Grid>
 
@@ -89,7 +102,7 @@
                      Background="#FDFDFD">
 
                 <TabItem.Header>
-                    <TextBlock Text="Legs"
+                    <TextBlock Text="Lower"
                                FontSize="16"
                                FontFamily="Serif"
                                Foreground="#272537"/>
@@ -97,44 +110,44 @@
 
                 <Grid>
 
-                    <TextBlock Text="Select Body Plan"
+                    <TextBlock Text="Select Upper Plan"
 					            Width="130"
 					            HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="150,22,0,0"
+					            Margin="150,25,0,0"
                                 Style="{StaticResource TextBlockTheme}"/>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,22,0,0"
+					            Margin="340,25,0,0"
 					            Style="{StaticResource ComboBoxTheme}"
 					            Loaded="BodyPlanComboBox_Loaded"
 					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
 
-                    <TextBlock Text="Select Legs Plan"
+                    <TextBlock Text="Select Lower Plan"
 					            VerticalAlignment="Top"
 					            HorizontalAlignment="Left"
-					            Margin="150,59,0,0"
+					            Margin="150,62,0,0"
 					            Style="{StaticResource TextBlockTheme}"/>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,59,0,0"
+					            Margin="340,62,0,0"
 					            Style="{StaticResource ComboBoxTheme}"
 				                Loaded="LegsPlanComboBox_Loaded"
 					            SelectionChanged="LegsPlanComboBox_SelectionChanged"/>
 
-                    <TextBlock Text="Select Legs PTV"
+                    <TextBlock Text="Select Lower PTV"
 					            VerticalAlignment="Top"
 					            HorizontalAlignment="Left"
-					            Margin="150,96,0,0"
+					            Margin="150,99,0,0"
 					            Style="{StaticResource TextBlockTheme}"/>
 
                     <ComboBox HorizontalAlignment="Left"
-					            VerticalAlignment="Top"
-					            Margin="340,96,0,0"
-					            Style="{StaticResource ComboBoxTheme}"
-				              x:Name="LegsPTVComboBox"
+                              VerticalAlignment="Top"
+                              Margin="340,99,0,0"
+                              Style="{StaticResource ComboBoxTheme}"
+                              x:Name="LegsPTVComboBox"
 				              Loaded="LegsPTVComboBox_Loaded"
                               SelectionChanged="LegsPTVComboBox_SelectionChanged"/>
 
@@ -142,27 +155,40 @@
                     <TextBlock Text="Select Registration"
 					            VerticalAlignment="Top"
 					            HorizontalAlignment="Left"
-					            Margin="150,133,0,0"
+					            Margin="150,136,0,0"
 					            Style="{StaticResource TextBlockTheme}"/>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,133,0,0"
+					            Margin="340,136,0,0"
 					            Style="{StaticResource ComboBoxTheme}"
 				              Loaded="RegistrationComboBox_Loaded"
 				              SelectionChanged="RegistrationComboBox_SelectionChanged"/>
 
-                    <Button HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Margin="0,195,0,0"
-                            Content="Generate Legs Junction Structures"
-				            Click="LegsJunctionButton_Click"/>
+                    
+                    <CheckBox HorizontalAlignment="Left"
+                              VerticalAlignment="Top"
+                              Margin="150,195,0,0"
+                              Content="Junction Structures"
+                              Style="{StaticResource CheckBoxTheme}"
+                              IsChecked="True"
+                              x:Name="LowerJunction"/>
+
+                    <CheckBox HorizontalAlignment="Right"
+                              VerticalAlignment="Top"
+                              Margin="0,195,150,0"
+                              Content="Control Structures"
+                              Style="{StaticResource CheckBoxTheme}"
+                              IsChecked="True"
+                              x:Name="LowerControl"/>
 
                     <Button HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,270,0,0"
-                            Content="Generate Legs Control Structures"
-				            Click="LegsControlButton_Click"/>
+                            Margin="0,240,0,0"
+                            Content="Generate"
+                            FontSize="20"
+                            Width="150"
+				            Click="LowerButton_Click"/>
 
                 </Grid>
 

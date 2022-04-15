@@ -65,18 +65,36 @@ namespace TMIJunction
             }
         }
 
-		private void BodyJunctionButton_Click(object sender, RoutedEventArgs e)
+		private void UpperButton_Click(object sender, RoutedEventArgs e)
         {
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
             string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs;
-            IStructure bodyJunction = new BodyJunction(selectedBodyPlanId, selectedBodyPTVId);
 			try
 			{
-				Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
-                bodyJunction.Create(context);
-				UpdateBodyPTVIds(selectedBodyPlanId);
-                MessageBox.Show("Done!", "Info");
+                if (UpperJunction.IsChecked == true && UpperControl.IsChecked == true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateJunction(new BodyJunction(selectedBodyPlanId, selectedBodyPTVId));
+                    GenerateControl(new BodyControlStructures(selectedBodyPlanId, StructureHelper.PTV_TOTAL));
+                    UpdateBodyPTVIds(selectedBodyPlanId);
+
+                    MessageBox.Show("Done!", "Info");
+                }
+                else if (UpperJunction.IsChecked == true && UpperControl.IsChecked != true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateJunction(new BodyJunction(selectedBodyPlanId, selectedBodyPTVId));
+                    UpdateBodyPTVIds(selectedBodyPlanId);
+
+                    MessageBox.Show("Done!", "Info");
+                }
+                else if (UpperJunction.IsChecked != true && UpperControl.IsChecked == true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateControl(new BodyControlStructures(selectedBodyPlanId, selectedBodyPTVId));
+
+                    MessageBox.Show("Done!", "Info");
+                }
             }
             catch (Exception exc)
             {
@@ -88,26 +106,16 @@ namespace TMIJunction
             }
         }
 
-        private void BodyControlButton_Click(object sender, RoutedEventArgs e)
+        private void GenerateControl(IStructure control)
         {
-            string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
-            string selectedBodyPTVId = ((UserInterfaceModel)DataContext).BodyPlanPTVs;
-            try
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-                IStructure bodyControl = new BodyControlStructures(selectedBodyPlanId, selectedBodyPTVId);
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
-                bodyControl.Create(context);
-                MessageBox.Show("Done!", "Info");
-            }
-            catch (Exception exc)
-            {
-                logger.LogAndWarnException(exc);
-            }
-            finally
-            {
-                Mouse.OverrideCursor = null;
-            }
+            WindowHelper.ShowAutoClosingMessageBox("Generating Control Structures.\nPlease wait... We're working for you 😊", "TMIJunction");
+            control.Create(context);
+        }
+
+        private void GenerateJunction(IStructure junction)
+        {
+            WindowHelper.ShowAutoClosingMessageBox("Generating Junction Structures.\nPlease wait... We're working for you 😊", "TMIJunction");
+            junction.Create(context);
         }
 
         private void LegsPlanComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -157,7 +165,7 @@ namespace TMIJunction
             ((ComboBox)sender).SelectedIndex = 0;
         }
 
-		private void LegsJunctionButton_Click(object sender, RoutedEventArgs e)
+		private void LowerButton_Click(object sender, RoutedEventArgs e)
 		{
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
             string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
@@ -165,12 +173,31 @@ namespace TMIJunction
             string selectedRegistration = ((UserInterfaceModel)DataContext).Registration;
             try
             {
-                IStructure legsJunction = new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration);
-                Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
-                legsJunction.Create(context);
-                UpdateLegsPTVIds(selectedLegsPlanId);
-                MessageBox.Show("Done!", "Info");
+                if (LowerJunction.IsChecked == true && LowerControl.IsChecked == true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateJunction(new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration));
+
+                    GenerateControl(new LegsControlStructures(selectedLegsPlanId, StructureHelper.PTV_TOTAL));
+                    UpdateLegsPTVIds(selectedLegsPlanId);
+
+                    MessageBox.Show("Done!", "Info");
+                }
+                else if (LowerJunction.IsChecked == true && LowerControl.IsChecked != true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateJunction(new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration));
+                    UpdateLegsPTVIds(selectedLegsPlanId);
+
+                    MessageBox.Show("Done!", "Info");
+                }
+                else if (LowerJunction.IsChecked != true && LowerControl.IsChecked == true)
+                {
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    GenerateControl(new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId));
+
+                    MessageBox.Show("Done!", "Info");
+                }
             }
             catch (Exception exc)
             {
@@ -179,28 +206,6 @@ namespace TMIJunction
             finally
             {
                 Mouse.OverrideCursor = Cursors.Arrow;
-            }
-        }
-
-		private void LegsControlButton_Click(object sender, RoutedEventArgs e)
-		{
-            string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
-            string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
-            try
-            {
-                IStructure legscontrol = new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId);
-                Mouse.OverrideCursor = Cursors.Wait;
-                WindowHelper.ShowAutoClosingMessageBox("Please wait... We're working for you 😊", "TMIJunction");
-                legscontrol.Create(context);
-                MessageBox.Show("Done!", "Info");
-            }
-            catch (Exception exc)
-            {
-                logger.LogAndWarnException(exc);
-            }
-            finally
-            {
-                Mouse.OverrideCursor = null;
             }
         }
 

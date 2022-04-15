@@ -11,17 +11,19 @@ namespace TMIJunction
 
     static class StructureHelper
     {
-        public const string PTV_JUNCTION25 = "PTV_Junction25%";
-        public const string PTV_JUNCTION50 = "PTV_Junction50%";
-        public const string PTV_JUNCTION75 = "PTV_Junction75%";
-        public const string PTV_JUNCTION100 = "PTV_Junction100%";
-        public const string PTV_LEGS_NO_JUNCTION = "PTVLegsNoJunc";
+        public const string PTV_JUNCTION25 = "PTV_J25%";
+        public const string PTV_JUNCTION50 = "PTV_J50%";
+        public const string PTV_JUNCTION75 = "PTV_J75%";
+        public const string PTV_JUNCTION100 = "PTV_J100%";
+        public const string UPPER_PTV_LEGS = "UpperPTVLegs";
         public const string DOSE_25 = "Dose_25%";
         public const string DOSE_50 = "Dose_50%";
         public const string DOSE_75 = "Dose_75%";
         public const string DOSE_100 = "Dose_100%";
-        public const string PTV_JUNCTION = "PTV_Junction";
-        public const string PTV_TOT_NO_JUNCTION = "PTVTotNoJunction";
+        public const string UPPER_PTV_JUNCTION = "UpperPTV_J";
+        public const string LOWER_PTV_JUNCTION = "LowerPTV_J";
+        public const string UPPER_PTV_NO_JUNCTION = "UpperPTVNoJ";
+        public const string LOWER_PTV_NO_JUNCTION = "LowerPTVNoJ";
         public const string PTV_TOTAL = "PTV_Total";
         public const string BODY = "BODY";
         public const string REM = "REM_AUTO";
@@ -107,8 +109,9 @@ namespace TMIJunction
             healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
             healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
 
-            logger.Information("RemoveSmallContoursFromStructure: {HT} {HT2}", HEALTHY_TISSUE, HEALTHY_TISSUE2);
+            logger.Information("RemoveSmallContoursFromStructure: {HT}", HEALTHY_TISSUE);
             ss.RemoveSmallContoursFromStructure(healthyTissue);
+            logger.Information("RemoveSmallContoursFromStructure: {HT2}", HEALTHY_TISSUE2);
             ss.RemoveSmallContoursFromStructure(healthyTissue2);
         }
 
@@ -130,6 +133,7 @@ namespace TMIJunction
 
         private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure)
         {
+            WindowHelper.ShowAutoClosingMessageBox($"Removing small contours from {structure.Id}.\nThis may take a while...", "RemoveSmallContoursFromStructure");
             foreach (int slice in ss.GetStructureSlices(structure))
             {
                 foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))

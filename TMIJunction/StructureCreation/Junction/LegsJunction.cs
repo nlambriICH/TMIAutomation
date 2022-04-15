@@ -89,6 +89,8 @@ namespace TMIJunction
 						return;
 					}
 
+					WindowHelper.ShowAutoClosingMessageBox($"Propagating contours of {isoStructure.Id}...", "Isodose Propagation");
+
 					logger.Information("Transform contours of {isodoseId}", isoStructure.Id);
 
 					bool stopCopyContour = false;
@@ -132,6 +134,7 @@ namespace TMIJunction
 
 			}
 
+			WindowHelper.ShowAutoClosingMessageBox($"Generating junction structures...", "TMIJunction");
 			CreateJunctionSubstructures(legsSS);
 			CreateREMStructure(legsSS);
 			CropIsodose100(legsSS);
@@ -178,7 +181,7 @@ namespace TMIJunction
 				}
 			}
 
-			Structure legsJunction = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_JUNCTION);
+			Structure legsJunction = legsSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
 			rem.SegmentVolume = rem.Sub(legsJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
 
 			logger.Information("Structure created: {rem}", rem.Id);
@@ -230,11 +233,11 @@ namespace TMIJunction
 			}
 			logger.Information("Structure created: {junction100}", junction100.Id);
 
-			Structure legsJunction = legsSS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION, logger);
+			Structure legsJunction = legsSS.TryAddStructure("PTV", StructureHelper.LOWER_PTV_JUNCTION, logger);
 			legsJunction.SegmentVolume = junction25.Or(junction50).Or(junction75).Or(junction100);
 			logger.Information("Structure created: {legsJunction}", legsJunction.Id);
 
-			Structure ptvTotNoJunctionLegs = legsSS.TryAddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION, logger);
+			Structure ptvTotNoJunctionLegs = legsSS.TryAddStructure("PTV", StructureHelper.LOWER_PTV_NO_JUNCTION, logger);
 			ptvTotNoJunctionLegs.SegmentVolume = ptvLegsWithJunction.Sub(legsJunction);
 			logger.Information("Structure created: {ptvTotNoJunctionLegs}", ptvTotNoJunctionLegs.Id);
 		}

@@ -85,6 +85,10 @@
     <Compile Include="Helper\WindowHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Theme\CheckBoxTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Theme\ComboBoxTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

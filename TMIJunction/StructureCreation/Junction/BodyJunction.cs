@@ -55,12 +55,12 @@ namespace TMIJunction
 
             logger.Information("Structures created: {@junctionSubStructures}", junctionSubStructures.Select(s => s.Id));
 
-            Structure bodyJunction = bodySS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION, logger);
+            Structure bodyJunction = bodySS.TryAddStructure("PTV", StructureHelper.UPPER_PTV_JUNCTION, logger);
             junctionSubStructures.ForEach(s => bodyJunction.SegmentVolume = bodyJunction.Or(s));
 
             logger.Information("Structure created: {@bodyJunction}", bodyJunction.Id);
 
-            Structure ptvTotNoJunctionBody = bodySS.TryAddStructure("PTV", StructureHelper.PTV_TOT_NO_JUNCTION, logger);
+            Structure ptvTotNoJunctionBody = bodySS.TryAddStructure("PTV", StructureHelper.UPPER_PTV_NO_JUNCTION, logger);
             ptvTotNoJunctionBody.SegmentVolume = ptvBodyWithJunction.Sub(bodyJunction);
 
             logger.Information("Structure created: {ptvTotNoJunctionBody}", ptvTotNoJunctionBody.Id);
@@ -73,14 +73,14 @@ namespace TMIJunction
 
             if (ptvLegsBody != null)
             {
-                Structure ptvLegsBodyNoJunction = bodySS.TryAddStructure(ptvLegsBody.DicomType, StructureHelper.PTV_LEGS_NO_JUNCTION, logger);
+                Structure ptvLegsBodyNoJunction = bodySS.TryAddStructure(ptvLegsBody.DicomType, StructureHelper.UPPER_PTV_LEGS, logger);
                 ptvLegsBodyNoJunction.SegmentVolume = ptvLegsBody.Sub(bodyJunction);
                 logger.Information("Structure created: {ptvLegsBodyNoJunction}", ptvLegsBodyNoJunction.Id);
             }
             else
             {
                 logger.Warning("Structure {ptvLegsBodyNoJunction} could not be created. " +
-                    "The script needs a PTV structure containing \"legs\" in its name (e.g., \"PTV_legs\")", StructureHelper.PTV_LEGS_NO_JUNCTION);
+                    "The script needs a PTV structure containing \"legs\" in its name (e.g., \"PTV_legs\")", StructureHelper.UPPER_PTV_LEGS);
             }
 
             Structure rem = bodySS.TryAddStructure("AVOIDANCE", StructureHelper.REM, logger);
