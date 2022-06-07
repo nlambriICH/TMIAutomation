@@ -14,7 +14,7 @@ namespace TMILegsOptimization
         // 98% covers 98% of the target volume
         public static void Normalize(this ExternalPlanSetup externalPlanSetup)
         {
-            Structure ptvTotNoJunction = externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == "PTVTotNoJunction");
+            Structure ptvTotNoJunction = externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == "LowerPTVNoJ");
             
             if (ptvTotNoJunction == null)
             {
