@@ -28,7 +28,7 @@ namespace TMILegsOptimization
                     || !double.TryParse(pointObjectiveParams[5], out double priority))
                 {
                     Log.Error("Fail parsing PointObjectives: {line}", line);
-                    continue;
+                    throw new InvalidDataException($"Fail parsing PointObjectives: {line}");
                 }
 
                 string doseUnit = pointObjectiveParams[4];
@@ -48,7 +48,7 @@ namespace TMILegsOptimization
                     || !double.TryParse(eudObjectiveParams[5], out double gEUDa))
                 {
                     Log.Error("Fail parsing EUDObjectives: {line}", line);
-                    continue;
+                    throw new InvalidDataException($"Fail parsing EUDObjectives: {line}");
                 }
 
                 string doseUnit = eudObjectiveParams[3];
