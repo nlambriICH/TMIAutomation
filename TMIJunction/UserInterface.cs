@@ -223,5 +223,51 @@ namespace TMIJunction
         {
             ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
         }
+
+        private void OptimizationButton_Click(object sender, RoutedEventArgs e)
+        {
+            string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
+            string selectedMachine = ((UserInterfaceModel)DataContext).MachineName;
+            try
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+                Isocenter iso = new Isocenter(selectedLegsPlanId, selectedMachine);
+                iso.Set(context);
+
+                WindowHelper.ShowAutoClosingMessageBox($"Isocenters placed.\n\nStart optimization...\n\nCheck the execution status at {LoggerHelper.LogDirectory}", "Info", time:30000);
+
+                Optimization opt = new Optimization(selectedLegsPlanId);
+                opt.Start(context);
+
+                MessageBox.Show("Done!", "Info");
+               
+            }
+            catch (Exception exc)
+            {
+                logger.LogAndWarnException(exc);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = Cursors.Arrow;
+            }
+        }
+
+        private void Machine_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ((UserInterfaceModel)DataContext).LegsPlanId = ((ComboBox)sender).SelectedItem as string;
+            UpdateLegsPTVIds(((UserInterfaceModel)DataContext).LegsPlanId);
+        }
+
+        private void MachineComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            ((ComboBox)sender).ItemsSource = new string[] { "TrueBeamSN1015", "TrueBeamSN4791" };
+            ((ComboBox)sender).SelectedIndex = 0;
+            ((UserInterfaceModel)DataContext).MachineName = ((ComboBox)sender).SelectedItem as string;
+        }
+
+        private void MachineComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ((UserInterfaceModel)DataContext).MachineName = ((ComboBox)sender).SelectedItem as string;
+        }
     }
 }

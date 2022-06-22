@@ -25,6 +25,7 @@ namespace VMS.TPS
         public Script()
         {
             Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
                 .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")

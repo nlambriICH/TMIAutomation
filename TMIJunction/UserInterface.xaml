@@ -165,7 +165,7 @@
 				              Loaded="RegistrationComboBox_Loaded"
 				              SelectionChanged="RegistrationComboBox_SelectionChanged"/>
 
-                    
+
                     <CheckBox HorizontalAlignment="Left"
                               VerticalAlignment="Top"
                               Margin="150,195,0,0"
@@ -190,6 +190,56 @@
                             Width="150"
 				            Click="LowerButton_Click"/>
 
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Width="110"
+                     Background="#FDFDFD">
+
+                <TabItem.Header>
+                    <TextBlock Text="Optimization"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
+
+                <Grid>
+
+                    <TextBlock Text="Select Lower Plan"
+					            VerticalAlignment="Top"
+					            HorizontalAlignment="Left"
+					            Margin="150,62,0,0"
+					            Style="{StaticResource TextBlockTheme}"/>
+
+                    <ComboBox HorizontalAlignment="Left"
+					            VerticalAlignment="Top"
+					            Margin="340,62,0,0"
+					            Style="{StaticResource ComboBoxTheme}"
+				                Loaded="LegsPlanComboBox_Loaded"
+					            SelectionChanged="LegsPlanComboBox_SelectionChanged"/>
+
+                    <TextBlock Text="Select Machine"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Left"
+                        Margin="150,100,0,0"
+                        Style="{StaticResource TextBlockTheme}"/>
+                    
+                    <ComboBox HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="340,100,0,0"
+                        Style="{StaticResource ComboBoxTheme}"
+                        Loaded="MachineComboBox_Loaded"
+                        SelectionChanged="MachineComboBox_SelectionChanged"/>
+
+                    <Button HorizontalAlignment="Center"
+                            VerticalAlignment="Top"
+                            Margin="0,240,0,0"
+                            Content="Start"
+                            FontSize="20"
+                            Width="150"
+				            Click="OptimizationButton_Click"/>
+                    
                 </Grid>
 
             </TabItem>

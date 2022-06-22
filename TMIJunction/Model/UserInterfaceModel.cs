@@ -33,6 +33,14 @@ namespace TMIJunction
             }
         }
 
+        private string machineName;
+
+        public string MachineName
+        {
+            get { return machineName; }
+            set { machineName = value; }
+        }
+
 
         private string legsPlanPTVs;
         private string bodyPlanPTVs;

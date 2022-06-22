@@ -15,9 +15,9 @@ namespace TMIJunction
 
         private const UInt32 WM_CLOSE = 0x0010;
 
-        public static void ShowAutoClosingMessageBox(string message, string caption)
+        public static void ShowAutoClosingMessageBox(string message, string caption, int time=8000)
         {
-            System.Timers.Timer timer = new System.Timers.Timer(8000) { AutoReset = false };
+            System.Timers.Timer timer = new System.Timers.Timer(time) { AutoReset = false };
             timer.Elapsed += delegate
             {
                 IntPtr hWnd = FindWindowByCaption(IntPtr.Zero, caption);

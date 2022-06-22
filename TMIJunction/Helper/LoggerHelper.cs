@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 
 namespace TMIJunction
@@ -11,8 +12,8 @@ namespace TMIJunction
         {
             get
             {
-                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(desktopPath, "TMIAutomation"));
+                string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
                 return directory.FullName;
             }
         }
@@ -20,7 +21,7 @@ namespace TMIJunction
         public static void LogAndWarnException(this ILogger logger, Exception exc)
         {
             logger.Error("{@Exception}", exc);
-            MessageBox.Show($"Something went wrong... see the log traces at {LogDirectory}", "Error");
+            MessageBox.Show($"Something went wrong: {exc.Message}\n\nFor more details, see the log traces at: {LogDirectory}.", "Error");
         }
     }
 }
