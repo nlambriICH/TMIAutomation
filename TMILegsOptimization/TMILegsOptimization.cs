@@ -69,11 +69,15 @@ namespace TMILegsOptimization
 
                 Patient patient = app.OpenPatientById(patientId);
                 PlanSetup planSetup = patient.Courses.FirstOrDefault(c => c.Id == courseId).PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-                StructureSet ss = planSetup.StructureSet;
+                
+                patient.BeginModifications();
+
+                ExternalPlanSetup externalPlanSetup = patient.Courses.FirstOrDefault(c => c.Id == courseId).ExternalPlanSetups.FirstOrDefault(ps => ps.Id == planId);
+
+                externalPlanSetup.OptimizationSetup(); // must set dose prescription before adding objectives
 
                 OptimizationSetup optSetup = planSetup.OptimizationSetup;
-
-                patient.BeginModifications();
+                StructureSet ss = planSetup.StructureSet;
 
                 optSetup.ClearObjectives();
                 optSetup.AddPointObjectives(ss);
@@ -82,9 +86,6 @@ namespace TMILegsOptimization
                 optSetup.AddAutomaticNormalTissueObjective(150);
                 //optSetup.ExcludeStructuresFromOptimization(ss);
 
-                ExternalPlanSetup externalPlanSetup = patient.Courses.FirstOrDefault(c => c.Id == courseId).ExternalPlanSetups.FirstOrDefault(ps => ps.Id == planId);
-
-                externalPlanSetup.SetupModels();
                 externalPlanSetup.OptimizePlan(patientId);
                 externalPlanSetup.AdjustYJawToMLCShape();
                 externalPlanSetup.CalculateDose(patientId);

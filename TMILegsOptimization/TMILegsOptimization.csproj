@@ -92,7 +92,7 @@
     <Compile Include="TMILegsOptimization.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\CalculationOptions.txt" />
+    <Content Include="Resources\OptimizationOptions.txt" />
     <Content Include="Resources\EUDOptimizationObjectives.txt" />
     <Content Include="Resources\PointOptimizationObjectives.txt" />
     <Content Include="Resources\PatientsInfo.txt" />

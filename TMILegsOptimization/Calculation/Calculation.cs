@@ -12,20 +12,25 @@ namespace TMILegsOptimization
         private static string OPTIMIZATION_ALGORITHM;
         private static string DOSE_CALCULATION_ALGORITHM;
         private static string MLCID;
+        private static string DOSE_PER_FRACTION_GY;
+        private static string NUMBER_OF_FRACTIONS;
 
-        public static void SetupModels(this ExternalPlanSetup externalPlanSetup)
+        public static void OptimizationSetup(this ExternalPlanSetup externalPlanSetup)
         {
-            foreach (var line in File.ReadLines("CalculationOptions.txt").Skip(3))
+            foreach (var line in File.ReadLines("OptimizationOptions.txt").Skip(3))
             {
-                string[] calcOptions = line.Split('\t');
-                OPTIMIZATION_ALGORITHM = calcOptions[0];
-                DOSE_CALCULATION_ALGORITHM = calcOptions[1];
-                MLCID = calcOptions[2];
+                string[] optSetup = line.Split('\t');
+                OPTIMIZATION_ALGORITHM = optSetup[0];
+                DOSE_CALCULATION_ALGORITHM = optSetup[1];
+                MLCID = optSetup[2];
+                DOSE_PER_FRACTION_GY = optSetup[3];
+                NUMBER_OF_FRACTIONS = optSetup[4];
             }
 
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, OPTIMIZATION_ALGORITHM);
             externalPlanSetup.SetCalculationOption(OPTIMIZATION_ALGORITHM, "/PhotonOptCalculationOptions/@MRLevelAtRestart", "MR3"); // Calculation options: \\machinename\dcf$\client
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, DOSE_CALCULATION_ALGORITHM);
+            externalPlanSetup.SetPrescription(int.Parse(NUMBER_OF_FRACTIONS), new DoseValue(double.Parse(DOSE_PER_FRACTION_GY), DoseValue.DoseUnit.Gy), 1.0);
         }
 
         public static void OptimizePlan(this ExternalPlanSetup externalPlanSetup, string patientId)
