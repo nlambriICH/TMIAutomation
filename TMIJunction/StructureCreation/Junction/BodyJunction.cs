@@ -30,8 +30,6 @@ namespace TMIJunction
 
             Structure ptvBodyWithJunction = bodySS.Structures.FirstOrDefault(s => s.Id == bodyPTVId);
 
-            context.Patient.BeginModifications();
-
             List<Structure> junctionSubStructures = new List<Structure>
             {
                 bodySS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION25, logger),

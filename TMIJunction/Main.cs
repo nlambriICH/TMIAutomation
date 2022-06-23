@@ -6,6 +6,8 @@ using VMS.TPS.Common.Model.API;
 using Serilog;
 using System.IO;
 using System;
+using System.Linq;
+using VMS.TPS.Common.Model.Types;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.7")]
@@ -25,7 +27,9 @@ namespace VMS.TPS
         public Script()
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
+                .Destructure.ByTransforming<VVector>(vv => new { X = vv.x, Y = vv.y, Z = vv.z })
+                .Destructure.ByTransforming<VRect<double>>(vr => new { vr.X1, vr.X2, vr.Y1, vr.Y2 })
                 .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
@@ -39,9 +43,11 @@ namespace VMS.TPS
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void Execute(ScriptContext context, Window window /*, ScriptEnvironment environment*/)
         {
+            context.Patient.BeginModifications();
+
             UserInterface ui = new UserInterface(context)
             {
-                DataContext = new UserInterfaceModel()
+                DataContext = new UserInterfaceModel(context.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last())
             };
 
             window.Content = ui;

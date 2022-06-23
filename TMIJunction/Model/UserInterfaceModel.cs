@@ -1,9 +1,22 @@
 ﻿using System.ComponentModel;
+using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction
 {
     class UserInterfaceModel : INotifyPropertyChanged
     {
+        public UserInterfaceModel(Course latestCourse)
+        {
+            this.latestCourse = latestCourse;
+        }
+
+        private Course latestCourse;
+
+        public Course LatestCourse
+        {
+            get { return latestCourse; }
+            set { latestCourse = value; }
+        }
 
         private string bodyPlanId;
 

@@ -9,16 +9,16 @@ namespace TMIJunction
 {
     class LegsJunction : IStructure
     {
-        private readonly string bodyPlanId;
-        private readonly string legsPlanId;
+        private readonly PlanSetup bodyPlan;
+        private readonly PlanSetup legsPlan;
         private readonly string legsPTVId;
         private readonly string imageRegId;
 		private readonly ILogger logger;
 
-        public LegsJunction(string bodyPlanId, string legsPlanId, string legsPTVId, string imageRegId)
+        public LegsJunction(PlanSetup bodyPlan, PlanSetup legsPlan, string legsPTVId, string imageRegId)
         {
-            this.bodyPlanId = bodyPlanId;
-            this.legsPlanId = legsPlanId;
+            this.bodyPlan = bodyPlan;
+            this.legsPlan = legsPlan;
             this.legsPTVId = legsPTVId;
             this.imageRegId = imageRegId;
 			this.logger = Log.ForContext<LegsJunction>();
@@ -27,15 +27,12 @@ namespace TMIJunction
         public void Create(ScriptContext context)
 		{
 
-			logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlanId, legsPlanId, legsPTVId, imageRegId } );
+			logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlan.Id, legsPlan.Id, legsPTVId, imageRegId } );
 
-			PlanSetup bodyPlan = context.PlansInScope.FirstOrDefault(p => p.Id == bodyPlanId);
 			StructureSet bodySS = bodyPlan.StructureSet;
-			StructureSet legsSS = context.PlansInScope.FirstOrDefault(p => p.Id == legsPlanId).StructureSet;
+			StructureSet legsSS = legsPlan.StructureSet;
 
 			List<string> isoStructuresId = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
-
-			context.Patient.BeginModifications();
 
 			if (!isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
 			{
@@ -97,7 +94,7 @@ namespace TMIJunction
 					foreach (int slice in bodySS.GetStructureSlices(isoStructure))
 					{
 						VVector[][] contours = isoStructure.GetContoursOnImagePlane(slice);
-						logger.Debug("Found {numContours} contours on body slice {slice}", contours.Length, slice);
+						logger.Verbose("Found {numContours} contours on body slice {slice}", contours.Length, slice);
 
 						foreach (VVector[] contour in contours)
 						{
@@ -113,9 +110,9 @@ namespace TMIJunction
 								break;
                             }
 
-                            VVector vvUser = legsSS.Image.DicomToUser(transformedContour.FirstOrDefault(), context.PlansInScope.FirstOrDefault(p => p.Id == legsPlanId));
+                            VVector vvUser = legsSS.Image.DicomToUser(transformedContour.FirstOrDefault(), legsPlan);
 
-							logger.Debug("Transformed contour at DICOM={dicomZ}, User={userZ}mm, slice={slice}", Math.Round(dicomZ, 2), Math.Round(vvUser.z, 2), sliceZ);
+							logger.Verbose("Transformed contour at DICOM={dicomZ}, User={userZ}mm, slice={slice}", Math.Round(dicomZ, 2), Math.Round(vvUser.z, 2), sliceZ);
 
 							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), sliceZ);
 						}

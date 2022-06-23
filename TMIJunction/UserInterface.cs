@@ -26,7 +26,9 @@ namespace TMIJunction
 
         private void BodyPlanComboBox_Loaded(object sender, RoutedEventArgs e)
         {
-            ((ComboBox)sender).ItemsSource = context.PlansInScope.Where(p => p.Id.Contains("up")).OrderByDescending(p => p.CreationDateTime).Select(p => p.Id);
+            ((ComboBox)sender).ItemsSource = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.Where(p => p.Id.Contains("up"))
+                .OrderByDescending(p => p.CreationDateTime)
+                .Select(p => p.Id);
             ((ComboBox)sender).SelectedIndex = 0;
             ((UserInterfaceModel)DataContext).BodyPlanId = ((ComboBox)sender).SelectedItem as string;
         }
@@ -46,7 +48,7 @@ namespace TMIJunction
 
 		private void UpdateBodyPTVIds(string selectedBodyPlanId)
 		{
-            PlanSetup selectedBodyPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedBodyPlanId);
+            PlanSetup selectedBodyPlan = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.FirstOrDefault(p => p.Id == selectedBodyPlanId);
             try
             {
                 if (selectedBodyPlan != null)
@@ -108,19 +110,21 @@ namespace TMIJunction
 
         private void GenerateControl(IStructure control)
         {
-            WindowHelper.ShowAutoClosingMessageBox("Generating Control Structures.\nPlease wait... We're working for you 😊", "TMIJunction");
+            WindowHelper.ShowAutoClosingMessageBox("Generating Control Structures.\n\nPlease wait... We're working for you 😊", "TMIJunction");
             control.Create(context);
         }
 
         private void GenerateJunction(IStructure junction)
         {
-            WindowHelper.ShowAutoClosingMessageBox("Generating Junction Structures.\nPlease wait... We're working for you 😊", "TMIJunction");
+            WindowHelper.ShowAutoClosingMessageBox("Generating Junction Structures.\n\nPlease wait... We're working for you 😊", "TMIJunction");
             junction.Create(context);
         }
 
         private void LegsPlanComboBox_Loaded(object sender, RoutedEventArgs e)
         {
-            ((ComboBox)sender).ItemsSource = context.PlansInScope.Where(p => p.Id.Contains("down")).OrderByDescending(p => p.CreationDateTime).Select(p => p.Id);
+            ((ComboBox)sender).ItemsSource = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.Where(p => p.Id.Contains("down"))
+                                                                                                      .OrderByDescending(p => p.CreationDateTime)
+                                                                                                      .Select(p => p.Id);
             ((ComboBox)sender).SelectedIndex = 0;
             ((UserInterfaceModel)DataContext).LegsPlanId = ((ComboBox)sender).SelectedItem as string;
         }
@@ -128,7 +132,6 @@ namespace TMIJunction
         private void LegsPlanComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ((UserInterfaceModel)DataContext).LegsPlanId = ((ComboBox)sender).SelectedItem as string;
-            UpdateLegsPTVIds(((UserInterfaceModel)DataContext).LegsPlanId);
         }
 
         private void LegsPTVComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -139,18 +142,27 @@ namespace TMIJunction
 
         private void UpdateLegsPTVIds(string selectedLegsPlanId)
         {
-            PlanSetup selectedLegsPlan = context.PlansInScope.FirstOrDefault(p => p.Id == selectedLegsPlanId);
             try
             {
-                if (selectedLegsPlan != null)
+                StructureSet ssInContext = string.IsNullOrEmpty(selectedLegsPlanId) ?
+                    context.StructureSet : ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.FirstOrDefault(ps => ps.Id == selectedLegsPlanId).StructureSet;
+                
+                if (ssInContext == null)
                 {
-                    LegsPTVComboBox.ItemsSource = new ObservableCollection<string>(selectedLegsPlan.StructureSet.Structures
-                                .Where(s => s.DicomType == "PTV")
-                                .OrderByDescending(s => s.Volume)
-                                .Select(p => p.Id));
-                    LegsPTVComboBox.SelectedIndex = 0;
-                    ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
+                    throw new InvalidOperationException("There is no structure set opened in the current context");
                 }
+
+                if (ssInContext == context.PlansInScope.FirstOrDefault(ps => ps.Id == ((UserInterfaceModel)DataContext).BodyPlanId)?.StructureSet)
+                {
+                    throw new InvalidOperationException("The structure set opened in the current context is assigned to the upper plan.\n\nPlease open a structure set for the lower extremities."); ;
+                }
+
+                LegsPTVComboBox.ItemsSource = new ObservableCollection<string>(ssInContext.Structures
+                            .Where(s => s.DicomType == "PTV")
+                            .OrderByDescending(s => s.Volume)
+                            .Select(s => s.Id));
+                LegsPTVComboBox.SelectedIndex = 0;
+                ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
             }
             catch (Exception exc)
             {
@@ -168,33 +180,58 @@ namespace TMIJunction
 		private void LowerButton_Click(object sender, RoutedEventArgs e)
 		{
             string selectedBodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
-            string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
+            PlanSetup upperPlan = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.FirstOrDefault(ps => ps.Id == selectedBodyPlanId);
             string selectedLegsPTVId = ((UserInterfaceModel)DataContext).LegsPlanPTVs;
             string selectedRegistration = ((UserInterfaceModel)DataContext).Registration;
             try
             {
+                Mouse.OverrideCursor = Cursors.Wait;
+
                 if (LowerJunction.IsChecked == true && LowerControl.IsChecked == true)
                 {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    GenerateJunction(new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration));
+                    ExternalPlanSetup lowerPlan = GenerateNewLowerPlan();
+                    GenerateJunction(new LegsJunction(upperPlan, lowerPlan, selectedLegsPTVId, selectedRegistration));
 
-                    GenerateControl(new LegsControlStructures(selectedLegsPlanId, StructureHelper.PTV_TOTAL));
-                    UpdateLegsPTVIds(selectedLegsPlanId);
+                    GenerateControl(new LegsControlStructures(lowerPlan, StructureHelper.PTV_TOTAL));
+                    UpdateLegsPTVIds(lowerPlan.Id);
+
+                    if (LowerOptimization.IsChecked == true)
+                    {
+                        Optimize(lowerPlan.Id);
+                    }
 
                     MessageBox.Show("Done!", "Info");
                 }
                 else if (LowerJunction.IsChecked == true && LowerControl.IsChecked != true)
                 {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    GenerateJunction(new LegsJunction(selectedBodyPlanId, selectedLegsPlanId, selectedLegsPTVId, selectedRegistration));
-                    UpdateLegsPTVIds(selectedLegsPlanId);
+                    ExternalPlanSetup plan = GenerateNewLowerPlan();
+                    GenerateJunction(new LegsJunction(upperPlan, plan, selectedLegsPTVId, selectedRegistration));
+                    UpdateLegsPTVIds(plan.Id);
+
+                    if (LowerOptimization.IsChecked == true)
+                    {
+                        Optimize(plan.Id);
+                    }
 
                     MessageBox.Show("Done!", "Info");
                 }
                 else if (LowerJunction.IsChecked != true && LowerControl.IsChecked == true)
                 {
-                    Mouse.OverrideCursor = Cursors.Wait;
-                    GenerateControl(new LegsControlStructures(selectedLegsPlanId, selectedLegsPTVId));
+                    ExternalPlanSetup plan = GenerateNewLowerPlan();
+                    GenerateControl(new LegsControlStructures(plan, selectedLegsPTVId));
+
+                    if (LowerOptimization.IsChecked == true)
+                    {
+                        Optimize(plan.Id);
+                    }
+
+                    MessageBox.Show("Done!", "Info");
+                }
+                else if (LowerJunction.IsChecked != true && LowerControl.IsChecked != true && LowerOptimization.IsChecked == true)
+                {
+                    string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
+
+                    Optimize(selectedLegsPlanId);
 
                     MessageBox.Show("Done!", "Info");
                 }
@@ -209,7 +246,41 @@ namespace TMIJunction
             }
         }
 
-		private void RegistrationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private ExternalPlanSetup GenerateNewLowerPlan()
+        {
+            if (context.StructureSet == null) throw new InvalidOperationException("Plase open the structure set to be assigned to the new plan.");
+
+            ExternalPlanSetup plan = ((UserInterfaceModel)DataContext).LatestCourse.AddExternalPlanSetup(context.StructureSet);
+
+            int numOfAutoPlans = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.Count(ps => ps.Id.Contains("TMLIdownAuto"));
+            plan.Id = numOfAutoPlans == 0 ? "TMLIdownAuto" : string.Concat("TMLIdownAuto", numOfAutoPlans);
+            UpdateLegsPlanIds();
+            return plan;
+        }
+
+        private void Optimize(string planId)
+        {
+            string selectedMachine = ((UserInterfaceModel)DataContext).MachineName;
+
+            Isocenter iso = new Isocenter(((UserInterfaceModel)DataContext).LatestCourse, planId, selectedMachine);
+            iso.Set(context);
+
+            WindowHelper.ShowAutoClosingMessageBox($"Isocenters placed.\n\nStart optimization...\n\nCheck the execution status at: {LoggerHelper.LogDirectory}", "Info", time: 30000);
+
+            Optimization opt = new Optimization(planId);
+            opt.Start(context);
+        }
+
+        private void UpdateLegsPlanIds()
+        {
+            LegsPlanComboBox.ItemsSource = new ObservableCollection<string>(context.PlansInScope
+                                            .OrderByDescending(p => p.CreationDateTime)
+                                            .Select(p => p.Id));
+            LegsPlanComboBox.SelectedIndex = 0;
+            ((UserInterfaceModel)DataContext).LegsPlanId = LegsPlanComboBox.SelectedItem as string;
+        }
+
+        private void RegistrationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
             ((UserInterfaceModel)DataContext).Registration = ((ComboBox)sender).SelectedItem as string;
         }
@@ -224,38 +295,9 @@ namespace TMIJunction
             ((UserInterfaceModel)DataContext).LegsPlanPTVs = LegsPTVComboBox.SelectedItem as string;
         }
 
-        private void OptimizationButton_Click(object sender, RoutedEventArgs e)
-        {
-            string selectedLegsPlanId = ((UserInterfaceModel)DataContext).LegsPlanId;
-            string selectedMachine = ((UserInterfaceModel)DataContext).MachineName;
-            try
-            {
-                Mouse.OverrideCursor = Cursors.Wait;
-                Isocenter iso = new Isocenter(selectedLegsPlanId, selectedMachine);
-                iso.Set(context);
-
-                WindowHelper.ShowAutoClosingMessageBox($"Isocenters placed.\n\nStart optimization...\n\nCheck the execution status at {LoggerHelper.LogDirectory}", "Info", time:30000);
-
-                Optimization opt = new Optimization(selectedLegsPlanId);
-                opt.Start(context);
-
-                MessageBox.Show("Done!", "Info");
-               
-            }
-            catch (Exception exc)
-            {
-                logger.LogAndWarnException(exc);
-            }
-            finally
-            {
-                Mouse.OverrideCursor = Cursors.Arrow;
-            }
-        }
-
         private void Machine_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ((UserInterfaceModel)DataContext).LegsPlanId = ((ComboBox)sender).SelectedItem as string;
-            UpdateLegsPTVIds(((UserInterfaceModel)DataContext).LegsPlanId);
         }
 
         private void MachineComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -269,5 +311,6 @@ namespace TMIJunction
         {
             ((UserInterfaceModel)DataContext).MachineName = ((ComboBox)sender).SelectedItem as string;
         }
+
     }
 }

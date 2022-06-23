@@ -7,13 +7,13 @@ namespace TMIJunction
 {
     class LegsControlStructures : IStructure
     {
-        private readonly string legsPlanId;
+        private readonly PlanSetup legsPlan;
         private readonly string legsPTVId;
         private readonly ILogger logger;
 
-        public LegsControlStructures(string legsPlanId, string ptvId)
+        public LegsControlStructures(PlanSetup legsPlan, string ptvId)
         {
-            this.legsPlanId = legsPlanId;
+            this.legsPlan = legsPlan;
             this.legsPTVId = ptvId;
             this.logger = Log.ForContext<LegsControlStructures>();
         }
@@ -21,14 +21,12 @@ namespace TMIJunction
         public void Create(ScriptContext context)
         {
 
-            logger.Information("LegsControlStructures context: {@context}", new List<string> { legsPlanId, legsPTVId });
-
-            context.Patient.BeginModifications();
+            logger.Information("LegsControlStructures context: {@context}", new List<string> { legsPlan.Id, legsPTVId });
 
             /*
              * Create Healthy Tissue (HT), Healthy Tissue 2 (HT2), and Body Free (Body_free)
              */
-            StructureSet legsSS = context.PlansInScope.FirstOrDefault(p => p.Id == legsPlanId).StructureSet;
+            StructureSet legsSS = legsPlan.StructureSet;
             Structure ptv = legsSS.Structures.FirstOrDefault(s => s.Id == legsPTVId);
             int bottomSlicePTVWithJunction = legsSS.GetStructureSlices(ptv).LastOrDefault();
             int clearBodyFreeOffset = 3;

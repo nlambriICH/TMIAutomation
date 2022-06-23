@@ -23,8 +23,6 @@ namespace TMIJunction
 
             logger.Information("BodyControlStructures context: {@context}", new List<string> { bodyPlanId, bodyPTVId });
 
-            context.Patient.BeginModifications();
-
             /*
              * Create Healthy Tissue (HT), Healthy Tissue 2 (HT2), and Body Free (Body_free)
              */

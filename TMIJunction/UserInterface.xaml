@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d" Height="450" Width="650">
+             mc:Ignorable="d" Height="500" Width="650">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -46,12 +46,12 @@
 					            Width="130"
 					            HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="150,30,0,0"
+					            Margin="150,45,0,0"
                                 Style="{StaticResource TextBlockTheme}"><Run Text="Select "/><Run Text="Upper "/><Run Text="Plan"/></TextBlock>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,30,0,0"
+					            Margin="340,45,0,0"
 					            Style="{StaticResource ComboBoxTheme}"
 					            Loaded="BodyPlanComboBox_Loaded"
 					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
@@ -59,20 +59,20 @@
                     <TextBlock
 					            VerticalAlignment="Top"
                                 HorizontalAlignment="Left"
-					            Margin="150,80,0,0"
+					            Margin="150,95,0,0"
 					            Style="{StaticResource TextBlockTheme}"><Run Text="Select "/><Run Text="Upper "/><Run Text="PTV"/></TextBlock>
 
                     <ComboBox  HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,80,0,0"
+					            Margin="340,95,0,0"
 					            x:Name="BodyPTVComboBox"
 					            Style="{StaticResource ComboBoxTheme}"
 					            Loaded="BodyPTVComboBox_Loaded"
-                                SelectionChanged="BodyPTVComboBox_SelectionChanged" Grid.Column="1"/>
+                                SelectionChanged="BodyPTVComboBox_SelectionChanged"/>
 
                     <CheckBox HorizontalAlignment="Left"
                               VerticalAlignment="Top"
-                              Margin="150,160,0,0"
+                              Margin="150,175,0,0"
                               Content="Junction Structures"
                               Style="{StaticResource CheckBoxTheme}"
                               IsChecked="True"
@@ -80,7 +80,7 @@
 
                     <CheckBox HorizontalAlignment="Right"
                               VerticalAlignment="Top"
-                              Margin="0,160,150,0"
+                              Margin="0,175,150,0"
                               Content="Control Structures"
                               Style="{StaticResource CheckBoxTheme}"
                               IsChecked="True"
@@ -88,7 +88,7 @@
 
                     <Button HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,240,0,0"
+                            Margin="247,255,247,0"
                             Content="Generate"
                             FontSize="20"
                             Click="UpperButton_Click"
@@ -115,134 +115,255 @@
 					            HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
 					            Margin="150,25,0,0"
-                                Style="{StaticResource TextBlockTheme}"/>
+                               FontSize="16" Height="25"
+                               FontFamily="Serif" Foreground="#FDFDFD"
+                               Padding="3">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding  ElementName=LowerJunction, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
 					            Margin="340,25,0,0"
-					            Style="{StaticResource ComboBoxTheme}"
 					            Loaded="BodyPlanComboBox_Loaded"
-					            SelectionChanged="BodyPlanComboBox_SelectionChanged"/>
-
-                    <TextBlock Text="Select Lower Plan"
-					            VerticalAlignment="Top"
-					            HorizontalAlignment="Left"
-					            Margin="150,62,0,0"
-					            Style="{StaticResource TextBlockTheme}"/>
-
-                    <ComboBox HorizontalAlignment="Left"
-					            VerticalAlignment="Top"
-					            Margin="340,62,0,0"
-					            Style="{StaticResource ComboBoxTheme}"
-				                Loaded="LegsPlanComboBox_Loaded"
-					            SelectionChanged="LegsPlanComboBox_SelectionChanged"/>
+					            SelectionChanged="BodyPlanComboBox_SelectionChanged"
+                              Height="25" FontSize="12" FontFamily="Serif"
+                              Foreground="#2A324F" Width="140">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding  ElementName=LowerJunction, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
 
                     <TextBlock Text="Select Lower PTV"
 					            VerticalAlignment="Top"
 					            HorizontalAlignment="Left"
-					            Margin="150,99,0,0"
-					            Style="{StaticResource TextBlockTheme}"/>
+					            Margin="150,65,0,0"
+					            FontSize="16" Height="25"
+                               FontFamily="Serif" Foreground="#FDFDFD"
+                               Padding="3">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=LowerJunction, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerControl, Path=IsChecked}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
                     <ComboBox HorizontalAlignment="Left"
                               VerticalAlignment="Top"
-                              Margin="340,99,0,0"
-                              Style="{StaticResource ComboBoxTheme}"
+                              Margin="340,65,0,0"
                               x:Name="LegsPTVComboBox"
 				              Loaded="LegsPTVComboBox_Loaded"
-                              SelectionChanged="LegsPTVComboBox_SelectionChanged"/>
+                              SelectionChanged="LegsPTVComboBox_SelectionChanged"
+                              Width="140"
+                              Height="25" FontSize="12" FontFamily="Serif"
+                              Foreground="#2A324F">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=LowerJunction, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerControl, Path=IsChecked}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
 
 
                     <TextBlock Text="Select Registration"
 					            VerticalAlignment="Top"
 					            HorizontalAlignment="Left"
-					            Margin="150,136,0,0"
-					            Style="{StaticResource TextBlockTheme}"/>
+					            Margin="150,105,0,0"
+                                x:Name="RegistrationText"
+                               FontSize="16" Height="25"
+                               FontFamily="Serif" Foreground="#FDFDFD"
+                               Padding="3">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding  ElementName=LowerJunction, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
                     <ComboBox HorizontalAlignment="Left"
 					            VerticalAlignment="Top"
-					            Margin="340,136,0,0"
-					            Style="{StaticResource ComboBoxTheme}"
+					            Margin="340,105,0,0"
 				              Loaded="RegistrationComboBox_Loaded"
-				              SelectionChanged="RegistrationComboBox_SelectionChanged"/>
+				              SelectionChanged="RegistrationComboBox_SelectionChanged"
+                              x:Name="RegistrationComboBox" Width="140"
+                              Height="25" FontSize="12" FontFamily="Serif"
+                              Foreground="#2A324F">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding  ElementName=LowerJunction, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
+
+
 
 
                     <CheckBox HorizontalAlignment="Left"
                               VerticalAlignment="Top"
-                              Margin="150,195,0,0"
+                              Margin="66,245,0,0"
                               Content="Junction Structures"
                               Style="{StaticResource CheckBoxTheme}"
-                              IsChecked="True"
-                              x:Name="LowerJunction"/>
+                              x:Name="LowerJunction" IsChecked="True"/>
 
-                    <CheckBox HorizontalAlignment="Right"
+                    <CheckBox HorizontalAlignment="Left"
                               VerticalAlignment="Top"
-                              Margin="0,195,150,0"
+                              Margin="266,245,0,0"
                               Content="Control Structures"
                               Style="{StaticResource CheckBoxTheme}"
-                              IsChecked="True"
-                              x:Name="LowerControl"/>
+                              x:Name="LowerControl" IsChecked="True"/>
 
                     <Button HorizontalAlignment="Center"
                             VerticalAlignment="Top"
-                            Margin="0,240,0,0"
-                            Content="Generate"
+                            Margin="247,300,247,0"
+                            Content="Start"
                             FontSize="20"
                             Width="150"
 				            Click="LowerButton_Click"/>
 
-                </Grid>
-
-            </TabItem>
-
-            <TabItem Width="110"
-                     Background="#FDFDFD">
-
-                <TabItem.Header>
-                    <TextBlock Text="Optimization"
-                               FontSize="16"
-                               FontFamily="Serif"
-                               Foreground="#272537"/>
-                </TabItem.Header>
-
-                <Grid>
-
-                    <TextBlock Text="Select Lower Plan"
-					            VerticalAlignment="Top"
-					            HorizontalAlignment="Left"
-					            Margin="150,62,0,0"
-					            Style="{StaticResource TextBlockTheme}"/>
-
-                    <ComboBox HorizontalAlignment="Left"
-					            VerticalAlignment="Top"
-					            Margin="340,62,0,0"
-					            Style="{StaticResource ComboBoxTheme}"
-				                Loaded="LegsPlanComboBox_Loaded"
-					            SelectionChanged="LegsPlanComboBox_SelectionChanged"/>
+                    <CheckBox HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="466,245,0,0"
+                        Content="Optimize"
+                        Style="{StaticResource CheckBoxTheme}"
+                        x:Name="LowerOptimization" IsChecked="True"/>
 
                     <TextBlock Text="Select Machine"
                         VerticalAlignment="Top"
                         HorizontalAlignment="Left"
-                        Margin="150,100,0,0"
-                        Style="{StaticResource TextBlockTheme}"/>
-                    
+                        Margin="150,145,0,0"
+                        FontSize="16" Height="25"
+                        FontFamily="Serif" Foreground="#FDFDFD"
+                        Padding="3">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=LowerOptimization}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
                     <ComboBox HorizontalAlignment="Left"
                         VerticalAlignment="Top"
-                        Margin="340,100,0,0"
-                        Style="{StaticResource ComboBoxTheme}"
+                        Margin="340,145,0,0"
                         Loaded="MachineComboBox_Loaded"
-                        SelectionChanged="MachineComboBox_SelectionChanged"/>
+                        SelectionChanged="MachineComboBox_SelectionChanged"
+                        Width="140"
+                        Height="25" FontSize="12" FontFamily="Serif"
+                        Foreground="#2A324F">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=LowerOptimization}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
 
-                    <Button HorizontalAlignment="Center"
-                            VerticalAlignment="Top"
-                            Margin="0,240,0,0"
-                            Content="Start"
-                            FontSize="20"
-                            Width="150"
-				            Click="OptimizationButton_Click"/>
-                    
+                    <TextBlock Text="Select Lower Plan"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Left"
+                        Margin="150,185,0,0"
+                        x:Name="LowerPlanText"
+                        FontSize="16" Height="25"
+                        FontFamily="Serif" Foreground="#FDFDFD"
+                        Padding="3">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=LowerJunction, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerControl, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerOptimization, Path=IsChecked}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <ComboBox HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="340,185,0,0"
+                        x:Name="LegsPlanComboBox"
+                        Loaded="LegsPlanComboBox_Loaded"
+                        SelectionChanged="LegsPlanComboBox_SelectionChanged"
+                              Width="140"
+                              Height="25" FontSize="12" FontFamily="Serif"
+                              Foreground="#2A324F">
+                        <ComboBox.Style>
+                            <Style TargetType="{x:Type ComboBox}">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=LowerJunction, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerControl, Path=IsChecked}" Value="False"/>
+                                            <Condition Binding="{Binding ElementName=LowerOptimization, Path=IsChecked}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
+                    </ComboBox>
+
                 </Grid>
 
             </TabItem>
+
         </TabControl>
 
 

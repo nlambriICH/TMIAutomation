@@ -16,11 +16,10 @@ namespace TMIJunction
         {
             ExternalPlanSetup externalPlanSetup = context.ExternalPlansInScope.FirstOrDefault(ps => ps.Id == lowerPlan);
 
-            StructureSet ss = externalPlanSetup.StructureSet;
+            externalPlanSetup.OptimizationSetup(); // must set dose prescription before adding objectives
 
             OptimizationSetup optSetup = externalPlanSetup.OptimizationSetup;
-
-            context.Patient.BeginModifications();
+            StructureSet ss = externalPlanSetup.StructureSet;
 
             optSetup.ClearObjectives();
             optSetup.AddPointObjectives(ss);
@@ -29,7 +28,6 @@ namespace TMIJunction
             optSetup.AddAutomaticNormalTissueObjective(150);
             //optSetup.ExcludeStructuresFromOptimization(ss);
 
-            externalPlanSetup.SetupModels();
             externalPlanSetup.OptimizePlan(context.Patient.Id);
             externalPlanSetup.AdjustYJawToMLCShape();
             externalPlanSetup.CalculateDose(context.Patient.Id);
