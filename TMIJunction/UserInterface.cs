@@ -38,6 +38,15 @@ namespace TMIJunction
             string selectedBodyPlanId = ((ComboBox)sender).SelectedItem as string;
             ((UserInterfaceModel)DataContext).BodyPlanId = selectedBodyPlanId;
             UpdateBodyPTVIds(selectedBodyPlanId);
+            UpdateMachineName(selectedBodyPlanId);
+        }
+
+        private void UpdateMachineName(string selectedBodyPlanId)
+        {
+            TextBoxMachineName.Text = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.FirstOrDefault(p => p.Id == selectedBodyPlanId).Beams
+                                                                                                          .Select(b => b.TreatmentUnit.Id)
+                                                                                                          .FirstOrDefault();
+            ((UserInterfaceModel)DataContext).MachineName = TextBoxMachineName.Text;
         }
 
         private void BodyPTVComboBox_Loaded(object sender, RoutedEventArgs e)
@@ -260,6 +269,7 @@ namespace TMIJunction
 
         private void Optimize(string planId)
         {
+            if (TextBoxMachineName.Text == string.Empty) throw new InvalidOperationException("Please enter a machine name for plan optimization");
             string selectedMachine = ((UserInterfaceModel)DataContext).MachineName;
 
             Isocenter iso = new Isocenter(((UserInterfaceModel)DataContext).LatestCourse, planId, selectedMachine);
@@ -300,17 +310,13 @@ namespace TMIJunction
             ((UserInterfaceModel)DataContext).LegsPlanId = ((ComboBox)sender).SelectedItem as string;
         }
 
-        private void MachineComboBox_Loaded(object sender, RoutedEventArgs e)
+        private void MachineTextBox_Loaded(object sender, RoutedEventArgs e)
         {
-            ((ComboBox)sender).ItemsSource = new string[] { "TrueBeamSN1015", "TrueBeamSN4791" };
-            ((ComboBox)sender).SelectedIndex = 0;
-            ((UserInterfaceModel)DataContext).MachineName = ((ComboBox)sender).SelectedItem as string;
+            string bodyPlanId = ((UserInterfaceModel)DataContext).BodyPlanId;
+            ((TextBox)sender).Text = ((UserInterfaceModel)DataContext).LatestCourse.PlanSetups.FirstOrDefault(p => p.Id == bodyPlanId).Beams
+                                                                                              .Select(b => b.TreatmentUnit.Id)
+                                                                                              .FirstOrDefault();
+            ((UserInterfaceModel)DataContext).MachineName = ((TextBox)sender).Text;
         }
-
-        private void MachineComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ((UserInterfaceModel)DataContext).MachineName = ((ComboBox)sender).SelectedItem as string;
-        }
-
     }
 }
