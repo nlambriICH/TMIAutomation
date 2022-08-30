@@ -8,6 +8,9 @@ using System.IO;
 using System;
 using System.Linq;
 using VMS.TPS.Common.Model.Types;
+using TMIJunction.Async;
+using TMIJunction.ViewModel;
+using TMIJunction.View;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.8")]
@@ -41,23 +44,37 @@ namespace VMS.TPS
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void Execute(ScriptContext context, Window window /*, ScriptEnvironment environment*/)
+        public void Execute(ScriptContext context /*, Window window, ScriptEnvironment environment*/)
         {
+
+            // The ESAPI worker needs to be created in the main thread
+            EsapiWorker esapiWorker = new EsapiWorker(context);
+
             context.Patient.BeginModifications();
 
-            UserInterface ui = new UserInterface(context)
+            // Create and show the main window on a separate thread
+            ConcurrentStaThreadRunner.Run(() =>
             {
-                DataContext = new UserInterfaceModel(context.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last())
-            };
+                LegsJunction legsJunction = new LegsJunction(esapiWorker);
+                MainViewModel viewModel = new MainViewModel(legsJunction);
+                MainWindow mainWindow = new MainWindow(viewModel);
+                mainWindow.ShowDialog();
+                mainWindow.Closed += CloseAndFlushLogger;
+            });
 
-            window.Content = ui;
-            window.SizeToContent = SizeToContent.WidthAndHeight;
-            window.ResizeMode = ResizeMode.NoResize;
-            window.Title = "ESAPI";
+            //UserInterface ui = new UserInterface(context)
+            //{
+            //    DataContext = new UserInterfaceModel(context.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last())
+            //};
 
-            logger.Information("Window content set to the user interface");
+            //window.Content = ui;
+            //window.SizeToContent = SizeToContent.WidthAndHeight;
+            //window.ResizeMode = ResizeMode.NoResize;
+            //window.Title = "ESAPI";
 
-            window.Closed += CloseAndFlushLogger;
+            //logger.Information("Window content set to the user interface");
+
+            //window.Closed += CloseAndFlushLogger;
 
         }
         public void CloseAndFlushLogger(object sender, EventArgs e)

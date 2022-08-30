@@ -5,7 +5,7 @@ using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction
 {
-    class LegsControlStructures : IStructure
+    class LegsControlStructures : BaseStructure
     {
         private readonly PlanSetup legsPlan;
         private readonly string legsPTVId;
@@ -18,7 +18,7 @@ namespace TMIJunction
             this.logger = Log.ForContext<LegsControlStructures>();
         }
 
-        public void Create(ScriptContext context)
+        public override void Create(ScriptContext context)
         {
 
             logger.Information("LegsControlStructures context: {@context}", new List<string> { legsPlan.Id, legsPTVId });

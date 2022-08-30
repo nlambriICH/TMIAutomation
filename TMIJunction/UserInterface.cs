@@ -117,13 +117,13 @@ namespace TMIJunction
             }
         }
 
-        private void GenerateControl(IStructure control)
+        private void GenerateControl(BaseStructure control)
         {
             WindowHelper.ShowAutoClosingMessageBox("Generating Control Structures.\n\nPlease wait... We're working for you 😊", "TMIJunction");
             control.Create(context);
         }
 
-        private void GenerateJunction(IStructure junction)
+        private void GenerateJunction(BaseStructure junction)
         {
             WindowHelper.ShowAutoClosingMessageBox("Generating Junction Structures.\n\nPlease wait... We're working for you 😊", "TMIJunction");
             junction.Create(context);

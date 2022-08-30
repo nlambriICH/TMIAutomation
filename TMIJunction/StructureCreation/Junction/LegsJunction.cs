@@ -2,20 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using TMIJunction.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
 namespace TMIJunction
 {
-    class LegsJunction : IStructure
+    public class LegsJunction : BaseStructure
     {
         private readonly PlanSetup bodyPlan;
         private readonly PlanSetup legsPlan;
         private readonly string legsPTVId;
         private readonly string imageRegId;
 		private readonly ILogger logger;
+		private readonly EsapiWorker esapiWorker;
 
-        public LegsJunction(PlanSetup bodyPlan, PlanSetup legsPlan, string legsPTVId, string imageRegId)
+		public LegsJunction(PlanSetup bodyPlan, PlanSetup legsPlan, string legsPTVId, string imageRegId)
         {
             this.bodyPlan = bodyPlan;
             this.legsPlan = legsPlan;
@@ -24,117 +27,146 @@ namespace TMIJunction
 			this.logger = Log.ForContext<LegsJunction>();
         }
 
-        public void Create(ScriptContext context)
+		public LegsJunction(EsapiWorker esapiWorker)
+		{
+			this.esapiWorker = esapiWorker;
+		}
+
+		public Task<List<string>> GetLowerPlans()
+        {
+            return esapiWorker.RunAsync(scriptContext =>
+			{
+				Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+				return latestCourse.PlanSetups.Where(p => p.Id.Contains("down"))
+								  .OrderByDescending(p => p.CreationDateTime)
+								  .Select(p => p.Id)
+								  .ToList();
+			});
+		}
+
+		public Task<List<string>> GetUpperPlans()
+		{
+			return esapiWorker.RunAsync(scriptContext =>
+			{
+				Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+				return latestCourse.PlanSetups.Where(p => p.Id.Contains("up"))
+                                  .OrderByDescending(p => p.CreationDateTime)
+                                  .Select(p => p.Id)
+                                  .ToList();
+			});
+		}
+
+		public override void Create(ScriptContext context)
 		{
 
-			logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlan.Id, legsPlan.Id, legsPTVId, imageRegId } );
+			//logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlan.Id, legsPlan.Id, legsPTVId, imageRegId } );
 
-			StructureSet bodySS = bodyPlan.StructureSet;
-			StructureSet legsSS = legsPlan.StructureSet;
+			//StructureSet bodySS = bodyPlan.StructureSet;
+			//StructureSet legsSS = legsPlan.StructureSet;
 
-			List<string> isoStructuresId = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
+			//List<string> isoStructuresId = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
 
-			if (!isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
-			{
-				/*
-				 * Isodose levels body CT
-				 */
-				List<double> doseValues = null;
-				DoseValue.DoseUnit doseUnit = DoseValue.DoseUnit.Unknown;
+			//if (!isoStructuresId.All(id => legsSS.Structures.Select(s => s.Id).Contains(id)))
+			//{
+			//	/*
+			//	 * Isodose levels body CT
+			//	 */
+			//	List<double> doseValues = null;
+			//	DoseValue.DoseUnit doseUnit = DoseValue.DoseUnit.Unknown;
 
-				if (bodyPlan.DoseValuePresentation == DoseValuePresentation.Absolute)
-				{
-					double dosePerFraction = bodyPlan.DosePerFraction.Dose;
-					doseValues = new List<double> { 0.25, 0.50, 0.75, 1.0 };
-					doseValues.ForEach(d => Math.Round(d * dosePerFraction, 2, MidpointRounding.AwayFromZero));
-					doseUnit = DoseValue.DoseUnit.Gy;
-				}
-				else
-				{
-					doseValues = new List<double> { 25.0, 50.0, 75.0, 100.0 };
-					doseUnit = DoseValue.DoseUnit.Percent;
-				}
+			//	if (bodyPlan.DoseValuePresentation == DoseValuePresentation.Absolute)
+			//	{
+			//		double dosePerFraction = bodyPlan.DosePerFraction.Dose;
+			//		doseValues = new List<double> { 0.25, 0.50, 0.75, 1.0 };
+			//		doseValues.ForEach(d => Math.Round(d * dosePerFraction, 2, MidpointRounding.AwayFromZero));
+			//		doseUnit = DoseValue.DoseUnit.Gy;
+			//	}
+			//	else
+			//	{
+			//		doseValues = new List<double> { 25.0, 50.0, 75.0, 100.0 };
+			//		doseUnit = DoseValue.DoseUnit.Percent;
+			//	}
 
-				List<Structure> bodyIsodoseStructures = new List<Structure>
-				{
-					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_25, logger),
-					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_50, logger),
-					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_75, logger),
-					bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_100, logger)
-				};
+			//	List<Structure> bodyIsodoseStructures = new List<Structure>
+			//	{
+			//		bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_25, logger),
+			//		bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_50, logger),
+			//		bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_75, logger),
+			//		bodySS.TryAddStructure("CONTROL", StructureHelper.DOSE_100, logger)
+			//	};
 
-				for (int i = 0; i < bodyIsodoseStructures.Count; ++i)
-				{
-					bodyIsodoseStructures[i].ConvertDoseLevelToStructure(bodyPlan.Dose, new DoseValue(doseValues[i], doseUnit));
-				}
+			//	for (int i = 0; i < bodyIsodoseStructures.Count; ++i)
+			//	{
+			//		bodyIsodoseStructures[i].ConvertDoseLevelToStructure(bodyPlan.Dose, new DoseValue(doseValues[i], doseUnit));
+			//	}
 
-				logger.Information("Structures created: {@bodyIsodoseStructures}", bodyIsodoseStructures.Select(s => s.Id));
+			//	logger.Information("Structures created: {@bodyIsodoseStructures}", bodyIsodoseStructures.Select(s => s.Id));
 
-				/*
-				 * Copy structures to legs RTSTRUCT
-				 */
-				Registration registration = context.Patient.Registrations.FirstOrDefault(reg => reg.Id == imageRegId);
+			//	/*
+			//	 * Copy structures to legs RTSTRUCT
+			//	 */
+			//	Registration registration = context.Patient.Registrations.FirstOrDefault(reg => reg.Id == imageRegId);
 
-				bodyIsodoseStructures.ForEach(isoStructure =>
-				{
-					Structure legIsoDose = legsSS.TryAddStructure(isoStructure.DicomType, isoStructure.Id, logger);
+			//	bodyIsodoseStructures.ForEach(isoStructure =>
+			//	{
+			//		Structure legIsoDose = legsSS.TryAddStructure(isoStructure.DicomType, isoStructure.Id, logger);
 
-					// do not modify already existing structure (not empty)
-					if (!legIsoDose.IsEmpty)
-					{
-						logger.Information("Isodose structure {isodoseId} is not empty. Skip copying contours", isoStructure.Id);
-						return;
-					}
+			//		// do not modify already existing structure (not empty)
+			//		if (!legIsoDose.IsEmpty)
+			//		{
+			//			logger.Information("Isodose structure {isodoseId} is not empty. Skip copying contours", isoStructure.Id);
+			//			return;
+			//		}
 
-					WindowHelper.ShowAutoClosingMessageBox($"Propagating contours of {isoStructure.Id}...", "Isodose Propagation");
+			//		WindowHelper.ShowAutoClosingMessageBox($"Propagating contours of {isoStructure.Id}...", "Isodose Propagation");
 
-					logger.Information("Transform contours of {isodoseId}", isoStructure.Id);
+			//		logger.Information("Transform contours of {isodoseId}", isoStructure.Id);
 
-					bool stopCopyContour = false;
-					foreach (int slice in bodySS.GetStructureSlices(isoStructure))
-					{
-						VVector[][] contours = isoStructure.GetContoursOnImagePlane(slice);
-						logger.Verbose("Found {numContours} contours on body slice {slice}", contours.Length, slice);
+			//		bool stopCopyContour = false;
+			//		foreach (int slice in bodySS.GetStructureSlices(isoStructure))
+			//		{
+			//			VVector[][] contours = isoStructure.GetContoursOnImagePlane(slice);
+			//			logger.Verbose("Found {numContours} contours on body slice {slice}", contours.Length, slice);
 
-						foreach (VVector[] contour in contours)
-						{
-							IEnumerable<VVector> transformedContour = contour.Select(vv => bodySS.Image.FOR == registration.SourceFOR ? registration.TransformPoint(vv) : registration.InverseTransformPoint(vv));
+			//			foreach (VVector[] contour in contours)
+			//			{
+			//				IEnumerable<VVector> transformedContour = contour.Select(vv => bodySS.Image.FOR == registration.SourceFOR ? registration.TransformPoint(vv) : registration.InverseTransformPoint(vv));
 
-							double dicomZ = transformedContour.FirstOrDefault().z;
-							var sliceZ = legsSS.GetSlice(dicomZ);
+			//				double dicomZ = transformedContour.FirstOrDefault().z;
+			//				var sliceZ = legsSS.GetSlice(dicomZ);
 
-							if (sliceZ > legsSS.Image.ZSize)
-                            {
-								logger.Information("Slice {slice} exceeding Legs CT ZSize ({zSize}). Stop copying contours", sliceZ, legsSS.Image.ZSize);
-								stopCopyContour = true;
-								break;
-                            }
+			//				if (sliceZ > legsSS.Image.ZSize)
+   //                         {
+			//					logger.Information("Slice {slice} exceeding Legs CT ZSize ({zSize}). Stop copying contours", sliceZ, legsSS.Image.ZSize);
+			//					stopCopyContour = true;
+			//					break;
+   //                         }
 
-                            VVector vvUser = legsSS.Image.DicomToUser(transformedContour.FirstOrDefault(), legsPlan);
+   //                         VVector vvUser = legsSS.Image.DicomToUser(transformedContour.FirstOrDefault(), legsPlan);
 
-							logger.Verbose("Transformed contour at DICOM={dicomZ}, User={userZ}mm, slice={slice}", Math.Round(dicomZ, 2), Math.Round(vvUser.z, 2), sliceZ);
+			//				logger.Verbose("Transformed contour at DICOM={dicomZ}, User={userZ}mm, slice={slice}", Math.Round(dicomZ, 2), Math.Round(vvUser.z, 2), sliceZ);
 
-							legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), sliceZ);
-						}
+			//				legIsoDose.AddContourOnImagePlane(transformedContour.ToArray(), sliceZ);
+			//			}
 
-						if (stopCopyContour) break;
-					}
+			//			if (stopCopyContour) break;
+			//		}
 
-					/*
-					 * in some patients, possibly due to the registration, contours were missing in one or more isolated slices
-					 * applying an asymmetric margin to cover those slices (this also avoids issues when Body CT and Legs CT have different ZRes)
-					*/
-					legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, legsSS.Image.ZRes));
-				});
+			//		/*
+			//		 * in some patients, possibly due to the registration, contours were missing in one or more isolated slices
+			//		 * applying an asymmetric margin to cover those slices (this also avoids issues when Body CT and Legs CT have different ZRes)
+			//		*/
+			//		legIsoDose.SegmentVolume = legIsoDose.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, legsSS.Image.ZRes));
+			//	});
 
-				logger.Information("Isodose structures copied to legs StructureSet {ss} using registration: {registration}", legsSS.Id, registration.Id);
+			//	logger.Information("Isodose structures copied to legs StructureSet {ss} using registration: {registration}", legsSS.Id, registration.Id);
 
-			}
+			//}
 
-			WindowHelper.ShowAutoClosingMessageBox($"Generating junction structures...", "TMIJunction");
-			CreateJunctionSubstructures(legsSS);
-			CreateREMStructure(legsSS);
-			CropIsodose100(legsSS);
+			//WindowHelper.ShowAutoClosingMessageBox($"Generating junction structures...", "TMIJunction");
+			//CreateJunctionSubstructures(legsSS);
+			//CreateREMStructure(legsSS);
+			//CropIsodose100(legsSS);
 		}
 
 		private void CropIsodose100(StructureSet legsSS)

@@ -6,7 +6,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIJunction
 {
-    class BodyJunction : IStructure
+    class BodyJunction : BaseStructure
     {
         private readonly string bodyPlanId;
         private readonly string bodyPTVId;
@@ -19,7 +19,7 @@ namespace TMIJunction
             this.logger = Log.ForContext<BodyJunction>();
         }
 
-        public void Create(ScriptContext context)
+        public override void Create(ScriptContext context)
         {
             logger.Information("BodyJunction context: {@context}", new List<string> { bodyPlanId, bodyPTVId });
 
