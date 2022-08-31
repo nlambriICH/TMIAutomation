@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodel="clr-namespace:TMIJunction.ViewModel"
+             d:DataContext="{d:DesignInstance Type=viewmodel:UpperViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -21,43 +23,48 @@
         <TextBlock Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="150,45,0,0"
+                   Margin="230,55,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Upper Plan"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,45,0,0"
-                  Style="{StaticResource ComboBoxTheme}"/>
+                  Margin="430,55,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding UpperPlans}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedPlanId}"/>
 
         <TextBlock VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="150,95,0,0"
+                   Margin="230,95,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Upper PTV"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,95,0,0"
-                  Style="{StaticResource ComboBoxTheme}"/>
+                  Margin="430,95,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding UpperPTVs}"
+                  IsSynchronizedWithCurrentItem="True"/>
 
         <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="150,175,0,0"
+                  Margin="150,245,0,0"
                   Content="Junction Structures"
                   Style="{StaticResource CheckBoxTheme}"
                   IsChecked="True"/>
 
-        <CheckBox HorizontalAlignment="Right"
+        <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="0,175,150,0"
+                  Margin="350,245,0,0"
                   Content="Control Structures"
                   Style="{StaticResource CheckBoxTheme}"
                   IsChecked="True"/>
 
-        <Button HorizontalAlignment="Center"
+        <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Margin="247,255,247,0"
+                Margin="325,300,0,0"
                 Content="Start"
                 FontSize="20"
                 Width="150"/>

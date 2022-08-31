@@ -1,22 +1,29 @@
 ﻿using Serilog;
 using System.Collections.Generic;
 using System.Linq;
+using TMIJunction.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
 namespace TMIJunction
 {
-    class BodyJunction : BaseStructure
+    public class BodyJunction : BaseStructure
     {
         private readonly string bodyPlanId;
         private readonly string bodyPTVId;
         private readonly ILogger logger;
+        private readonly EsapiWorker esapiWorker;
 
         public BodyJunction(string bodyPlanId, string ptvId)
         {
             this.bodyPlanId = bodyPlanId;
             this.bodyPTVId = ptvId;
             this.logger = Log.ForContext<BodyJunction>();
+        }
+
+        public BodyJunction(EsapiWorker esapiWorker)
+        {
+            this.esapiWorker = esapiWorker;
         }
 
         public override void Create(ScriptContext context)

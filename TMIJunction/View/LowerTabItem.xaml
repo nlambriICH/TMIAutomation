@@ -22,9 +22,11 @@
                    Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="150,25,0,0"
-                   FontSize="16" Height="25"
-                   FontFamily="Serif" Foreground="#FDFDFD"
+                   Margin="230,25,0,0"
+                   FontSize="16"
+                   Height="25"
+                   FontFamily="Serif"
+                   Foreground="#FDFDFD"
                    Padding="3">
             <TextBlock.Style>
                 <Style TargetType="{x:Type TextBlock}">
@@ -40,7 +42,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,25,0,0"
+                  Margin="430,25,0,0"
                   Height="25"
                   FontSize="12"
                   FontFamily="Serif"
@@ -62,7 +64,7 @@
         <TextBlock Text="Select Lower PTV"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="150,65,0,0"
+                   Margin="230,65,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -86,7 +88,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,65,0,0"
+                  Margin="430,65,0,0"
                   x:Name="LegsPTVComboBox"
                   Width="140"
                   Height="25"
@@ -113,7 +115,7 @@
         <TextBlock Text="Select Registration"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="150,105,0,0"
+                   Margin="230,105,0,0"
                    x:Name="RegistrationText"
                    FontSize="16"
                    Height="25"
@@ -134,7 +136,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,105,0,0"
+                  Margin="430,105,0,0"
                   x:Name="RegistrationComboBox"
                   Width="140"
                   Height="25"
@@ -153,40 +155,9 @@
             </ComboBox.Style>
         </ComboBox>
 
-        <CheckBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="66,245,0,0"
-                  Content="Junction Structures"
-                  Style="{StaticResource CheckBoxTheme}"
-                  x:Name="LowerJunction"
-                  IsChecked="True"/>
-
-        <CheckBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="266,245,0,0"
-                  Content="Control Structures"
-                  Style="{StaticResource CheckBoxTheme}"
-                  x:Name="LowerControl"
-                  IsChecked="True"/>
-
-        <Button HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Margin="247,300,247,0"
-                Content="Start"
-                FontSize="20"
-                Width="150"/>
-
-        <CheckBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="466,245,0,0"
-                  Content="Optimize"
-                  Style="{StaticResource CheckBoxTheme}"
-                  x:Name="LowerOptimization"
-                  IsChecked="True"/>
-
         <TextBlock VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="150,145,0,0"
+                   Margin="230,145,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -207,7 +178,7 @@
 
         <TextBox HorizontalAlignment="Left"
                  VerticalAlignment="Top"
-                 Margin="340,145,0,0"
+                 Margin="430,145,0,0"
                  Width="140"
                  Height="25"
                  FontSize="12"
@@ -230,7 +201,7 @@
         <TextBlock Text="Select Lower Plan"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="150,185,0,0"
+                   Margin="230,185,0,0"
                    x:Name="LowerPlanText"
                    FontSize="16"
                    Height="25"
@@ -256,7 +227,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="340,185,0,0"
+                  Margin="430,185,0,0"
                   x:Name="LegsPlanComboBox"
                   Width="140"
                   Height="25"
@@ -279,5 +250,37 @@
                 </Style>
             </ComboBox.Style>
         </ComboBox>
+
+        <CheckBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="150,245,0,0"
+                  Content="Junction Structures"
+                  Style="{StaticResource CheckBoxTheme}"
+                  x:Name="LowerJunction"
+                  IsChecked="True"/>
+
+        <CheckBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="350,245,0,0"
+                  Content="Control Structures"
+                  Style="{StaticResource CheckBoxTheme}"
+                  x:Name="LowerControl"
+                  IsChecked="True"/>
+
+        <CheckBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="550,245,0,0"
+                  Content="Optimize"
+                  Style="{StaticResource CheckBoxTheme}"
+                  x:Name="LowerOptimization"
+                  IsChecked="True"/>
+
+        <Button HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="325,300,0,0"
+                Content="Start"
+                FontSize="20"
+                Width="150"/>
+
     </Grid>
 </UserControl>

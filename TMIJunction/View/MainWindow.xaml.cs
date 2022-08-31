@@ -24,7 +24,7 @@ namespace TMIJunction.View
         {
             InitializeComponent();
 
-            DataContext = viewModel;
+            this.DataContext = viewModel;
         }
     }
 }

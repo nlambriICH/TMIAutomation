@@ -56,7 +56,7 @@ namespace VMS.TPS
             ConcurrentStaThreadRunner.Run(() =>
             {
                 LegsJunction legsJunction = new LegsJunction(esapiWorker);
-                MainViewModel viewModel = new MainViewModel(legsJunction);
+                MainViewModel viewModel = new MainViewModel(esapiWorker, legsJunction);
                 MainWindow mainWindow = new MainWindow(viewModel);
                 mainWindow.ShowDialog();
                 mainWindow.Closed += CloseAndFlushLogger;

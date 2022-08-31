@@ -5,34 +5,25 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMIJunction.Async;
+using TMIJunction.StructureCreation;
 using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        private bool isCalculationInProgress;
-
         private UpperViewModel upperVM;
         public UpperViewModel UpperVM { get { return upperVM; } }
 
         private LowerViewModel lowerVM;
         public LowerViewModel LowerVM { get { return lowerVM; } }
 
-        public MainViewModel(LegsJunction legsJunction)
+        public MainViewModel(EsapiWorker esapiWorker, LegsJunction legsJunction)
         {
-            upperVM = new UpperViewModel();
-            lowerVM = new LowerViewModel(legsJunction);
-
-            isCalculationInProgress = false;
+            var baseModel = new BaseModel(esapiWorker);
+            upperVM = new UpperViewModel(baseModel);
+            lowerVM = new LowerViewModel(new LegsJunction(esapiWorker));
         }
-
-        private List<string> plans;
-        public List<string> Plans
-        {
-            get { return plans; }
-            set { Set(ref plans, value); }
-        }
-
     }
 }
