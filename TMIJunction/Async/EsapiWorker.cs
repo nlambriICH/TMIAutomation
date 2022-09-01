@@ -19,7 +19,7 @@ namespace TMIJunction.Async
         public EsapiWorker(ScriptContext scriptContext)
         {
             this.scriptContext = scriptContext;
-            currentThreadWorker = new CurrentThreadWorker();
+            this.currentThreadWorker = new CurrentThreadWorker();
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace TMIJunction.Async
         /// <returns>The started task associated with the given action.</returns>
         public Task RunAsync(Action<ScriptContext> a)
         {
-            return currentThreadWorker.RunAsync(() => a(scriptContext));
+            return this.currentThreadWorker.RunAsync(() => a(scriptContext));
         }
 
         /// <summary>
@@ -40,12 +40,12 @@ namespace TMIJunction.Async
         /// <returns>The started task associated with the given function.</returns>
         public Task<T> RunAsync<T>(Func<ScriptContext, T> f)
         {
-            return currentThreadWorker.RunAsync(() => f(scriptContext));
+            return this.currentThreadWorker.RunAsync(() => f(scriptContext));
         }
 
         public T Run<T>(Func<ScriptContext, T> f)
         {
-            return currentThreadWorker.RunAsync(() => f(scriptContext)).Result;
+            return this.currentThreadWorker.RunAsync(() => f(scriptContext)).Result;
         }
 }
 }

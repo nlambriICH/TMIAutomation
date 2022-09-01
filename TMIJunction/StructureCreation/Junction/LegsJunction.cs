@@ -9,7 +9,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIJunction
 {
-    public class LegsJunction : BaseStructure
+    public class LegsJunction : IStructure
     {
         private readonly PlanSetup bodyPlan;
         private readonly PlanSetup legsPlan;
@@ -56,7 +56,7 @@ namespace TMIJunction
 			});
 		}
 
-		public override void Create(ScriptContext context)
+		public void Create(ScriptContext context)
 		{
 
 			//logger.Information("LegsJunction context: {@context}", new List<string> { bodyPlan.Id, legsPlan.Id, legsPTVId, imageRegId } );

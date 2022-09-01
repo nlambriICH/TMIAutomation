@@ -41,12 +41,13 @@ namespace VMS.TPS
             this.logger = Log.ForContext<Script>();
 
             logger.Information("TMIJunction script instance created");
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void Execute(ScriptContext context /*, Window window, ScriptEnvironment environment*/)
         {
-
             // The ESAPI worker needs to be created in the main thread
             EsapiWorker esapiWorker = new EsapiWorker(context);
 
@@ -62,24 +63,17 @@ namespace VMS.TPS
                 mainWindow.Closed += CloseAndFlushLogger;
             });
 
-            //UserInterface ui = new UserInterface(context)
-            //{
-            //    DataContext = new UserInterfaceModel(context.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last())
-            //};
-
-            //window.Content = ui;
-            //window.SizeToContent = SizeToContent.WidthAndHeight;
-            //window.ResizeMode = ResizeMode.NoResize;
-            //window.Title = "ESAPI";
-
-            //logger.Information("Window content set to the user interface");
-
-            //window.Closed += CloseAndFlushLogger;
-
         }
         public void CloseAndFlushLogger(object sender, EventArgs e)
         {
             Log.CloseAndFlush();
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            logger.LogAndWarnException(e);
+            logger.Information("Runtime terminating: {isTerminating}", args.IsTerminating);
         }
     }
 }

@@ -106,19 +106,23 @@
     <Compile Include="StructureCreation\ControlStructures\BodyControlStructures.cs" />
     <Compile Include="StructureCreation\ControlStructures\LegsControlStructures.cs" />
     <Compile Include="StructureCreation\Junction\BodyJunction.cs" />
-    <Compile Include="StructureCreation\BaseStructure.cs" />
+    <Compile Include="StructureCreation\IStructure.cs" />
     <Compile Include="StructureCreation\Junction\LegsJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
     <Compile Include="Helper\WindowHelper.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ProgressBarViewModel.cs" />
     <Compile Include="ViewModel\UpperViewModel.cs" />
     <Compile Include="View\LowerTabItem.xaml.cs">
       <DependentUpon>LowerTabItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ProgressBarWindow.xaml.cs">
+      <DependentUpon>ProgressBarWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UpperTabItem.xaml.cs">
       <DependentUpon>UpperTabItem.xaml</DependentUpon>
@@ -154,6 +158,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ProgressBarWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

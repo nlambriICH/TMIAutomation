@@ -7,7 +7,8 @@
         xmlns:viewmodel="clr-namespace:TMIJunction.ViewModel;assembly=TMIJunction.esapi"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
-        Title="ESAPI" Height="500" Width="800">
+        Title="ESAPI" Height="550" Width="800"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary>

@@ -46,27 +46,30 @@
                   Margin="430,95,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding UpperPTVs}"
-                  IsSynchronizedWithCurrentItem="True"/>
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedPTVId}"/>
 
         <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   Margin="150,245,0,0"
                   Content="Junction Structures"
                   Style="{StaticResource CheckBoxTheme}"
-                  IsChecked="True"/>
+                  IsChecked="{Binding Path=IsUpperJunctionChecked, Mode=TwoWay}"/>
 
         <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   Margin="350,245,0,0"
                   Content="Control Structures"
                   Style="{StaticResource CheckBoxTheme}"
-                  IsChecked="True"/>
+                  IsChecked="{Binding Path=IsUpperControlChecked, Mode=TwoWay}"/>
 
         <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="325,300,0,0"
                 Content="Start"
                 FontSize="20"
-                Width="150"/>
+                Width="150"
+                Command="{Binding StartOrCancelExecutionCommand}"/>
+
     </Grid>
 </UserControl>

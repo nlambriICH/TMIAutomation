@@ -6,7 +6,7 @@ using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction
 {
-    public class LegsControlStructures : BaseStructure
+    public class LegsControlStructures : IStructure
     {
         private readonly PlanSetup legsPlan;
         private readonly string legsPTVId;
@@ -25,7 +25,7 @@ namespace TMIJunction
             this.esapiWorker = esapiWorker;
         }
 
-        public override void Create(ScriptContext context)
+        public void Create(ScriptContext context)
         {
 
             logger.Information("LegsControlStructures context: {@context}", new List<string> { legsPlan.Id, legsPTVId });

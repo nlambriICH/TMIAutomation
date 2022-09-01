@@ -11,7 +11,6 @@ namespace TMIJunction.StructureCreation
     public class BaseModel
     {
         private EsapiWorker esapiWorker;
-        private BodyJunction bodyJunction;
         private BodyControlStructures bodyControlStructures;
         private LegsJunction legsJunction;
         private LegsControlStructures legsControlStructures;
@@ -19,7 +18,6 @@ namespace TMIJunction.StructureCreation
         public BaseModel(EsapiWorker esapiWorker)
         {
             this.esapiWorker = esapiWorker;
-            this.bodyJunction = new BodyJunction(esapiWorker);
             this.bodyControlStructures = new BodyControlStructures(esapiWorker);
             this.legsJunction = new LegsJunction(esapiWorker);
             this.legsControlStructures = new LegsControlStructures(esapiWorker);
@@ -48,6 +46,12 @@ namespace TMIJunction.StructureCreation
                                 .Select(p => p.Id)
                                 .ToList();
             });
+        }
+
+        public Task GenerateUpperJunction(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
+        {
+            BodyJunction bodyJunction = new BodyJunction(this.esapiWorker, upperPlanId, upperPTVId);
+            return bodyJunction.CreateAsync(progress, message);
         }
     }
 }
