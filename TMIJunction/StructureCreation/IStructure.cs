@@ -1,9 +1,10 @@
-﻿using VMS.TPS.Common.Model.API;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace TMIJunction
 {
     public interface IStructure
     {
-        void Create(ScriptContext context);
+        Task CreateAsync(IProgress<double> progress, IProgress<string> message);
     }
 }

@@ -100,13 +100,9 @@
     <Compile Include="Optimization\Objectives\ObjectivesSetup.cs" />
     <Compile Include="Optimization\Optimization.cs" />
     <Compile Include="StructureCreation\BaseModel.cs" />
-    <Compile Include="UserInterface.cs">
-      <DependentUpon>UserInterface.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Model\UserInterfaceModel.cs" />
-    <Compile Include="StructureCreation\ControlStructures\BodyControlStructures.cs" />
+    <Compile Include="StructureCreation\ControlStructures\UpperControl.cs" />
     <Compile Include="StructureCreation\ControlStructures\LegsControlStructures.cs" />
-    <Compile Include="StructureCreation\Junction\BodyJunction.cs" />
+    <Compile Include="StructureCreation\Junction\UpperJunction.cs" />
     <Compile Include="StructureCreation\IStructure.cs" />
     <Compile Include="StructureCreation\Junction\LegsJunction.cs" />
     <Compile Include="Main.cs" />
@@ -139,10 +135,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Theme\TextBlockTheme.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UserInterface.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

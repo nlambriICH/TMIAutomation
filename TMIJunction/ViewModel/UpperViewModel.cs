@@ -75,7 +75,7 @@ namespace TMIJunction.ViewModel
             this.baseModel = baseModel;
             IsUpperJunctionChecked = true;
             IsUpperControlChecked = true;
-            StartOrCancelExecutionCommand = new RelayCommand(StartOrCancelExecution);
+            StartOrCancelExecutionCommand = new RelayCommand(StartExecution);
             RetrieveUpperPlans();
         }
 
@@ -91,9 +91,8 @@ namespace TMIJunction.ViewModel
             SelectedPTVId = this.upperPTVs.Count != 0 ? this.upperPTVs[0] : string.Empty;
         }
 
-        private async void StartOrCancelExecution()
+        private async void StartExecution()
         {
-
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Upper-body");
             Progress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
             Progress<string> message = new Progress<string>(pbViewModel.UpdateMessage);

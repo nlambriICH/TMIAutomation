@@ -43,7 +43,7 @@ namespace TMIJunction.Async
                 {
                     if (isWriteable)
                     {
-                        Thread.Sleep(500);
+                        Thread.Sleep(1000);
                     }
                 });
         }

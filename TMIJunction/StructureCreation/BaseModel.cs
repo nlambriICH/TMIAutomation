@@ -49,14 +49,14 @@ namespace TMIJunction.StructureCreation
 
         public Task GenerateUpperJunctionAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
         {
-            BodyJunction bodyJunction = new BodyJunction(this.esapiWorker, upperPlanId, upperPTVId);
-            return bodyJunction.CreateAsync(progress, message);
+            UpperJunction upperJunction = new UpperJunction(this.esapiWorker, upperPlanId, upperPTVId);
+            return upperJunction.CreateAsync(progress, message);
         }
 
         public Task GenerateUpperControlAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
         {
-            BodyControlStructures bodyControlStructures = new BodyControlStructures(this.esapiWorker, upperPlanId, upperPTVId);
-            return bodyControlStructures.CreateAsync(progress, message);
+            UpperControl upperControl = new UpperControl(this.esapiWorker, upperPlanId, upperPTVId);
+            return upperControl.CreateAsync(progress, message);
         }
     }
 }
