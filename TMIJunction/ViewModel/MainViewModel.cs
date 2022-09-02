@@ -14,9 +14,9 @@ namespace TMIJunction.ViewModel
 
         public MainViewModel(EsapiWorker esapiWorker, LegsJunction legsJunction)
         {
-            var baseModel = new BaseModel(esapiWorker);
-            upperVM = new UpperViewModel(baseModel);
-            lowerVM = new LowerViewModel(new LegsJunction(esapiWorker));
+            ModelBase modelBase = new ModelBase(esapiWorker);
+            upperVM = new UpperViewModel(modelBase);
+            lowerVM = new LowerViewModel(modelBase);
         }
     }
 }

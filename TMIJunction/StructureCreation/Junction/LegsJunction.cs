@@ -23,30 +23,6 @@ namespace TMIJunction
             this.esapiWorker = esapiWorker;
         }
 
-        public Task<List<string>> GetLowerPlans()
-        {
-            return esapiWorker.RunAsync(scriptContext =>
-            {
-                Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                return latestCourse.PlanSetups.Where(p => p.Id.Contains("down"))
-                                  .OrderByDescending(p => p.CreationDateTime)
-                                  .Select(p => p.Id)
-                                  .ToList();
-            });
-        }
-
-        public Task<List<string>> GetUpperPlans()
-        {
-            return esapiWorker.RunAsync(scriptContext =>
-            {
-                Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                return latestCourse.PlanSetups.Where(p => p.Id.Contains("up"))
-                                  .OrderByDescending(p => p.CreationDateTime)
-                                  .Select(p => p.Id)
-                                  .ToList();
-            });
-        }
-
         public Task CreateAsync(IProgress<double> progress, IProgress<string> message)
         {
             return esapiWorker.RunAsync(ScriptContext =>

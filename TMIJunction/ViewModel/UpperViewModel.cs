@@ -14,7 +14,11 @@ namespace TMIJunction.ViewModel
         public List<string> UpperPlans
         {
             get { return upperPlans; }
-            set { Set(ref upperPlans, value); }
+            set
+            {
+                Set(ref upperPlans, value);
+                SelectedPlanId = this.upperPlans.Count != 0 ? this.upperPlans[0] : string.Empty;
+            }
         }
 
         private string selectedPlanId;
@@ -35,7 +39,11 @@ namespace TMIJunction.ViewModel
         public List<string> UpperPTVs
         {
             get { return upperPTVs; }
-            set { Set(ref upperPTVs, value); }
+            set
+            {
+                Set(ref upperPTVs, value);
+                SelectedPTVId = this.upperPTVs.Count != 0 ? this.upperPTVs[0] : string.Empty;
+            }
         }
 
         private string selectedPTVId;
@@ -45,21 +53,21 @@ namespace TMIJunction.ViewModel
             set { Set(ref selectedPTVId, value); }
         }
 
-        private bool isUpperJunctionChecked;
-        public bool IsUpperJunctionChecked
+        private bool isJunctionChecked;
+        public bool IsJunctionChecked
         {
-            get { return isUpperJunctionChecked; }
-            set { Set(ref isUpperJunctionChecked, value); }
+            get { return isJunctionChecked; }
+            set { Set(ref isJunctionChecked, value); }
         }
 
-        private bool isUpperControlChecked;
-        public bool IsUpperControlChecked
+        private bool isControlChecked;
+        public bool IsControlChecked
         {
-            get { return isUpperControlChecked; }
-            set { Set(ref isUpperControlChecked, value); }
+            get { return isControlChecked; }
+            set { Set(ref isControlChecked, value); }
         }
 
-        private readonly BaseModel baseModel;
+        private readonly ModelBase modelBase;
 
         public ICommand StartOrCancelExecutionCommand { get; }
 
@@ -70,25 +78,23 @@ namespace TMIJunction.ViewModel
             set { Set(ref progress, value); }
         }
 
-        public UpperViewModel(BaseModel baseModel)
+        public UpperViewModel(ModelBase modelBase)
         {
-            this.baseModel = baseModel;
-            IsUpperJunctionChecked = true;
-            IsUpperControlChecked = true;
+            this.modelBase = modelBase;
+            IsJunctionChecked = true;
+            IsControlChecked = true;
             StartOrCancelExecutionCommand = new RelayCommand(StartExecution);
             RetrieveUpperPlans();
         }
 
         private async void RetrieveUpperPlans()
         {
-            UpperPlans = await this.baseModel.GetUpperPlansAsync();
-            SelectedPlanId = this.upperPlans.Count != 0 ? this.upperPlans[0] : string.Empty;
+            UpperPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Up);
         }
 
         private async void RetrieveUpperPTVs(string planId)
         {
-            UpperPTVs = await this.baseModel.GetPTVsOfPlanAsync(planId);
-            SelectedPTVId = this.upperPTVs.Count != 0 ? this.upperPTVs[0] : string.Empty;
+            UpperPTVs = await this.modelBase.GetPTVsOfPlanAsync(planId);
         }
 
         private async void StartExecution()
@@ -99,20 +105,20 @@ namespace TMIJunction.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            if (this.isUpperJunctionChecked && this.isUpperControlChecked)
+            if (this.isJunctionChecked && this.isControlChecked)
             {
                 pbViewModel.NumOperations++; // rescale the progress bar update
             }
 
-            if (this.isUpperJunctionChecked)
+            if (this.isJunctionChecked)
             {
-                await this.baseModel.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
                 RetrieveUpperPTVs(this.selectedPlanId);
             }
 
-            if (this.isUpperControlChecked)
+            if (this.isControlChecked)
             {
-                await this.baseModel.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
             }
 
             pbViewModel.ResetProgress();

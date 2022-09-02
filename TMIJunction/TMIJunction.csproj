@@ -99,7 +99,7 @@
     <Compile Include="Optimization\IsoConfiguration\Isocenter.cs" />
     <Compile Include="Optimization\Objectives\ObjectivesSetup.cs" />
     <Compile Include="Optimization\Optimization.cs" />
-    <Compile Include="StructureCreation\BaseModel.cs" />
+    <Compile Include="StructureCreation\ModelBase.cs" />
     <Compile Include="StructureCreation\ControlStructures\UpperControl.cs" />
     <Compile Include="StructureCreation\ControlStructures\LegsControlStructures.cs" />
     <Compile Include="StructureCreation\Junction\UpperJunction.cs" />

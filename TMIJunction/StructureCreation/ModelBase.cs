@@ -7,25 +7,26 @@ using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction.StructureCreation
 {
-    public class BaseModel
+    public class ModelBase
     {
-        private EsapiWorker esapiWorker;
-        private LegsJunction legsJunction;
-        private LegsControlStructures legsControlStructures;
-
-        public BaseModel(EsapiWorker esapiWorker)
+        private readonly EsapiWorker esapiWorker;
+        public enum PlanType
         {
-            this.esapiWorker = esapiWorker;
-            this.legsJunction = new LegsJunction(esapiWorker);
-            this.legsControlStructures = new LegsControlStructures(esapiWorker);
+            Up,
+            Down
         }
 
-        public Task<List<string>> GetUpperPlansAsync()
+        public ModelBase(EsapiWorker esapiWorker)
+        {
+            this.esapiWorker = esapiWorker;
+        }
+
+        public Task<List<string>> GetPlansAsync(PlanType planType)
         {
             return esapiWorker.RunAsync(scriptContext =>
             {
                 Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                return latestCourse.PlanSetups.Where(p => p.Id.Contains("up"))
+                return latestCourse.PlanSetups.Where(p => p.Id.IndexOf(planType.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
                                   .OrderByDescending(p => p.CreationDateTime)
                                   .Select(p => p.Id)
                                   .ToList();
@@ -38,11 +39,24 @@ namespace TMIJunction.StructureCreation
             return esapiWorker.RunAsync(scriptContext =>
             {
                 PlanSetup selectedPlan = scriptContext.Patient.Courses.SelectMany(c => c.PlanSetups).FirstOrDefault(ps => ps.Id == planId);
-                return selectedPlan.StructureSet.Structures
+
+                return selectedPlan == null ? new List<string>()
+                : selectedPlan.StructureSet.Structures
                                 .Where(s => s.DicomType == "PTV")
                                 .OrderByDescending(s => s.Volume)
                                 .Select(p => p.Id)
                                 .ToList();
+            },
+            isWriteable: false);
+        }
+
+        public Task<List<string>> GetRegistrationsAsync()
+        {
+            return esapiWorker.RunAsync(scriptContext =>
+            {
+                return scriptContext.Patient.Registrations.OrderByDescending(reg => reg.CreationDateTime)
+                                                          .Select(reg => reg.Id)
+                                                          .ToList();
             },
             isWriteable: false);
         }
