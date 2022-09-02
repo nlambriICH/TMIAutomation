@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
+﻿using GalaSoft.MvvmLight;
 
 namespace TMIJunction.ViewModel
 {
@@ -30,19 +25,23 @@ namespace TMIJunction.ViewModel
             set { Set(ref windowTitle, value); }
         }
 
-        public ProgressBarViewModel(string windowTitle)
+        public int NumOperations { get; set; }
+
+        public ProgressBarViewModel(string windowTitle, int numOperations = 1)
         {
             WindowTitle = windowTitle;
+            Message = "Starting execution...";
+            NumOperations = numOperations;
         }
 
-        public void UpdateProgress(double p)
+        public void IncrementProgress(double p)
         {
-            Progress = p;
+            Progress += p / NumOperations;
         }
 
         public void ResetProgress()
         {
-            UpdateProgress(0.0);
+            Progress = 0;
         }
 
         public void UpdateMessage(string m)

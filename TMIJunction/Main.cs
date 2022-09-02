@@ -1,12 +1,10 @@
 using TMIJunction;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using VMS.TPS.Common.Model.API;
 using Serilog;
 using System.IO;
 using System;
-using System.Linq;
 using VMS.TPS.Common.Model.Types;
 using TMIJunction.Async;
 using TMIJunction.ViewModel;
@@ -41,8 +39,6 @@ namespace VMS.TPS
             this.logger = Log.ForContext<Script>();
 
             logger.Information("TMIJunction script instance created");
-
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -56,24 +52,24 @@ namespace VMS.TPS
             // Create and show the main window on a separate thread
             ConcurrentStaThreadRunner.Run(() =>
             {
-                LegsJunction legsJunction = new LegsJunction(esapiWorker);
-                MainViewModel viewModel = new MainViewModel(esapiWorker, legsJunction);
-                MainWindow mainWindow = new MainWindow(viewModel);
-                mainWindow.ShowDialog();
-                mainWindow.Closed += CloseAndFlushLogger;
+                try
+                {
+                    LegsJunction legsJunction = new LegsJunction(esapiWorker);
+                    MainViewModel viewModel = new MainViewModel(esapiWorker, legsJunction);
+                    MainWindow mainWindow = new MainWindow(viewModel);
+                    mainWindow.ShowDialog();
+                    mainWindow.Closed += CloseAndFlushLogger;
+                }
+                catch (Exception e)
+                {
+                    System.Windows.MessageBox.Show(e.Message);
+                }
             });
 
         }
         public void CloseAndFlushLogger(object sender, EventArgs e)
         {
             Log.CloseAndFlush();
-        }
-
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
-        {
-            Exception e = (Exception)args.ExceptionObject;
-            logger.LogAndWarnException(e);
-            logger.Information("Runtime terminating: {isTerminating}", args.IsTerminating);
         }
     }
 }

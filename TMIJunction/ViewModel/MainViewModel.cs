@@ -1,13 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMIJunction.Async;
 using TMIJunction.StructureCreation;
-using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction.ViewModel
 {

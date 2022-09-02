@@ -38,7 +38,6 @@ namespace TMIJunction
             {
                 logger.Information("BodyJunction context: {@context}", new List<string> { upperPlanId, upperPTVId });
 
-                message.Report("Starting execution...");
                 /*
                  * Create junction structures body CT
                  */
@@ -54,8 +53,8 @@ namespace TMIJunction
                     bodySS.TryAddStructure("PTV", StructureHelper.PTV_JUNCTION100, logger)
                 };
 
-                progress.Report(0.25);
-                message.Report("Creating Junction...");
+                progress.Report(0.30);
+                message.Report("Generating Junction structures...");
 
                 int count = 0;
                 int bottomSlicePTVBodyWithJunction = bodySS.GetStructureSlices(ptvBodyWithJunction).FirstOrDefault();
@@ -82,8 +81,6 @@ namespace TMIJunction
 
                 logger.Information("Structure created: {ptvTotNoJunctionBody}", ptvTotNoJunctionBody.Id);
 
-                progress.Report(0.5);
-
                 Structure ptvLegsBody = bodySS.Structures.FirstOrDefault(s =>
                 {
                     string structureIdLower = s.Id.ToLower();
@@ -102,8 +99,8 @@ namespace TMIJunction
                         "The script needs a PTV structure containing \"legs\" in its name (e.g., \"PTV_legs\")", StructureHelper.UPPER_PTV_LEGS);
                 }
 
-                progress.Report(0.75);
-                message.Report("Creating REM...");
+                progress.Report(0.30);
+                message.Report("Generating REM_AUTO optimization structure...");
 
                 Structure rem = bodySS.TryAddStructure("AVOIDANCE", StructureHelper.REM, logger);
                 IEnumerable<int> slicesIsodose25 = bodySS.GetStructureSlices(junctionSubStructures[0]);
@@ -125,9 +122,9 @@ namespace TMIJunction
                 bodySS.RemoveStructure(bodyShrunk);
                 rem.SegmentVolume = rem.Sub(bodyJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
 
-                progress.Report(1);
-
                 logger.Information("Structure created: {rem}", rem.Id);
+                progress.Report(0.4);
+                message.Report("Done!");
             });
         }
 

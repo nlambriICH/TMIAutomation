@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TMIJunction.Async;
 using VMS.TPS.Common.Model.API;
@@ -11,14 +10,12 @@ namespace TMIJunction.StructureCreation
     public class BaseModel
     {
         private EsapiWorker esapiWorker;
-        private BodyControlStructures bodyControlStructures;
         private LegsJunction legsJunction;
         private LegsControlStructures legsControlStructures;
 
         public BaseModel(EsapiWorker esapiWorker)
         {
             this.esapiWorker = esapiWorker;
-            this.bodyControlStructures = new BodyControlStructures(esapiWorker);
             this.legsJunction = new LegsJunction(esapiWorker);
             this.legsControlStructures = new LegsControlStructures(esapiWorker);
         }
@@ -32,7 +29,8 @@ namespace TMIJunction.StructureCreation
                                   .OrderByDescending(p => p.CreationDateTime)
                                   .Select(p => p.Id)
                                   .ToList();
-            });
+            },
+            isWriteable: false);
         }
 
         public Task<List<string>> GetPTVsOfPlanAsync(string planId)
@@ -45,13 +43,20 @@ namespace TMIJunction.StructureCreation
                                 .OrderByDescending(s => s.Volume)
                                 .Select(p => p.Id)
                                 .ToList();
-            });
+            },
+            isWriteable: false);
         }
 
-        public Task GenerateUpperJunction(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
+        public Task GenerateUpperJunctionAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
         {
             BodyJunction bodyJunction = new BodyJunction(this.esapiWorker, upperPlanId, upperPTVId);
             return bodyJunction.CreateAsync(progress, message);
+        }
+
+        public Task GenerateUpperControlAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
+        {
+            BodyControlStructures bodyControlStructures = new BodyControlStructures(this.esapiWorker, upperPlanId, upperPTVId);
+            return bodyControlStructures.CreateAsync(progress, message);
         }
     }
 }

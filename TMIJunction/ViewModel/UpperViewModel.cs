@@ -1,6 +1,5 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
@@ -94,23 +93,31 @@ namespace TMIJunction.ViewModel
 
         private async void StartOrCancelExecution()
         {
-            ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Upper");
-            Progress<double> progress = new Progress<double>(pbViewModel.UpdateProgress);
+
+            ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Upper-body");
+            Progress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
             Progress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
-            try
+            pbWindow.Show();
+
+            if (this.isUpperJunctionChecked && this.isUpperControlChecked)
             {
-                if (this.isUpperJunctionChecked)
-                {
-                    pbWindow.Show();
-                    await this.baseModel.GenerateUpperJunction(this.selectedPlanId, this.selectedPTVId, progress, message);
-                }
+                pbViewModel.NumOperations++; // rescale the progress bar update
             }
-            finally
+
+            if (this.isUpperJunctionChecked)
             {
-                pbViewModel.ResetProgress();
-                pbWindow.Close();
+                await this.baseModel.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                RetrieveUpperPTVs(this.selectedPlanId);
             }
+
+            if (this.isUpperControlChecked)
+            {
+                await this.baseModel.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+            }
+
+            pbViewModel.ResetProgress();
+            pbWindow.Close();
         }
     }
 }

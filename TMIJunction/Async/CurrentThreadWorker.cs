@@ -11,7 +11,7 @@ namespace TMIJunction.Async
     /// </summary>
     public class CurrentThreadWorker
     {
-        private TaskScheduler _taskScheduler;
+        private TaskScheduler taskScheduler;
 
         public CurrentThreadWorker()
         {
@@ -19,7 +19,7 @@ namespace TMIJunction.Async
             // ensure that the proper synchronization context exists
             Dispatcher.CurrentDispatcher.Invoke(() =>
             {
-                _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+                this.taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             });
         }
 
@@ -28,7 +28,7 @@ namespace TMIJunction.Async
             return Task.Factory.StartNew(action,
                 CancellationToken.None,
                 TaskCreationOptions.None,
-                _taskScheduler);
+                this.taskScheduler);
         }
 
         public Task<T> RunAsync<T>(Func<T> function)
@@ -36,7 +36,7 @@ namespace TMIJunction.Async
             return Task.Factory.StartNew(function,
                 CancellationToken.None,
                 TaskCreationOptions.None,
-                _taskScheduler);
+                this.taskScheduler);
         }
     }
 }

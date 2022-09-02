@@ -6,23 +6,24 @@
         xmlns:viewmodel="clr-namespace:TMIJunction.ViewModel;assembly=TMIJunction.esapi"
         d:DataContext="{d:DesignInstance Type=viewmodel:ProgressBarViewModel}"
         mc:Ignorable="d"
-        Height="150" Width="400"
+        Height="150" Width="450"
         WindowStartupLocation="CenterScreen"
-        Title="{Binding WindowTitle}">
+        Title="{Binding WindowTitle}"
+        ResizeMode="CanMinimize">
 
     <Grid Background="#b6b5bd">
         <StackPanel>
             <TextBlock HorizontalAlignment="Center"
                        VerticalAlignment="Top"
-                       Margin="0,30,0,0"
-                       Width="350"
-                       Height="15"
+                       Margin="0,25,0,0"
+                       Width="400"
+                       Height="20"
                        Text="{Binding Message}"/>
 
             <ProgressBar HorizontalAlignment="Center"
                          VerticalAlignment="Top"
-                         Margin="0,20,0,0"
-                         Width="350"
+                         Margin="0,25,0,0"
+                         Width="400"
                          Height="15"
                          Value="{Binding Progress}"
                          Minimum="0.0"
