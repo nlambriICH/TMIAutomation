@@ -95,7 +95,10 @@
                   Height="25"
                   FontSize="12"
                   FontFamily="Serif"
-                  Foreground="#2A324F">
+                  Foreground="#2A324F"
+                  ItemsSource="{Binding LowerPTVs}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedLowerPTVId}">
             <ComboBox.Style>
                 <Style TargetType="{x:Type ComboBox}">
                     <Setter Property="Visibility" Value="Visible"/>
@@ -283,7 +286,8 @@
                 Margin="325,300,0,0"
                 Content="Start"
                 FontSize="20"
-                Width="150"/>
+                Width="150"
+                Command="{Binding StartExecutionCommand}"/>
 
     </Grid>
 </UserControl>

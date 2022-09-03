@@ -12,7 +12,7 @@ namespace TMIJunction.ViewModel
         private LowerViewModel lowerVM;
         public LowerViewModel LowerVM { get { return lowerVM; } }
 
-        public MainViewModel(EsapiWorker esapiWorker, LegsJunction legsJunction)
+        public MainViewModel(EsapiWorker esapiWorker)
         {
             ModelBase modelBase = new ModelBase(esapiWorker);
             upperVM = new UpperViewModel(modelBase);

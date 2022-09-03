@@ -25,16 +25,17 @@ namespace TMIJunction
 
         public Task CreateAsync(IProgress<double> progress, IProgress<string> message)
         {
-            return esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("UpperJunction context: {@context}", new List<string> { upperPlanId, upperPTVId });
+                logger.Information("UpperJunction context: {@context}", new List<string> { this.upperPlanId, this.upperPTVId });
 
                 /*
                  * Create junction structures upper CT
                  */
-                StructureSet upperSS = scriptContext.PlansInScope.FirstOrDefault(p => p.Id == upperPlanId).StructureSet;
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                StructureSet upperSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId).StructureSet;
 
-                Structure upperPTV = upperSS.Structures.FirstOrDefault(s => s.Id == upperPTVId);
+                Structure upperPTV = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
 
                 List<Structure> junctionSubStructures = new List<Structure>
                 {

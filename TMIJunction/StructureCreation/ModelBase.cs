@@ -23,36 +23,80 @@ namespace TMIJunction.StructureCreation
 
         public Task<List<string>> GetPlansAsync(PlanType planType)
         {
-            return esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext =>
             {
-                Course latestCourse = scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                return latestCourse.PlanSetups.Where(p => p.Id.IndexOf(planType.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-                                  .OrderByDescending(p => p.CreationDateTime)
-                                  .Select(p => p.Id)
-                                  .ToList();
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                return targetCourse.PlanSetups.Where(p => p.Id.IndexOf(planType.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
+                                              .OrderByDescending(p => p.CreationDateTime)
+                                              .Select(s => s.Id)
+                                              .ToList();
             },
             isWriteable: false);
         }
 
-        public Task<List<string>> GetPTVsOfPlanAsync(string planId)
+        public Task<List<string>> GetPTVsFromPlanAsync(string planId)
         {
-            return esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext =>
             {
-                PlanSetup selectedPlan = scriptContext.Patient.Courses.SelectMany(c => c.PlanSetups).FirstOrDefault(ps => ps.Id == planId);
-
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
                 return selectedPlan == null ? new List<string>()
-                : selectedPlan.StructureSet.Structures
-                                .Where(s => s.DicomType == "PTV")
-                                .OrderByDescending(s => s.Volume)
-                                .Select(p => p.Id)
-                                .ToList();
+                : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
+                                                      .OrderByDescending(s => s.Volume)
+                                                      .Select(s => s.Id)
+                                                      .ToList();
+
             },
             isWriteable: false);
         }
 
+        public Task<List<string>> GetPTVsFromSSAsync(List<string> excludeSSOfPlanIds)
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                bool isOpenedSSToExclude = targetCourse.PlanSetups.Where(p => excludeSSOfPlanIds.Contains(p.Id))
+                                                                  .Select(p => p.StructureSet)
+                                                                  .Contains(scriptContext.StructureSet);
+                if (scriptContext.StructureSet == null || isOpenedSSToExclude)
+                {
+                    StructureSet latestSSInTargetCourse = targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last();
+                    return latestSSInTargetCourse.Structures.Where(s => s.DicomType == "PTV")
+                                                            .OrderByDescending(s => s.Volume)
+                                                            .Select(s => s.Id)
+                                                            .ToList();
+                }
+                else
+                {
+                    return scriptContext.StructureSet.Structures.Where(s => s.DicomType == "PTV")
+                                                                .OrderByDescending(s => s.Volume)
+                                                                .Select(s => s.Id)
+                                                                .ToList();
+                }
+            },
+            isWriteable: false);
+        }
+
+        private StructureSet GetTargetStructureSet(ScriptContext scriptContext, List<string> excludeSSOfPlanIds)
+        {
+            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            bool isOpenedSSToExclude = targetCourse.PlanSetups.Where(p => excludeSSOfPlanIds.Contains(p.Id))
+                                                              .Select(p => p.StructureSet)
+                                                              .Contains(scriptContext.StructureSet);
+            if (scriptContext.StructureSet == null || isOpenedSSToExclude)
+            {
+                return targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last();
+            }
+            else
+            {
+                return scriptContext.StructureSet;
+            }
+        }
+
+        // Must be called only within an EsapiWorker task
         public Task<List<string>> GetRegistrationsAsync()
         {
-            return esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext =>
             {
                 return scriptContext.Patient.Registrations.OrderByDescending(reg => reg.CreationDateTime)
                                                           .Select(reg => reg.Id)
@@ -71,6 +115,30 @@ namespace TMIJunction.StructureCreation
         {
             UpperControl upperControl = new UpperControl(this.esapiWorker, upperPlanId, upperPTVId);
             return upperControl.CreateAsync(progress, message);
+        }
+
+        public Task GenerateLowerPlanAsync(List<string> excludeSSOfPlanIds)
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                StructureSet targetSS = GetTargetStructureSet(scriptContext, excludeSSOfPlanIds);
+
+                ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIdownAuto"));
+                newPlan.Id = numOfAutoPlans == 0 ? "TMLIdownAuto" : string.Concat("TMLIdownAuto", numOfAutoPlans);
+            });
+        }
+
+        public Task GenerateLowerJunctionAsync(string upperPlanId,
+                                               string lowerPlanId,
+                                               string lowerPTVId,
+                                               string registrationId,
+                                               Progress<double> progress,
+                                               Progress<string> message)
+        {
+            LowerJunction lowerJunction = new LowerJunction(this.esapiWorker, upperPlanId, lowerPlanId, lowerPTVId, registrationId);
+            return lowerJunction.CreateAsync(progress, message);
         }
     }
 }

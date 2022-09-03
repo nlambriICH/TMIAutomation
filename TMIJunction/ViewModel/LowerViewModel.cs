@@ -1,14 +1,16 @@
 ﻿using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using TMIJunction.StructureCreation;
+using TMIJunction.View;
 
 namespace TMIJunction.ViewModel
 {
     public class LowerViewModel : ViewModelBase
     {
-        private readonly LegsJunction legsJunction;
-
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
@@ -33,11 +35,28 @@ namespace TMIJunction.ViewModel
             }
         }
 
-        private List<string> lowerPTV;
-        public List<string> LowerPTV
+        private List<string> lowerPTVs;
+        public List<string> LowerPTVs
         {
-            get { return lowerPTV; }
-            set { Set(ref lowerPTV, value); }
+            get { return lowerPTVs; }
+            set
+            {
+                Set(ref lowerPTVs, value);
+                SelectedLowerPTVId = this.LowerPTVs.Count != 0 ? this.lowerPTVs[0] : string.Empty;
+            }
+        }
+
+        private string selectedLowerPTVId;
+        public string SelectedLowerPTVId
+        {
+            get { return selectedLowerPTVId; }
+            set
+            {
+                if (selectedLowerPTVId != value)
+                {
+                    Set(ref selectedLowerPTVId, value);
+                }
+            }
         }
 
         private List<string> registrations;
@@ -111,6 +130,14 @@ namespace TMIJunction.ViewModel
         }
 
         private readonly ModelBase modelBase;
+        public ICommand StartExecutionCommand { get; }
+
+        private double progress;
+        public double Progress
+        {
+            get { return progress; }
+            set { Set(ref progress, value); }
+        }
 
         public LowerViewModel(ModelBase modelBase)
         {
@@ -118,6 +145,7 @@ namespace TMIJunction.ViewModel
             IsJunctionChecked = true;
             IsControlChecked = true;
             IsOptimizationChecked = true;
+            StartExecutionCommand = new RelayCommand(StartExecution);
             RetrieveData();
         }
 
@@ -128,8 +156,47 @@ namespace TMIJunction.ViewModel
             Task<List<string>> lowerPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
             UpperPlans = await upperPlansTask;
-            Registrations = await registrationsTask;
             LowerPlans = await lowerPlansTask;
+            LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
+                ? await this.modelBase.GetPTVsFromSSAsync(this.upperPlans)
+                : await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
+
+            Registrations = await registrationsTask;
+        }
+
+        private async void StartExecution()
+        {
+            ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Lower-extremities");
+            Progress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
+            Progress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
+            ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
+            pbWindow.Show();
+
+            //if (this.isJunctionChecked && this.isControlChecked)
+            //{
+            //    pbViewModel.NumOperations++; // rescale the progress bar update
+            //}
+
+            if (this.isJunctionChecked)
+            {
+                await this.modelBase.GenerateLowerPlanAsync(this.upperPlans);
+                LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
+                await this.modelBase.GenerateLowerJunctionAsync(this.selectedUpperPlanId,
+                                                                this.selectedLowerPlanId,
+                                                                this.selectedLowerPTVId,
+                                                                this.selectedRegistrationId,
+                                                                progress,
+                                                                message);
+                LowerPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
+            }
+
+            //if (this.isControlChecked)
+            //{
+            //    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+            //}
+
+            pbViewModel.ResetProgress();
+            pbWindow.Close();
         }
     }
 }

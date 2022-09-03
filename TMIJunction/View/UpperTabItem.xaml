@@ -69,7 +69,7 @@
                 Content="Start"
                 FontSize="20"
                 Width="150"
-                Command="{Binding StartOrCancelExecutionCommand}"/>
+                Command="{Binding StartExecutionCommand}"/>
 
     </Grid>
 </UserControl>

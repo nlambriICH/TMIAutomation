@@ -54,8 +54,7 @@ namespace VMS.TPS
             {
                 try
                 {
-                    LegsJunction legsJunction = new LegsJunction(esapiWorker);
-                    MainViewModel viewModel = new MainViewModel(esapiWorker, legsJunction);
+                    MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
                     mainWindow.ShowDialog();
                     mainWindow.Closed += CloseAndFlushLogger;

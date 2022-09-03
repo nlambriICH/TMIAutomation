@@ -69,7 +69,7 @@ namespace TMIJunction.ViewModel
 
         private readonly ModelBase modelBase;
 
-        public ICommand StartOrCancelExecutionCommand { get; }
+        public ICommand StartExecutionCommand { get; }
 
         private double progress;
         public double Progress
@@ -83,7 +83,7 @@ namespace TMIJunction.ViewModel
             this.modelBase = modelBase;
             IsJunctionChecked = true;
             IsControlChecked = true;
-            StartOrCancelExecutionCommand = new RelayCommand(StartExecution);
+            StartExecutionCommand = new RelayCommand(StartExecution);
             RetrieveUpperPlans();
         }
 
@@ -94,7 +94,7 @@ namespace TMIJunction.ViewModel
 
         private async void RetrieveUpperPTVs(string planId)
         {
-            UpperPTVs = await this.modelBase.GetPTVsOfPlanAsync(planId);
+            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(planId);
         }
 
         private async void StartExecution()

@@ -104,7 +104,7 @@
     <Compile Include="StructureCreation\ControlStructures\LegsControlStructures.cs" />
     <Compile Include="StructureCreation\Junction\UpperJunction.cs" />
     <Compile Include="StructureCreation\IStructure.cs" />
-    <Compile Include="StructureCreation\Junction\LegsJunction.cs" />
+    <Compile Include="StructureCreation\Junction\LowerJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
     <Compile Include="Helper\WindowHelper.cs" />
@@ -175,7 +175,6 @@
     <Resource Include="Configuration\OptimizationOptions.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Interface\" />
     <Folder Include="PlanApproval\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

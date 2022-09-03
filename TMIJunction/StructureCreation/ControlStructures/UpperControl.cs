@@ -24,15 +24,16 @@ namespace TMIJunction
 
         public Task CreateAsync(IProgress<double> progress, IProgress<string> message)
         {
-            return esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("UpperControl context: {@context}", new List<string> { upperPlanId, upperPTVId });
+                logger.Information("UpperControl context: {@context}", new List<string> { this.upperPlanId, this.upperPTVId });
 
                 /*
                 * Create Healthy Tissue (HT), Healthy Tissue 2 (HT2), and Body Free (Body_free)
                 */
-                StructureSet upperSS = scriptContext.PlansInScope.FirstOrDefault(p => p.Id == upperPlanId).StructureSet;
-                Structure ptv = upperSS.Structures.FirstOrDefault(s => s.Id == upperPTVId);
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                StructureSet upperSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId).StructureSet;
+                Structure ptv = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
                 int bottomSlicePTVWithJunction = upperSS.GetStructureSlices(ptv).FirstOrDefault();
                 int clearBodyFreeOffset = 3;
                 int bodyFreeSliceRemove = bottomSlicePTVWithJunction - clearBodyFreeOffset;
