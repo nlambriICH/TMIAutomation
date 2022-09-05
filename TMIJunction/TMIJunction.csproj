@@ -24,7 +24,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
+    <AllowedReferenceRelatedFileExtensions>
+          <!-- Prevent default XML documentation files to be copied to output-->
+          .pdb
+    </AllowedReferenceRelatedFileExtensions>
+	<PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>Library\release\</OutputPath>
@@ -100,6 +104,7 @@
     <Compile Include="Optimization\Objectives\ObjectivesSetup.cs" />
     <Compile Include="Optimization\Optimization.cs" />
     <Compile Include="StructureCreation\ModelBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureCreation\ControlStructures\UpperControl.cs" />
     <Compile Include="StructureCreation\ControlStructures\LowerControl.cs" />
     <Compile Include="StructureCreation\Junction\UpperJunction.cs" />
