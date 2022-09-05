@@ -101,8 +101,8 @@ namespace TMIJunction.ViewModel
         private async void StartExecution()
         {
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Upper-body");
-            Progress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
-            Progress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
+            IProgress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
+            IProgress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 

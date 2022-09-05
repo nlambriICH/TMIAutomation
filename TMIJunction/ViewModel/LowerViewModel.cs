@@ -86,6 +86,19 @@ namespace TMIJunction.ViewModel
             }
         }
 
+        private string machineName;
+        public string MachineName
+        {
+            get { return machineName; }
+            set
+            {
+                if (machineName != value)
+                {
+                    Set(ref machineName, value);
+                }
+            }
+        }
+
         private List<string> lowerPlans;
         public List<string> LowerPlans
         {
@@ -158,6 +171,7 @@ namespace TMIJunction.ViewModel
             Task<List<string>> lowerPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
             UpperPlans = await upperPlansTask;
+            MachineName = await this.modelBase.GetMachineNameAsync(this.selectedUpperPlanId);
             LowerPlans = await lowerPlansTask;
             LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
                 ? await this.modelBase.GetPTVsFromSSAsync(this.upperPlans)
@@ -169,8 +183,8 @@ namespace TMIJunction.ViewModel
         private async void StartExecution()
         {
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Lower-extremities");
-            Progress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
-            Progress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
+            IProgress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
+            IProgress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
@@ -207,10 +221,11 @@ namespace TMIJunction.ViewModel
                                                                    this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
                                                                    progress, message);
                 }
-            }
-            catch (InvalidOperationException exc)
-            {
-                MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
+
+                if (this.isOptimizationChecked)
+                {
+                    await this.modelBase.OptimizeAsync(this.selectedLowerPlanId, this.machineName, progress, message);
+                }
             }
             finally
             {

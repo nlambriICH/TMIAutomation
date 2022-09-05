@@ -9,6 +9,7 @@ using VMS.TPS.Common.Model.Types;
 using TMIJunction.Async;
 using TMIJunction.ViewModel;
 using TMIJunction.View;
+using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.8")]
@@ -22,7 +23,6 @@ namespace VMS.TPS
 {
     public class Script
     {
-
         private readonly ILogger logger;
 
         public Script()
@@ -59,9 +59,9 @@ namespace VMS.TPS
                     mainWindow.ShowDialog();
                     mainWindow.Closed += CloseAndFlushLogger;
                 }
-                catch (Exception e)
+                catch (Exception exc)
                 {
-                    System.Windows.MessageBox.Show(e.Message);
+                    MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
                 }
             });
 

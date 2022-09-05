@@ -85,13 +85,13 @@ namespace TMIJunction.StructureCreation
             isWriteable: false);
         }
 
-        public Task GenerateUpperJunctionAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
+        public Task GenerateUpperJunctionAsync(string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
         {
             UpperJunction upperJunction = new UpperJunction(this.esapiWorker, upperPlanId, upperPTVId);
             return upperJunction.CreateAsync(progress, message);
         }
 
-        public Task GenerateUpperControlAsync(string upperPlanId, string upperPTVId, Progress<double> progress, Progress<string> message)
+        public Task GenerateUpperControlAsync(string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
         {
             UpperControl upperControl = new UpperControl(this.esapiWorker, upperPlanId, upperPTVId);
             return upperControl.CreateAsync(progress, message);
@@ -125,8 +125,8 @@ namespace TMIJunction.StructureCreation
                                                string lowerPlanId,
                                                string lowerPTVId,
                                                string registrationId,
-                                               Progress<double> progress,
-                                               Progress<string> message)
+                                               IProgress<double> progress,
+                                               IProgress<string> message)
         {
             LowerJunction lowerJunction = new LowerJunction(this.esapiWorker, upperPlanId, lowerPlanId, lowerPTVId, registrationId);
             return lowerJunction.CreateAsync(progress, message);
@@ -134,11 +134,31 @@ namespace TMIJunction.StructureCreation
 
         public Task GenerateLowerControlAsync(string lowerPlanId,
                                               string lowerPTVId,
-                                              Progress<double> progress,
-                                              Progress<string> message)
+                                              IProgress<double> progress,
+                                              IProgress<string> message)
         {
             LowerControl lowerControl = new LowerControl(this.esapiWorker, lowerPlanId, lowerPTVId);
             return lowerControl.CreateAsync(progress, message);
+        }
+
+        public Task<string> GetMachineNameAsync(string planId)
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == planId);
+                return selectedPlan == null ? string.Empty
+                : selectedPlan.Beams.Select(b => b.TreatmentUnit.Id).FirstOrDefault();
+            });
+        }
+
+        public Task OptimizeAsync(string lowerPlanId,
+                                  string machineName,
+                                  IProgress<double> progress,
+                                  IProgress<string> message)
+        {
+            Optimization optimization = new Optimization(this.esapiWorker, lowerPlanId, machineName);
+            return optimization.ComputeAsync(progress, message);
         }
     }
 }

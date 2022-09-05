@@ -168,7 +168,7 @@
                    FontFamily="Serif"
                    Foreground="#FDFDFD"
                    Padding="3"
-                   Text="Insert Machine">
+                   Text="Insert Machine Name">
             <TextBlock.Style>
                 <Style TargetType="{x:Type TextBlock}">
                     <Setter Property="Visibility" Value="Visible"/>
@@ -189,8 +189,8 @@
                  FontSize="12"
                  FontFamily="Serif"
                  Foreground="#2A324F"
-                 x:Name="TextBoxMachineName"
-                 VerticalContentAlignment="Center">
+                 VerticalContentAlignment="Center"
+                 Text="{Binding MachineName}">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}">
                     <Setter Property="Visibility" Value="Visible"/>

@@ -1,37 +1,73 @@
-﻿using System.Linq;
+﻿using Serilog;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using TMIJunction.Async;
 using VMS.TPS.Common.Model.API;
 
 namespace TMIJunction
 {
-    class Optimization
+    public class Optimization
     {
-        private readonly string lowerPlan;
+        private readonly ILogger logger = Log.ForContext<Optimization>();
+        private readonly EsapiWorker esapiWorker;
+        private readonly string lowerPlanId;
+        private readonly string machineName;
 
-        public Optimization(string lowerPlan)
+        public Optimization(EsapiWorker esapiWorker, string lowerPlanId, string machineName)
         {
-            this.lowerPlan = lowerPlan;
+            this.esapiWorker = esapiWorker;
+            this.lowerPlanId = lowerPlanId;
+            this.machineName = machineName;
         }
 
-        public void Start(ScriptContext context)
+        public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
         {
-            ExternalPlanSetup externalPlanSetup = context.ExternalPlansInScope.FirstOrDefault(ps => ps.Id == lowerPlan);
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == lowerPlanId);
 
-            externalPlanSetup.OptimizationSetup(); // must set dose prescription before adding objectives
+                progress.Report(0.3);
+                message.Report("Placing isocenters...");
+                lowerPlan.SetIsocenters(this.machineName);
 
-            OptimizationSetup optSetup = externalPlanSetup.OptimizationSetup;
-            StructureSet ss = externalPlanSetup.StructureSet;
+                lowerPlan.OptimizationSetup(); // must set dose prescription before adding objectives
 
-            optSetup.ClearObjectives();
-            optSetup.AddPointObjectives(ss);
-            optSetup.AddEUDObjectives(ss);
-            optSetup.UseJawTracking = false;
-            optSetup.AddAutomaticNormalTissueObjective(150);
-            //optSetup.ExcludeStructuresFromOptimization(ss);
+                OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
+                StructureSet ss = lowerPlan.StructureSet;
 
-            externalPlanSetup.OptimizePlan(context.Patient.Id);
-            externalPlanSetup.AdjustYJawToMLCShape();
-            externalPlanSetup.CalculateDose(context.Patient.Id);
-            externalPlanSetup.Normalize();
+                optSetup.ClearObjectives();
+                optSetup.AddPointObjectives(ss);
+                optSetup.AddEUDObjectives(ss);
+                optSetup.UseJawTracking = false;
+                optSetup.AddAutomaticNormalTissueObjective(150);
+                //optSetup.ExcludeStructuresFromOptimization(ss);
+
+                progress.Report(0.35);
+                message.Report("Optimizing plan...");
+                bool optSuccess = lowerPlan.OptimizePlan();
+                if (!optSuccess)
+                {
+                    logger.Error("An error occured during optimization");
+                    throw new Exception("Optimization was not successful");
+                }
+
+                message.Report("Adjusting jaw y-size to MLC shape...");
+                lowerPlan.AdjustYJawToMLCShape();
+
+                progress.Report(0.35);
+                message.Report("Calculating dose...");
+                bool doseSuccess = lowerPlan.CalculatePlanDose();
+                if (!doseSuccess)
+                {
+                    logger.Error("An error occured during dose calculation");
+                    throw new Exception("Dose calculation was not successful");
+                }
+
+                message.Report($"Normalize plan: {StructureHelper.LOWER_PTV_NO_JUNCTION}-98%=98%...");
+                lowerPlan.Normalize();
+            });
 
         }
     }

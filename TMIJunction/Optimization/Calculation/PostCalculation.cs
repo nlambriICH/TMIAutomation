@@ -13,22 +13,21 @@ namespace TMIJunction
         public static void Normalize(this ExternalPlanSetup externalPlanSetup)
         {
             Structure ptvTotNoJunction = externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
-            
+
             if (ptvTotNoJunction == null)
             {
                 logger.Warning("Could not find structure: {ptvTotNoJunction}. Skip plan normalization", StructureHelper.LOWER_PTV_NO_JUNCTION);
-                WindowHelper.ShowAutoClosingMessageBox($"Could not find structure: {StructureHelper.LOWER_PTV_NO_JUNCTION}. Skip plan normalization", "Info");
                 return;
             }
 
             externalPlanSetup.PlanNormalizationValue = 100.0; // no plan normalization
             double targetDose = externalPlanSetup.TotalDose.Dose;
-            double doseNormalizationTarget = (98.0 / 100.0) * targetDose;
+            double doseNormalizationTarget = 98.0 / 100.0 * targetDose;
             DoseValue doseValue = new DoseValue(doseNormalizationTarget, "Gy");
 
             double volumeNormalizationTarget = 98.0;
             double volume = externalPlanSetup.GetVolumeAtDose(ptvTotNoJunction, doseValue, VolumePresentation.Relative);
-            
+
             if (volume < volumeNormalizationTarget)
             {
                 doseValue = externalPlanSetup.GetDoseAtVolume(ptvTotNoJunction, volumeNormalizationTarget, VolumePresentation.Relative, DoseValuePresentation.Absolute);

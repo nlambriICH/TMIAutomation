@@ -37,10 +37,8 @@ namespace TMIJunction
             externalPlanSetup.SetPrescription(int.Parse(NUMBER_OF_FRACTIONS), new DoseValue(double.Parse(DOSE_PER_FRACTION_GY), DoseValue.DoseUnit.Gy), 1.0);
         }
 
-        public static void OptimizePlan(this ExternalPlanSetup externalPlanSetup, string patientId)
+        public static bool OptimizePlan(this ExternalPlanSetup externalPlanSetup)
         {
-            logger.Information("Start optimization for patient {patientId}", patientId);
-
             OptimizerResult optimizerResult;
             using (var serilogListener = new SerilogTraceListener.SerilogTraceListener(logger))
             {
@@ -48,19 +46,11 @@ namespace TMIJunction
                 optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationIntermediateDoseOption.UseIntermediateDose, MLCID));
             }
 
-            if (!optimizerResult.Success)
-            {
-                logger.Error("An error occured during optimization");
-                MessageBox.Show("The optimization was NOT successful!", "Error");
-                return;
-            }
-            logger.Information("Optimization completed!");
-            WindowHelper.ShowAutoClosingMessageBox("Optimization completed!", "Info");
+            return optimizerResult.Success;
         }
-        public static void CalculateDose(this ExternalPlanSetup externalPlanSetup, string patientId)
-        {
-            logger.Information("Start dose calculation for patient {patientId}", patientId);
 
+        public static bool CalculatePlanDose(this ExternalPlanSetup externalPlanSetup)
+        {
             CalculationResult calculationResult;
             using (var serilogListener = new SerilogTraceListener.SerilogTraceListener(logger))
             {
@@ -68,14 +58,7 @@ namespace TMIJunction
                 calculationResult = externalPlanSetup.CalculateDose();
             }
 
-            if (!calculationResult.Success)
-            {
-                logger.Error("An error occured during dose calculation");
-                MessageBox.Show("The dose calculation was NOT successful!", "Error");
-                return;
-            }
-            logger.Information("Dose calculation completed!");
-            WindowHelper.ShowAutoClosingMessageBox("Dose calculation completed!", "Info");
+            return calculationResult.Success;
         }
     }
 }
