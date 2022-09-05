@@ -24,13 +24,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
+    <AllowedReferenceRelatedFileExtensions>
+          <!-- Prevent default XML documentation files to be copied to output-->
+          .pdb
+    </AllowedReferenceRelatedFileExtensions>
+	<PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>Library\release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -80,6 +86,7 @@
     <Compile Include="Optimization\Objectives\ObjectivesSetup.cs" />
     <Compile Include="Optimization\Optimization.cs" />
     <Compile Include="PlanApproval\PlanApproval.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserInterface.cs">
       <DependentUpon>UserInterface.xaml</DependentUpon>
     </Compile>
