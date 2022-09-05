@@ -101,20 +101,6 @@ namespace TMIJunction
             return Convert.ToInt32((z - ss.Image.Origin.z) / imageRes);
         }
 
-        public static void CreateHealthyTissue(this StructureSet ss, Structure ptv, ILogger logger)
-        {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
-            Structure healthyTissue = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE, logger);
-            Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
-            healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
-            healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
-
-            logger.Information("RemoveSmallContoursFromStructure: {HT}", HEALTHY_TISSUE);
-            ss.RemoveSmallContoursFromStructure(healthyTissue);
-            logger.Information("RemoveSmallContoursFromStructure: {HT2}", HEALTHY_TISSUE2);
-            ss.RemoveSmallContoursFromStructure(healthyTissue2);
-        }
-
         public static void CreateHealthyTissue(this StructureSet ss,
                                                Structure ptv,
                                                ILogger logger,
@@ -127,7 +113,7 @@ namespace TMIJunction
             message.Report("Generating healthy tissue structure HT_AUTO...");
             Structure healthyTissue = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE, logger);
             healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
-            
+
             message.Report("Removing small contours from HT_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT}", HEALTHY_TISSUE);
             ss.RemoveSmallContoursFromStructure(healthyTissue, message);
@@ -136,26 +122,10 @@ namespace TMIJunction
             message.Report("Generating healthy tissue structure HT2_AUTO...");
             Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
             healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
-            
+
             message.Report("Removing small contours from HT2_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT2}", HEALTHY_TISSUE2);
             ss.RemoveSmallContoursFromStructure(healthyTissue2, message);
-        }
-
-        public static void CreateBodyFree(this StructureSet ss, Structure ptv, int bodyFreeSliceStart, int bodyFreeSliceRemove, ILogger logger)
-        {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
-            Structure bodyFree = ss.TryAddStructure("CONTROL", BODY_FREE, logger);
-
-            bodyFree.SegmentVolume = body.Margin(-3).Sub(ptv.Margin(35));
-
-            foreach (int slice in Enumerable.Range(bodyFreeSliceStart, bodyFreeSliceRemove))
-            {
-                bodyFree.ClearAllContoursOnImagePlane(slice);
-            }
-
-            logger.Information("RemoveSmallContoursFromStructure: {BodyFree}", BODY_FREE);
-            ss.RemoveSmallContoursFromStructure(bodyFree);
         }
 
         public static void CreateBodyFree(this StructureSet ss,

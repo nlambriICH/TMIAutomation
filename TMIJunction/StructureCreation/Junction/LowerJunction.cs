@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
 using TMIJunction.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
@@ -71,13 +71,6 @@ namespace TMIJunction
 			* Isodose levels upper-body CT
 			*/
             PlanSetup upperPlan = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
-            if (!upperPlan.IsDoseValid)
-            {
-                MessageBox.Show($"The selected upper-body plan {this.upperPlanId} has invalid dose." +
-                    $"The upper-body plan should have a calculated dose distribution assigned.",
-                    "TMIAutomation - Error");
-                return;
-            }
             List<double> doseValues = null;
             DoseValue.DoseUnit doseUnit = DoseValue.DoseUnit.Unknown;
 

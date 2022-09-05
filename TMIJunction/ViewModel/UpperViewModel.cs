@@ -2,6 +2,7 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using TMIJunction.StructureCreation;
 using TMIJunction.View;
@@ -105,10 +106,9 @@ namespace TMIJunction.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            if (this.isJunctionChecked && this.isControlChecked)
-            {
-                pbViewModel.NumOperations++; // rescale the progress bar update
-            }
+            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked};
+            int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
+            pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
 
             if (this.isJunctionChecked)
             {

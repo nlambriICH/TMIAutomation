@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using TMIJunction.StructureCreation;
 using TMIJunction.View;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace TMIJunction.ViewModel
 {
@@ -172,31 +174,49 @@ namespace TMIJunction.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            //if (this.isJunctionChecked && this.isControlChecked)
-            //{
-            //    pbViewModel.NumOperations++; // rescale the progress bar update
-            //}
+            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.isOptimizationChecked };
+            int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
+            pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
 
-            if (this.isJunctionChecked)
+            await this.modelBase.GenerateLowerPlanAsync(this.upperPlans);
+            LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
+
+            try
             {
-                await this.modelBase.GenerateLowerPlanAsync(this.upperPlans);
-                LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
-                await this.modelBase.GenerateLowerJunctionAsync(this.selectedUpperPlanId,
-                                                                this.selectedLowerPlanId,
-                                                                this.selectedLowerPTVId,
-                                                                this.selectedRegistrationId,
-                                                                progress,
-                                                                message);
-                LowerPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
+                if (this.isJunctionChecked)
+                {
+                    bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValid(this.selectedUpperPlanId);
+                    if (!isUpperPlanDoseValid)
+                    {
+                        throw new InvalidOperationException($"The selected upper-body plan {this.selectedUpperPlanId} has invalid dose." +
+                            $"The upper-body plan should have a calculated dose distribution assigned.");
+                    }
+
+                    await this.modelBase.GenerateLowerJunctionAsync(this.selectedUpperPlanId,
+                                                                    this.selectedLowerPlanId,
+                                                                    this.selectedLowerPTVId,
+                                                                    this.selectedRegistrationId,
+                                                                    progress,
+                                                                    message);
+                    LowerPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
+                }
+
+                if (this.isControlChecked)
+                {
+                    await this.modelBase.GenerateLowerControlAsync(this.selectedLowerPlanId,
+                                                                   this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
+                                                                   progress, message);
+                }
             }
-
-            //if (this.isControlChecked)
-            //{
-            //    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
-            //}
-
-            pbViewModel.ResetProgress();
-            pbWindow.Close();
+            catch (InvalidOperationException exc)
+            {
+                MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
+            }
+            finally
+            {
+                pbViewModel.ResetProgress();
+                pbWindow.Close();
+            }
         }
     }
 }

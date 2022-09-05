@@ -101,7 +101,7 @@
     <Compile Include="Optimization\Optimization.cs" />
     <Compile Include="StructureCreation\ModelBase.cs" />
     <Compile Include="StructureCreation\ControlStructures\UpperControl.cs" />
-    <Compile Include="StructureCreation\ControlStructures\LegsControlStructures.cs" />
+    <Compile Include="StructureCreation\ControlStructures\LowerControl.cs" />
     <Compile Include="StructureCreation\Junction\UpperJunction.cs" />
     <Compile Include="StructureCreation\IStructure.cs" />
     <Compile Include="StructureCreation\Junction\LowerJunction.cs" />

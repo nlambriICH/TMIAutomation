@@ -33,15 +33,15 @@ namespace TMIJunction
                 */
                 Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
                 StructureSet upperSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId).StructureSet;
-                Structure ptv = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
-                int bottomSlicePTVWithJunction = upperSS.GetStructureSlices(ptv).FirstOrDefault();
+                Structure upperPTV = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
+                int bottomSlicePTVWithJunction = upperSS.GetStructureSlices(upperPTV).FirstOrDefault();
                 int clearBodyFreeOffset = 3;
                 int bodyFreeSliceRemove = bottomSlicePTVWithJunction - clearBodyFreeOffset;
 
-                upperSS.CreateHealthyTissue(ptv, logger, progress, message);
+                upperSS.CreateHealthyTissue(upperPTV, logger, progress, message);
                 logger.Information("Structures created: {healthyTissue} {healthyTissue2}", StructureHelper.HEALTHY_TISSUE, StructureHelper.HEALTHY_TISSUE2);
 
-                upperSS.CreateBodyFree(ptv, 0, bodyFreeSliceRemove, logger, progress, message);
+                upperSS.CreateBodyFree(upperPTV, 0, bodyFreeSliceRemove, logger, progress, message);
                 logger.Information("Structure created: {bodyFree}", StructureHelper.BODY_FREE);
 
                 progress.Report(0.25);

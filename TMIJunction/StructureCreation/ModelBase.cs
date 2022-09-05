@@ -54,25 +54,11 @@ namespace TMIJunction.StructureCreation
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                bool isOpenedSSToExclude = targetCourse.PlanSetups.Where(p => excludeSSOfPlanIds.Contains(p.Id))
-                                                                  .Select(p => p.StructureSet)
-                                                                  .Contains(scriptContext.StructureSet);
-                if (scriptContext.StructureSet == null || isOpenedSSToExclude)
-                {
-                    StructureSet latestSSInTargetCourse = targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last();
-                    return latestSSInTargetCourse.Structures.Where(s => s.DicomType == "PTV")
-                                                            .OrderByDescending(s => s.Volume)
-                                                            .Select(s => s.Id)
-                                                            .ToList();
-                }
-                else
-                {
-                    return scriptContext.StructureSet.Structures.Where(s => s.DicomType == "PTV")
-                                                                .OrderByDescending(s => s.Volume)
-                                                                .Select(s => s.Id)
-                                                                .ToList();
-                }
+                StructureSet targetSS = GetTargetStructureSet(scriptContext, excludeSSOfPlanIds);
+                return targetSS.Structures.Where(s => s.DicomType == "PTV")
+                                          .OrderByDescending(s => s.Volume)
+                                          .Select(s => s.Id)
+                                          .ToList();
             },
             isWriteable: false);
         }
@@ -83,17 +69,11 @@ namespace TMIJunction.StructureCreation
             bool isOpenedSSToExclude = targetCourse.PlanSetups.Where(p => excludeSSOfPlanIds.Contains(p.Id))
                                                               .Select(p => p.StructureSet)
                                                               .Contains(scriptContext.StructureSet);
-            if (scriptContext.StructureSet == null || isOpenedSSToExclude)
-            {
-                return targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last();
-            }
-            else
-            {
-                return scriptContext.StructureSet;
-            }
+            return scriptContext.StructureSet == null || isOpenedSSToExclude
+                ? targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last()
+                : scriptContext.StructureSet;
         }
 
-        // Must be called only within an EsapiWorker task
         public Task<List<string>> GetRegistrationsAsync()
         {
             return this.esapiWorker.RunAsync(scriptContext =>
@@ -130,6 +110,17 @@ namespace TMIJunction.StructureCreation
             });
         }
 
+        public Task<bool> IsPlanDoseValid(string planId)
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                PlanSetup upperPlan = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == planId);
+
+                return upperPlan.IsDoseValid;
+            });
+        }
+
         public Task GenerateLowerJunctionAsync(string upperPlanId,
                                                string lowerPlanId,
                                                string lowerPTVId,
@@ -139,6 +130,15 @@ namespace TMIJunction.StructureCreation
         {
             LowerJunction lowerJunction = new LowerJunction(this.esapiWorker, upperPlanId, lowerPlanId, lowerPTVId, registrationId);
             return lowerJunction.CreateAsync(progress, message);
+        }
+
+        public Task GenerateLowerControlAsync(string lowerPlanId,
+                                              string lowerPTVId,
+                                              Progress<double> progress,
+                                              Progress<string> message)
+        {
+            LowerControl lowerControl = new LowerControl(this.esapiWorker, lowerPlanId, lowerPTVId);
+            return lowerControl.CreateAsync(progress, message);
         }
     }
 }
