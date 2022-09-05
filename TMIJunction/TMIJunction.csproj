@@ -107,7 +107,6 @@
     <Compile Include="StructureCreation\Junction\LowerJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
-    <Compile Include="Helper\WindowHelper.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProgressBarViewModel.cs" />
