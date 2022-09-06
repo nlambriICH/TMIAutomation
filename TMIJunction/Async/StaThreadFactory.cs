@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace TMIJunction.Async
+namespace TMIAutomation.Async
 {
 	public class StaThreadFactory
 	{

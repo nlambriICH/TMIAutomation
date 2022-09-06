@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TMIJunction.Async;
+using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIJunction
+namespace TMIAutomation
 {
 	public class LowerJunction : IStructure
 	{

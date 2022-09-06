@@ -1,10 +1,10 @@
 ﻿using Serilog;
 using System;
 using System.Windows;
-using TMIJunction.ViewModel;
+using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIJunction.View
+namespace TMIAutomation.View
 {
 	/// <summary>
 	/// Interaction logic for ProgressBarWindow.xaml

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TMIJunction.Async;
+using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 
-namespace TMIJunction.StructureCreation
+namespace TMIAutomation.StructureCreation
 {
 	public class ModelBase
 	{

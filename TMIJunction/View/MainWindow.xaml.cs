@@ -1,7 +1,7 @@
 ﻿using System.Windows;
-using TMIJunction.ViewModel;
+using TMIAutomation.ViewModel;
 
-namespace TMIJunction.View
+namespace TMIAutomation.View
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml

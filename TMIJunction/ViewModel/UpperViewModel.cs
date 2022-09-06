@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
-using TMIJunction.StructureCreation;
-using TMIJunction.View;
+using TMIAutomation.StructureCreation;
+using TMIAutomation.View;
 
-namespace TMIJunction.ViewModel
+namespace TMIAutomation.ViewModel
 {
 	public class UpperViewModel : ViewModelBase
 	{

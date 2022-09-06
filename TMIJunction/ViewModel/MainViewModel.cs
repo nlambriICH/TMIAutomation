@@ -1,10 +1,10 @@
 ﻿using GalaSoft.MvvmLight;
 using Serilog;
 using System;
-using TMIJunction.Async;
-using TMIJunction.StructureCreation;
+using TMIAutomation.Async;
+using TMIAutomation.StructureCreation;
 
-namespace TMIJunction.ViewModel
+namespace TMIAutomation.ViewModel
 {
 	public class MainViewModel : ViewModelBase
 	{

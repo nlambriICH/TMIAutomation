@@ -3,7 +3,7 @@ using System;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIJunction
+namespace TMIAutomation
 {
 	static class PostOptimization
 	{

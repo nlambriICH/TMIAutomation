@@ -7,7 +7,7 @@ using System.Reflection;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIJunction
+namespace TMIAutomation
 {
 	static public class ObjectivesSetup
 	{

@@ -6,7 +6,7 @@ using System.Windows.Media.Media3D;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIJunction
+namespace TMIAutomation
 {
 	static class Isocenter
 	{

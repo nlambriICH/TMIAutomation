@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Threading;
 
-namespace TMIJunction.Async
+namespace TMIAutomation.Async
 {
 	/// <summary>
 	/// Provides a static method to run a given action concurrently.

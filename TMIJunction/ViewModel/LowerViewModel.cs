@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TMIJunction.StructureCreation;
-using TMIJunction.View;
+using TMIAutomation.StructureCreation;
+using TMIAutomation.View;
 using System.Linq;
 using Serilog;
 
-namespace TMIJunction.ViewModel
+namespace TMIAutomation.ViewModel
 {
 	public class LowerViewModel : ViewModelBase
 	{

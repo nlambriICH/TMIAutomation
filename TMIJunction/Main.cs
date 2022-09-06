@@ -3,9 +3,9 @@ using VMS.TPS.Common.Model.API;
 using Serilog;
 using System.IO;
 using System;
-using TMIJunction.Async;
-using TMIJunction.ViewModel;
-using TMIJunction.View;
+using TMIAutomation.Async;
+using TMIAutomation.ViewModel;
+using TMIAutomation.View;
 using System.Windows.Forms;
 using System.Reflection;
 

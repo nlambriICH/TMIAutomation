@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VMS.TPS.Common.Model.API;
 
-namespace TMIJunction.Async
+namespace TMIAutomation.Async
 {
 	/// <summary>
 	/// Reperesents an object that runs operations asynchronously on the ESAPI thread.

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TMIJunction
+namespace TMIAutomation
 {
 	public interface IStructure
 	{

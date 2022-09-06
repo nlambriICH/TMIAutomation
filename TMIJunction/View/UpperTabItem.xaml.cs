@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace TMIJunction.View
+namespace TMIAutomation.View
 {
 	/// <summary>
 	/// Interaction logic for UpperTabItem.xaml

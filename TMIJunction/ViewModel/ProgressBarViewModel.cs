@@ -2,7 +2,7 @@
 using Serilog;
 using System;
 
-namespace TMIJunction.ViewModel
+namespace TMIAutomation.ViewModel
 {
 	public sealed class ProgressBarViewModel : ViewModelBase
 	{

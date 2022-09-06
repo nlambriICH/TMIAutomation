@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace TMIJunction.Async
+namespace TMIAutomation.Async
 {
 	/// <summary>
 	/// Represents an object that runs operations asynchronously
