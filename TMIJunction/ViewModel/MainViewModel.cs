@@ -1,22 +1,26 @@
 ﻿using GalaSoft.MvvmLight;
+using Serilog;
+using System;
 using TMIJunction.Async;
 using TMIJunction.StructureCreation;
 
 namespace TMIJunction.ViewModel
 {
-    public class MainViewModel : ViewModelBase
-    {
-        private UpperViewModel upperVM;
-        public UpperViewModel UpperVM { get { return upperVM; } }
+	public class MainViewModel : ViewModelBase
+	{
+		public UpperViewModel UpperVM { get; }
+		public LowerViewModel LowerVM { get; }
 
-        private LowerViewModel lowerVM;
-        public LowerViewModel LowerVM { get { return lowerVM; } }
+		public MainViewModel(EsapiWorker esapiWorker)
+		{
+			ModelBase modelBase = new ModelBase(esapiWorker);
+			UpperVM = new UpperViewModel(modelBase);
+			LowerVM = new LowerViewModel(modelBase);
+		}
 
-        public MainViewModel(EsapiWorker esapiWorker)
-        {
-            ModelBase modelBase = new ModelBase(esapiWorker);
-            upperVM = new UpperViewModel(modelBase);
-            lowerVM = new LowerViewModel(modelBase);
-        }
-    }
+		public void MainView_Closed(object sender, EventArgs e)
+		{
+			Log.CloseAndFlush();
+		}
+	}
 }

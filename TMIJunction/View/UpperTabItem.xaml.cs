@@ -2,14 +2,14 @@
 
 namespace TMIJunction.View
 {
-    /// <summary>
-    /// Interaction logic for UpperTabItem.xaml
-    /// </summary>
-    public partial class UpperTabItem : UserControl
-    {
-        public UpperTabItem()
-        {
-            InitializeComponent();
-        }
-    }
+	/// <summary>
+	/// Interaction logic for UpperTabItem.xaml
+	/// </summary>
+	public partial class UpperTabItem : UserControl
+	{
+		public UpperTabItem()
+		{
+			InitializeComponent();
+		}
+	}
 }

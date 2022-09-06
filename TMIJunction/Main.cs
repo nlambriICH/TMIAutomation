@@ -1,67 +1,66 @@
-using TMIJunction;
 using System.Runtime.CompilerServices;
 using VMS.TPS.Common.Model.API;
 using Serilog;
 using System.IO;
 using System;
-using VMS.TPS.Common.Model.Types;
 using TMIJunction.Async;
 using TMIJunction.ViewModel;
 using TMIJunction.View;
 using System.Windows.Forms;
+using System.Reflection;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
 namespace VMS.TPS
 {
-    public class Script
-    {
-        private readonly ILogger logger;
+	public class Script
+	{
+		private readonly ILogger logger;
 
-        public Script()
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .Destructure.ByTransforming<VVector>(vv => new { X = vv.x, Y = vv.y, Z = vv.z })
-                .Destructure.ByTransforming<VRect<double>>(vr => new { vr.X1, vr.X2, vr.Y1, vr.Y2 })
-                .WriteTo.File(Path.Combine(LoggerHelper.LogDirectory, "TMIJunction.log"),
-                              rollingInterval: RollingInterval.Day,
-                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
+		public Script()
+		{
+			string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+			DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
 
-            this.logger = Log.ForContext<Script>();
+			Log.Logger = new LoggerConfiguration()
+#if DEBUG
+				.MinimumLevel.Verbose()
+#else
+				.MinimumLevel.Debug()
+#endif
+				.WriteTo.File(Path.Combine(directory.FullName, "TMIJunction.log"),
+							  rollingInterval: RollingInterval.Day,
+							  outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+				.CreateLogger();
 
-            logger.Information("TMIJunction script instance created");
-        }
+			this.logger = Log.ForContext<Script>();
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public void Execute(ScriptContext context /*, Window window, ScriptEnvironment environment*/)
-        {
-            // The ESAPI worker needs to be created in the main thread
-            EsapiWorker esapiWorker = new EsapiWorker(context);
+			logger.Information("TMIJunction script instance created");
+		}
 
-            context.Patient.BeginModifications();
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public void Execute(ScriptContext context /*, Window window, ScriptEnvironment environment*/)
+		{
+			// The ESAPI worker needs to be created in the main thread
+			EsapiWorker esapiWorker = new EsapiWorker(context);
 
-            // Create and show the main window on a separate thread
-            ConcurrentStaThreadRunner.Run(() =>
-            {
-                try
-                {
-                    MainViewModel viewModel = new MainViewModel(esapiWorker);
-                    MainWindow mainWindow = new MainWindow(viewModel);
-                    mainWindow.ShowDialog();
-                    mainWindow.Closed += CloseAndFlushLogger;
-                }
-                catch (Exception exc)
-                {
-                    MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
-                }
-            });
+			context.Patient.BeginModifications();
 
-        }
-        public void CloseAndFlushLogger(object sender, EventArgs e)
-        {
-            Log.CloseAndFlush();
-        }
-    }
+			// Create and show the main window on a separate thread
+			ConcurrentStaThreadRunner.Run(() =>
+			{
+				try
+				{
+					MainViewModel viewModel = new MainViewModel(esapiWorker);
+					MainWindow mainWindow = new MainWindow(viewModel);
+					mainWindow.ShowDialog();
+				}
+				catch (Exception exc)
+				{
+					MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
+					logger.Fatal(exc, "The following fatal error occured during the script execution");
+				}
+			});
+		}
+	}
 }

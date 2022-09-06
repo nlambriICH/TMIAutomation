@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TMIJunction</RootNamespace>
     <AssemblyName>TMIJunction.esapi</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkProfile />
@@ -25,10 +25,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <AllowedReferenceRelatedFileExtensions>
-          <!-- Prevent default XML documentation files to be copied to output-->
+      <!-- Prevent default XML documentation files to be copied to output-->
           .pdb
     </AllowedReferenceRelatedFileExtensions>
-	<PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>Library\release\</OutputPath>
@@ -58,12 +58,18 @@
     <Reference Include="Serilog.Sinks.File, Version=5.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>packages\Serilog.Sinks.File.5.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
     </Reference>
+    <Reference Include="Serilog.Sinks.RichTextBox.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>packages\Serilog.Sinks.RichTextBox.Wpf.1.1.0\lib\net462\Serilog.Sinks.RichTextBox.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="SerilogTraceListener, Version=0.0.0.0, Culture=neutral, PublicKeyToken=9398e41289d9b801, processorArchitecture=MSIL">
       <HintPath>packages\SerilogTraceListener.3.2.0\lib\net45\SerilogTraceListener.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
@@ -96,7 +102,6 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
-    <Compile Include="Helper\LoggerHelper.cs" />
     <Compile Include="Optimization\Calculation\Calculation.cs" />
     <Compile Include="Optimization\Calculation\PostCalculation.cs" />
     <Compile Include="Optimization\Calculation\PostOptimization.cs" />
@@ -178,8 +183,6 @@
   <ItemGroup>
     <Resource Include="Configuration\OptimizationOptions.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="PlanApproval\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
