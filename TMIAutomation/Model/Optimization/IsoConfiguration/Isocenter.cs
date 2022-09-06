@@ -27,7 +27,7 @@ namespace TMIAutomation
 			Rect3D rect = lowerPTVTotal.MeshGeometry.Bounds;
 			double isoStep = rect.SizeZ / 4;
 
-			logger.Information("Using isocenter step [mm]: {isoStep}", isoStep);
+			logger.Information("Using isocenter step [mm]: {isoStep}", Math.Round(isoStep, MidpointRounding.AwayFromZero));
 
 			// Isocenter positions in CC direction
 			List<VVector> isoPositions = new List<VVector>
@@ -63,7 +63,7 @@ namespace TMIAutomation
 			};
 
 			logger.Information("Overlap between fields same isocenter [mm]: {overlapSameIso}", 20);
-			logger.Information("Overlap between fields adjacent isocenters [mm]: {overlapAdjIso}", (int)isoStep * .2);
+			logger.Information("Overlap between fields adjacent isocenters [mm]: {overlapAdjIso}", Math.Round(isoStep * .2, MidpointRounding.AwayFromZero));
 
 			for (int i = 0; i < isoPositions.Count(); ++i)
 			{
