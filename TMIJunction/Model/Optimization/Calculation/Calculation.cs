@@ -20,7 +20,7 @@ namespace TMIJunction
 		public static void OptimizationSetup(this ExternalPlanSetup externalPlanSetup)
 		{
 			string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			string optOptionsPath = Path.Combine(assemblyDir, "..", "..", "Configuration", "OptimizationOptions.txt");
+			string optOptionsPath = Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
 			logger.Verbose("Reading optimization options from {optOptionsPath}", optOptionsPath);
 			foreach (string line in File.ReadLines(optOptionsPath).Skip(3))
 			{

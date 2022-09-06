@@ -102,19 +102,19 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
-    <Compile Include="Optimization\Calculation\Calculation.cs" />
-    <Compile Include="Optimization\Calculation\PostCalculation.cs" />
-    <Compile Include="Optimization\Calculation\PostOptimization.cs" />
-    <Compile Include="Optimization\IsoConfiguration\Isocenter.cs" />
-    <Compile Include="Optimization\Objectives\ObjectivesSetup.cs" />
-    <Compile Include="Optimization\Optimization.cs" />
-    <Compile Include="StructureCreation\ModelBase.cs" />
+    <Compile Include="Model\Optimization\Calculation\Calculation.cs" />
+    <Compile Include="Model\Optimization\Calculation\PostCalculation.cs" />
+    <Compile Include="Model\Optimization\Calculation\PostOptimization.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\Isocenter.cs" />
+    <Compile Include="Model\Optimization\Objectives\ObjectivesSetup.cs" />
+    <Compile Include="Model\Optimization\Optimization.cs" />
+    <Compile Include="Model\ModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StructureCreation\ControlStructures\UpperControl.cs" />
-    <Compile Include="StructureCreation\ControlStructures\LowerControl.cs" />
-    <Compile Include="StructureCreation\Junction\UpperJunction.cs" />
-    <Compile Include="StructureCreation\IStructure.cs" />
-    <Compile Include="StructureCreation\Junction\LowerJunction.cs" />
+    <Compile Include="Model\StructureCreation\ControlStructures\UpperControl.cs" />
+    <Compile Include="Model\StructureCreation\ControlStructures\LowerControl.cs" />
+    <Compile Include="Model\StructureCreation\Junction\UpperJunction.cs" />
+    <Compile Include="Model\StructureCreation\IStructure.cs" />
+    <Compile Include="Model\StructureCreation\Junction\LowerJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
@@ -185,4 +185,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>robocopy $(ProjectDir)Configuration $(TargetDir)Configuration /mir</PostBuildEvent>
+  </PropertyGroup>
 </Project>

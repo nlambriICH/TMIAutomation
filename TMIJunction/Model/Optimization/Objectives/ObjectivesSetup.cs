@@ -25,7 +25,7 @@ namespace TMIJunction
 		public static void AddPointObjectives(this OptimizationSetup optSetup, StructureSet ss)
 		{
 			string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			string pointObjPath = Path.Combine(assemblyDir, "..", "..", "Configuration", "PointOptimizationObjectives.txt");
+			string pointObjPath = Path.Combine(assemblyDir, "Configuration", "PointOptimizationObjectives.txt");
 			logger.Verbose("Reading PointObjectives from {pointObjPath}", pointObjPath);
 			foreach (string line in File.ReadLines(pointObjPath).Skip(3))
 			{
@@ -58,7 +58,7 @@ namespace TMIJunction
 		public static void AddEUDObjectives(this OptimizationSetup optSetup, StructureSet ss)
 		{
 			string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			string eudObjPath = Path.Combine(assemblyDir, "..", "..", "Configuration", "EUDOptimizationObjectives.txt");
+			string eudObjPath = Path.Combine(assemblyDir, "Configuration", "EUDOptimizationObjectives.txt");
 			logger.Verbose("Reading EUDObjectives from {pointObjPath}", eudObjPath);
 			foreach (var line in File.ReadLines(eudObjPath).Skip(3))
 			{

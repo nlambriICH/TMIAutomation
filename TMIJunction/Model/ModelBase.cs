@@ -26,10 +26,23 @@ namespace TMIJunction.StructureCreation
 			return this.esapiWorker.RunAsync(scriptContext =>
 			{
 				Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-				return targetCourse.PlanSetups.Where(p => p.Id.IndexOf(planType.ToString(), StringComparison.OrdinalIgnoreCase) >= 0)
-											  .OrderByDescending(p => p.CreationDateTime)
-											  .Select(s => s.Id)
-											  .ToList();
+				List<string> orderedPlans = new List<string>();
+				switch (planType)
+				{
+					case PlanType.Up:
+						orderedPlans = targetCourse.PlanSetups.OrderByDescending(p => p.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY).Volume)
+											.ThenByDescending(p => p.CreationDateTime)
+											.Select(s => s.Id)
+											.ToList();
+						break;
+					case PlanType.Down:
+						orderedPlans = targetCourse.PlanSetups.OrderBy(p => p.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY).Volume)
+											.ThenByDescending(p => p.CreationDateTime)
+											.Select(s => s.Id)
+											.ToList();
+						break;
+				}
+				return orderedPlans;
 			},
 			isWriteable: false);
 		}
