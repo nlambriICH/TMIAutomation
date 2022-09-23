@@ -7,7 +7,7 @@ using System.Windows.Input;
 using TMIAutomation.StructureCreation;
 using TMIAutomation.View;
 using System.Linq;
-using Serilog;
+using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation.ViewModel
 {
@@ -174,7 +174,7 @@ namespace TMIAutomation.ViewModel
 			MachineName = await this.modelBase.GetMachineNameAsync(this.selectedUpperPlanId);
 			LowerPlans = await lowerPlansTask;
 			LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
-				? await this.modelBase.GetPTVsFromSSAsync(this.upperPlans)
+				? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
 				: await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
 
 			Registrations = await registrationsTask;
@@ -192,7 +192,7 @@ namespace TMIAutomation.ViewModel
 			int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
 			pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
 
-			await this.modelBase.GenerateLowerPlanAsync(this.upperPlans);
+			await this.modelBase.GenerateLowerPlanAsync();
 			LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
 			try

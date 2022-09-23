@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
+using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation.StructureCreation
 {
@@ -30,14 +31,14 @@ namespace TMIAutomation.StructureCreation
 				switch (planType)
 				{
 					case PlanType.Up:
-						orderedPlans = targetCourse.PlanSetups.OrderByDescending(p => p.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY).Volume)
-											.ThenByDescending(p => p.CreationDateTime)
+						orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
+											.OrderByDescending(p => p.CreationDateTime)
 											.Select(s => s.Id)
 											.ToList();
 						break;
 					case PlanType.Down:
-						orderedPlans = targetCourse.PlanSetups.OrderBy(p => p.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY).Volume)
-											.ThenByDescending(p => p.CreationDateTime)
+						orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine)
+											.OrderByDescending(p => p.CreationDateTime)
 											.Select(s => s.Id)
 											.ToList();
 						break;
@@ -63,28 +64,32 @@ namespace TMIAutomation.StructureCreation
 			isWriteable: false);
 		}
 
-		public Task<List<string>> GetPTVsFromSSAsync(List<string> excludeSSOfPlanIds)
+		public Task<List<string>> GetPTVsFromImgOrientationAsync(PatientOrientation patientOrientation)
 		{
 			return this.esapiWorker.RunAsync(scriptContext =>
 			{
-				StructureSet targetSS = GetTargetStructureSet(scriptContext, excludeSSOfPlanIds);
-				return targetSS.Structures.Where(s => s.DicomType == "PTV")
-										  .OrderByDescending(s => s.Volume)
-										  .Select(s => s.Id)
-										  .ToList();
+				StructureSet targetSS = this.GetTargetStructureSet(scriptContext, patientOrientation);
+				return targetSS == null ? new List<string>()
+				: targetSS.Structures.Where(s => s.DicomType == "PTV")
+						 .OrderByDescending(s => s.Volume)
+						 .Select(s => s.Id)
+						 .ToList();
 			},
 			isWriteable: false);
 		}
 
-		private StructureSet GetTargetStructureSet(ScriptContext scriptContext, List<string> excludeSSOfPlanIds)
+		private StructureSet GetTargetStructureSet(ScriptContext scriptContext, PatientOrientation patientOrientation)
 		{
-			Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-			bool isOpenedSSToExclude = targetCourse.PlanSetups.Where(p => excludeSSOfPlanIds.Contains(p.Id))
-															  .Select(p => p.StructureSet)
-															  .Contains(scriptContext.StructureSet);
-			return scriptContext.StructureSet == null || isOpenedSSToExclude
-				? targetCourse.PlanSetups.Select(p => p.StructureSet).OrderBy(c => c.HistoryDateTime).Last()
-				: scriptContext.StructureSet;
+			if (scriptContext.StructureSet != null && scriptContext.StructureSet.Image.ImagingOrientation == patientOrientation)
+			{
+				return scriptContext.StructureSet;
+			}
+			else
+			{
+				return scriptContext.Patient.StructureSets.Where(ss => ss.Image.ImagingOrientation == patientOrientation)
+											  .OrderByDescending(ss => ss.HistoryDateTime)
+											  .FirstOrDefault();
+			}
 		}
 
 		public Task<List<string>> GetRegistrationsAsync()
@@ -110,12 +115,12 @@ namespace TMIAutomation.StructureCreation
 			return upperControl.CreateAsync(progress, message);
 		}
 
-		public Task GenerateLowerPlanAsync(List<string> excludeSSOfPlanIds)
+		public Task GenerateLowerPlanAsync()
 		{
 			return this.esapiWorker.RunAsync(scriptContext =>
 			{
 				Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-				StructureSet targetSS = GetTargetStructureSet(scriptContext, excludeSSOfPlanIds);
+				StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.FeetFirstSupine);
 
 				ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
 				int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIdownAuto"));
