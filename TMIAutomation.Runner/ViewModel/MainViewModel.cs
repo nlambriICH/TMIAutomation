@@ -8,12 +8,12 @@ namespace TMIAutomation.Runner
 {
     internal class MainViewModel : ViewModelBase
     {
-        private readonly ScriptRunner pluginRunner;
+        private readonly ScriptRunner scriptRunner;
 
-        public MainViewModel(ScriptRunner pluginRunner)
+        public MainViewModel(ScriptRunner scriptRunner)
         {
-            this.pluginRunner = pluginRunner;
-            Recents = pluginRunner.GetRecentEntries().Reverse().ToList();
+            this.scriptRunner = scriptRunner;
+            Recents = scriptRunner.GetRecentEntries().Reverse().ToList();
         }
 
         private string searchText;
@@ -67,7 +67,7 @@ namespace TMIAutomation.Runner
 
         private void SearchPatient()
         {
-            PatientMatches = pluginRunner.FindPatientMatches(SearchText);
+            PatientMatches = scriptRunner.FindPatientMatches(SearchText);
 
             SelectedPatientMatch = null;
             PlansAndPlanSums = null;
@@ -75,7 +75,7 @@ namespace TMIAutomation.Runner
 
         private void OpenPatient()
         {
-            PlanOrPlanSum[] plansAndPlanSums = pluginRunner.GetPlansAndPlanSumsOfPatient(SelectedPatientMatch?.Id);
+            PlanOrPlanSum[] plansAndPlanSums = scriptRunner.GetPlansAndPlanSumsOfPatient(SelectedPatientMatch?.Id);
             PlansAndPlanSums = plansAndPlanSums?.Select(CreatePlanOrPlanSumViewModel).ToList();
         }
 
@@ -127,12 +127,12 @@ namespace TMIAutomation.Runner
 
         private void Run()
         {
-            pluginRunner.RunScript(SelectedPatientMatch?.Id, GetPlansAndPlanSumsInScope(), GetActivePlan());
+            scriptRunner.RunScript(SelectedPatientMatch?.Id, GetPlansAndPlanSumsInScope(), GetActivePlan());
 
             IList<RecentEntry> recents = Recents;
             RecentEntry selectedRecent = SelectedRecent;
 
-            Recents = pluginRunner.GetRecentEntries().Reverse().ToList();
+            Recents = scriptRunner.GetRecentEntries().Reverse().ToList();
 
             // If recents changed, it means a new recent was added, so select it as the recent;
             // otherwise, select the previously selected recent

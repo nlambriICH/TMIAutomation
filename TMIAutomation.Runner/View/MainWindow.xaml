@@ -5,22 +5,24 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:tmir="clr-namespace:TMIAutomation.Runner"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        d:DataContext="{d:DesignInstance Type=tmir:MainViewModel}"
         Title="TMIAutomation: ScriptRunner"
         Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
         WindowStartupLocation="CenterScreen"
         Width="640" Height="640">
     
     <Window.Resources>
-        <tmir:UnderscoreConverter x:Key="UnderscoreConverter" />
-        <tmir:PlansAndPlanSumsConverter x:Key="PlansAndPlanSumsConverter" />
+        <tmir:UnderscoreConverter x:Key="UnderscoreConverter"/>
+        <tmir:PlansAndPlanSumsConverter x:Key="PlansAndPlanSumsConverter"/>
 
         <!-- Sorted and grouped plans and plan sums -->
         <CollectionViewSource x:Key="PlansAndPlanSums" Source="{Binding PlansAndPlanSums}">
             <CollectionViewSource.SortDescriptions>
-                <cm:SortDescription PropertyName="Id" />
+                <cm:SortDescription PropertyName="Id"/>
             </CollectionViewSource.SortDescriptions>
             <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="CourseId" />
+                <PropertyGroupDescription PropertyName="CourseId"/>
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
 
@@ -29,8 +31,7 @@
             <TextBlock
                 Text="{Binding Name, StringFormat=Course: \{0\}, Converter={StaticResource UnderscoreConverter}}"
                 FontWeight="Bold"
-                Opacity="0.6"
-                />
+                Opacity="0.6"/>
         </DataTemplate>
 
         <!-- Style for course group container -->
@@ -50,36 +51,28 @@
         <BooleanToVisibilityConverter x:Key="VisibilityConverter" />
     </Window.Resources>
 
-    <Grid
-        FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}"
-        Margin="10"
-        >
+    <Grid FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}"
+          Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"   />
+            <RowDefinition Height="2*"/>
             <!-- Patient and plan list boxes-->
-            <RowDefinition Height="1*"   />
+            <RowDefinition Height="1*"/>
             <!-- Recent choices -->
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
             <!-- Run and exit buttons -->
         </Grid.RowDefinitions>
 
         <!-- Patient and plan list boxes -->
-        <UniformGrid
-            Grid.Row="0"
-            Columns="2"
-            >
+        <UniformGrid Grid.Row="0"
+                     Columns="2">
             <DockPanel Margin="0,0,5,0">
-                <TextBlock
-                    DockPanel.Dock="Top"
-                    Text="Patient (search by last name, first name, or ID):"
-                    />
+                <TextBlock DockPanel.Dock="Top"
+                           Text="Patient (search by last name, first name, or ID):"/>
                 <!-- Search box -->
-                <TextBox
-                    DockPanel.Dock="Top"
-                    Name="SearchTextBox"
-                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
-                    Margin="0,5,0,0"
-                    >
+                <TextBox DockPanel.Dock="Top"
+                         Name="SearchTextBox"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                         Margin="0,5,0,0">
                     <!-- Call the SearchPatientCommand when the SearchText is updated in the view model -->
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SourceUpdated">
@@ -88,12 +81,10 @@
                     </i:Interaction.Triggers>
                 </TextBox>
                 <!-- Patient matches -->
-                <ListBox
-                    DockPanel.Dock="Top"
-                    ItemsSource="{Binding PatientMatches}"
-                    SelectedItem="{Binding SelectedPatientMatch, NotifyOnSourceUpdated=True}"
-                    Margin="0,5,0,0"
-                    >
+                <ListBox DockPanel.Dock="Top"
+                         ItemsSource="{Binding PatientMatches}"
+                         SelectedItem="{Binding SelectedPatientMatch, NotifyOnSourceUpdated=True}"
+                         Margin="0,5,0,0">
                     <!-- Call the OpenPatientCommand when the SelectedItem is updated in the view model -->
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SourceUpdated">
@@ -111,37 +102,26 @@
             </DockPanel>
 
             <DockPanel Margin="5,0,0,0">
-                <DockPanel
-                    DockPanel.Dock="Top"
-                    HorizontalAlignment="Stretch"
-                    >
-                    <TextBlock
-                        Text="Plans and plan sums in scope:"
-                        />
-                    <TextBlock
-                        Text="Active plan"
-                        HorizontalAlignment="Right"
-                        />
+                <DockPanel DockPanel.Dock="Top"
+                           HorizontalAlignment="Stretch">
+                    <TextBlock Text="Plans and plan sums in scope:"/>
+                    <TextBlock Text="Active plan"
+                               HorizontalAlignment="Right"/>
                 </DockPanel>
-                <TextBlock
-                    DockPanel.Dock="Bottom"
-                    Text="Plan sums are shown in bold."
-                    Margin="0,5,0,0"
-                    />
+                <TextBlock DockPanel.Dock="Bottom"
+                           Text="Plan sums are shown in bold."
+                           Margin="0,5,0,0"/>
                 <!-- Plans and plan sums for the selected patient -->
-                <ListBox
-                    DockPanel.Dock="Top"
-                    ItemsSource="{Binding Source={StaticResource PlansAndPlanSums}}"
-                    SelectionChanged="PlansAndPlanSums_OnSelectionChanged"
-                    Margin="0,5,0,0"
-                    >
+                <ListBox DockPanel.Dock="Top"
+                         ItemsSource="{Binding Source={StaticResource PlansAndPlanSums}}"
+                         SelectionChanged="PlansAndPlanSums_OnSelectionChanged"
+                         Margin="0,5,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <DockPanel>
                                 <CheckBox
                                     Content="{Binding Id, Converter={StaticResource UnderscoreConverter}}"
-                                    IsChecked="{Binding IsInScope}"
-                                    >
+                                    IsChecked="{Binding IsInScope}">
                                     <CheckBox.Style>
                                         <Style TargetType="CheckBox">
                                             <Setter Property="FontWeight" Value="Normal" />
@@ -153,20 +133,17 @@
                                         </Style>
                                     </CheckBox.Style>
                                 </CheckBox>
-                                <RadioButton
-                                    IsChecked="{Binding IsActive}"
-                                    GroupName="Active"
-                                    HorizontalAlignment="Right"
-                                    Visibility="{Binding CanBeActive, Converter={StaticResource VisibilityConverter}}"
-                                    />
+                                <RadioButton IsChecked="{Binding IsActive}"
+                                             GroupName="Active"
+                                             HorizontalAlignment="Right"
+                                             Visibility="{Binding CanBeActive, Converter={StaticResource VisibilityConverter}}"
+                                             />
                             </DockPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.GroupStyle>
-                        <GroupStyle
-                            HeaderTemplate="{StaticResource CourseHeaderTemplate}"
-                            ContainerStyle="{StaticResource CourseContainerStyle}"
-                            />
+                        <GroupStyle HeaderTemplate="{StaticResource CourseHeaderTemplate}"
+                                    ContainerStyle="{StaticResource CourseContainerStyle}"/>
                     </ListBox.GroupStyle>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
@@ -178,48 +155,33 @@
         </UniformGrid>
 
         <!-- Recent choices -->
-        <DockPanel
-            Grid.Row="1"
-            Margin="0,10,0,0"
-            >
-            <TextBlock
-                DockPanel.Dock="Top"
-                Text="Recent choices (click to open, double-click to run):"
-                />
-            <DataGrid
-                ItemsSource="{Binding Recents}"
-                SelectedItem="{Binding SelectedRecent, NotifyOnSourceUpdated=True}"
-                AutoGenerateColumns="False"
-                IsReadOnly="True"
-                SelectionUnit="FullRow"
-                HeadersVisibility="Column"
-                GridLinesVisibility="None"
-                Background="White"
-                Margin="0,5,0,0"
-                >
+        <DockPanel Grid.Row="1"
+                   Margin="0,10,0,0">
+            <TextBlock DockPanel.Dock="Top"
+                       Text="Recent choices (click to open, double-click to run):"/>
+            <DataGrid ItemsSource="{Binding Recents}"
+                      SelectedItem="{Binding SelectedRecent, NotifyOnSourceUpdated=True}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      SelectionUnit="FullRow"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="None"
+                      Background="White"
+                      Margin="0,5,0,0">
 
                 <DataGrid.Columns>
                     <!-- Patient ID -->
-                    <DataGridTextColumn
-                        Header="Patient ID1"
-                        Binding="{Binding PatientId}"
-                        Width="*"
-                        />
-
+                    <DataGridTextColumn Header="Patient ID1"
+                                        Binding="{Binding PatientId}"
+                                        Width="*"/>
                     <!-- PlanningItems in scope -->
-                    <DataGridTextColumn
-                        Header="PlanningItem(s) in Scope"
-                        Binding="{Binding PlansAndPlanSumsInScope,
-                            Converter={StaticResource PlansAndPlanSumsConverter}}"
-                        Width="2*"
-                        />
-
+                    <DataGridTextColumn Header="PlanningItem(s) in Scope"
+                                        Binding="{Binding PlansAndPlanSumsInScope, Converter={StaticResource PlansAndPlanSumsConverter}}"
+                                        Width="2*"/>
                     <!-- Active PlanSetup -->
-                    <DataGridTextColumn
-                        Header="Active PlanSetup"
-                        Binding="{Binding ActivePlan.Id}"
-                        Width="*"
-                        />
+                    <DataGridTextColumn Header="Active PlanSetup"
+                                        Binding="{Binding ActivePlan.Id}"
+                                        Width="*"/>
                 </DataGrid.Columns>
 
                 <!-- Remove selection box around individual cells -->
@@ -240,22 +202,17 @@
                         <i:InvokeCommandAction Command="{Binding RunCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-
             </DataGrid>
         </DockPanel>
 
         <!-- Run and exit buttons -->
-        <StackPanel
-            Grid.Row="2"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right"
-            Margin="0,10,0,0"
-            >
-            <Button
-                Content="Run"
-                Command="{Binding RunCommand}"
-                Width="75"
-                />
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,10,0,0">
+            <Button Content="Run"
+                    Command="{Binding RunCommand}"
+                    Width="75"/>
         </StackPanel>
     </Grid>
 </Window>
