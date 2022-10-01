@@ -10,14 +10,14 @@ namespace TMIAutomation.Async
 	/// </summary>
 	public class EsapiWorker
 	{
-		private readonly ScriptContext scriptContext;
+		private readonly PluginScriptContext scriptContext;
 		private readonly CurrentThreadWorker currentThreadWorker;
 
 		/// <summary>
-		/// Initializes an instance of this class with the given ESAPI ScriptContext.
+		/// Initializes an instance of this class with the given PluginScriptContext.
 		/// </summary>
 		/// <param name="scriptContext"></param>
-		public EsapiWorker(ScriptContext scriptContext)
+		public EsapiWorker(PluginScriptContext scriptContext)
 		{
 			this.scriptContext = scriptContext;
 			this.currentThreadWorker = new CurrentThreadWorker();
@@ -36,7 +36,7 @@ namespace TMIAutomation.Async
 		/// As a workaround, when isWriteable is true this method waits 500ms to give the Eclipse's thread the time
 		/// to "commit" the changes to the data model
 		/// </remarks>
-		public Task RunAsync(Action<ScriptContext> a, bool isWriteable = true)
+		public Task RunAsync(Action<PluginScriptContext> a, bool isWriteable = true)
 		{
 			return this.currentThreadWorker.RunAsync(() => a(scriptContext))
 				.ContinueWith(_ =>
@@ -62,7 +62,7 @@ namespace TMIAutomation.Async
 		/// As a workaround, when isWriteable is true this method waits 500ms to give the Eclipse's thread the time
 		/// to "commit" the changes to the data model
 		/// </remarks>
-		public Task<T> RunAsync<T>(Func<ScriptContext, T> f, bool isWriteable = true)
+		public Task<T> RunAsync<T>(Func<PluginScriptContext, T> f, bool isWriteable = true)
 		{
 			return this.currentThreadWorker.RunAsync(() => f(scriptContext))
 				.ContinueWith(t =>

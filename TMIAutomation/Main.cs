@@ -8,6 +8,7 @@ using TMIAutomation.ViewModel;
 using TMIAutomation.View;
 using System.Windows.Forms;
 using System.Reflection;
+using TMIAutomation;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
@@ -40,6 +41,11 @@ namespace VMS.TPS
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public void Execute(ScriptContext context /*, Window window, ScriptEnvironment environment*/)
+		{
+			Run(new PluginScriptContext(context));
+		}
+
+		public void Run(PluginScriptContext context)
 		{
 			// The ESAPI worker needs to be created in the main thread
 			EsapiWorker esapiWorker = new EsapiWorker(context);

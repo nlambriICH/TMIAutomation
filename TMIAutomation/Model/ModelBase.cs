@@ -78,7 +78,7 @@ namespace TMIAutomation.StructureCreation
 			isWriteable: false);
 		}
 
-		private StructureSet GetTargetStructureSet(ScriptContext scriptContext, PatientOrientation patientOrientation)
+		private StructureSet GetTargetStructureSet(PluginScriptContext scriptContext, PatientOrientation patientOrientation)
 		{
 			if (scriptContext.StructureSet != null && scriptContext.StructureSet.Image.ImagingOrientation == patientOrientation)
 			{
