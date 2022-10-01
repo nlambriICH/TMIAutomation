@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:uc="clr-namespace:TMIAutomation.View"
-        xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel;assembly=TMIJunction.esapi"
+        xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel;assembly=TMIAutomation.esapi"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         mc:Ignorable="d"
         Title="ESAPI" Height="550" Width="800"
@@ -35,8 +35,7 @@
                    FontSize="22"
                    Style="{StaticResource TextBlockTheme}"/>
 
-        <TabControl Grid.Row="1"
-                    Background="#272537">
+        <TabControl Grid.Row="1">
 
             <TabItem Width="100"
                      Background="#FDFDFD"
