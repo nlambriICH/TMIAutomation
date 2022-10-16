@@ -9,22 +9,22 @@ namespace TMIAutomation.ViewModel
         private double progress;
         public double Progress
         {
-            get { return progress; }
-            set { Set(ref progress, value); }
+            get => progress;
+            set => Set(ref progress, value);
         }
 
         private string message;
         public string Message
         {
-            get { return message; }
-            set { Set(ref message, value); }
+            get => message;
+            set => Set(ref message, value);
         }
 
         private string windowTitle;
         public string WindowTitle
         {
-            get { return windowTitle; }
-            set { Set(ref windowTitle, value); }
+            get => windowTitle;
+            set => Set(ref windowTitle, value);
         }
 
         public int NumOperations { get; set; }

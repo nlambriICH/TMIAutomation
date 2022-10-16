@@ -14,7 +14,7 @@ namespace TMIAutomation.ViewModel
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
-            get { return upperPlans; }
+            get => upperPlans;
             set
             {
                 Set(ref upperPlans, value);
@@ -25,7 +25,7 @@ namespace TMIAutomation.ViewModel
         private string selectedPlanId;
         public string SelectedPlanId
         {
-            get { return selectedPlanId; }
+            get => selectedPlanId;
             set
             {
                 if (selectedPlanId != value)
@@ -39,7 +39,7 @@ namespace TMIAutomation.ViewModel
         private List<string> upperPTVs;
         public List<string> UpperPTVs
         {
-            get { return upperPTVs; }
+            get => upperPTVs;
             set
             {
                 Set(ref upperPTVs, value);
@@ -50,22 +50,22 @@ namespace TMIAutomation.ViewModel
         private string selectedPTVId;
         public string SelectedPTVId
         {
-            get { return selectedPTVId; }
-            set { Set(ref selectedPTVId, value); }
+            get => selectedPTVId;
+            set => Set(ref selectedPTVId, value);
         }
 
         private bool isJunctionChecked;
         public bool IsJunctionChecked
         {
-            get { return isJunctionChecked; }
-            set { Set(ref isJunctionChecked, value); }
+            get => isJunctionChecked;
+            set => Set(ref isJunctionChecked, value);
         }
 
         private bool isControlChecked;
         public bool IsControlChecked
         {
-            get { return isControlChecked; }
-            set { Set(ref isControlChecked, value); }
+            get => isControlChecked;
+            set => Set(ref isControlChecked, value);
         }
 
         private readonly ModelBase modelBase;
@@ -75,8 +75,8 @@ namespace TMIAutomation.ViewModel
         private double progress;
         public double Progress
         {
-            get { return progress; }
-            set { Set(ref progress, value); }
+            get => progress;
+            set => Set(ref progress, value);
         }
 
         public UpperViewModel(ModelBase modelBase)

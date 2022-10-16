@@ -10,9 +10,7 @@ namespace TMIAutomation.Runner
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string s)
-                return s.Replace("_", "__");
-            return null;
+            return value is string s ? s.Replace("_", "__") : null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

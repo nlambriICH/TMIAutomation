@@ -16,7 +16,7 @@ namespace TMIAutomation.ViewModel
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
-            get { return upperPlans; }
+            get => upperPlans;
             set
             {
                 Set(ref upperPlans, value);
@@ -27,7 +27,7 @@ namespace TMIAutomation.ViewModel
         private string selectedUpperPlanId;
         public string SelectedUpperPlanId
         {
-            get { return selectedUpperPlanId; }
+            get => selectedUpperPlanId;
             set
             {
                 if (selectedUpperPlanId != value)
@@ -40,7 +40,7 @@ namespace TMIAutomation.ViewModel
         private List<string> lowerPTVs;
         public List<string> LowerPTVs
         {
-            get { return lowerPTVs; }
+            get => lowerPTVs;
             set
             {
                 Set(ref lowerPTVs, value);
@@ -51,7 +51,7 @@ namespace TMIAutomation.ViewModel
         private string selectedLowerPTVId;
         public string SelectedLowerPTVId
         {
-            get { return selectedLowerPTVId; }
+            get => selectedLowerPTVId;
             set
             {
                 if (selectedLowerPTVId != value)
@@ -65,7 +65,7 @@ namespace TMIAutomation.ViewModel
         public List<string> Registrations
 
         {
-            get { return registrations; }
+            get => registrations;
             set
             {
                 Set(ref registrations, value);
@@ -76,7 +76,7 @@ namespace TMIAutomation.ViewModel
         private string selectedRegistrationId;
         public string SelectedRegistrationId
         {
-            get { return selectedUpperPlanId; }
+            get => selectedUpperPlanId;
             set
             {
                 if (selectedRegistrationId != value)
@@ -89,7 +89,7 @@ namespace TMIAutomation.ViewModel
         private string machineName;
         public string MachineName
         {
-            get { return machineName; }
+            get => machineName;
             set
             {
                 if (machineName != value)
@@ -102,7 +102,7 @@ namespace TMIAutomation.ViewModel
         private List<string> lowerPlans;
         public List<string> LowerPlans
         {
-            get { return lowerPlans; }
+            get => lowerPlans;
             set
             {
                 Set(ref lowerPlans, value);
@@ -113,7 +113,7 @@ namespace TMIAutomation.ViewModel
         private string selectedLowerPlanId;
         public string SelectedLowerPlanId
         {
-            get { return selectedLowerPlanId; }
+            get => selectedLowerPlanId;
             set
             {
                 if (selectedLowerPlanId != value)
@@ -126,22 +126,22 @@ namespace TMIAutomation.ViewModel
         private bool isJunctionChecked;
         public bool IsJunctionChecked
         {
-            get { return isJunctionChecked; }
-            set { Set(ref isJunctionChecked, value); }
+            get => isJunctionChecked;
+            set => Set(ref isJunctionChecked, value);
         }
 
         private bool isControlChecked;
         public bool IsControlChecked
         {
-            get { return isControlChecked; }
-            set { Set(ref isControlChecked, value); }
+            get => isControlChecked;
+            set => Set(ref isControlChecked, value);
         }
 
         private bool isOptimizationChecked;
         public bool IsOptimizationChecked
         {
-            get { return isOptimizationChecked; }
-            set { Set(ref isOptimizationChecked, value); }
+            get => isOptimizationChecked;
+            set => Set(ref isOptimizationChecked, value);
         }
 
         private readonly ModelBase modelBase;
@@ -150,8 +150,8 @@ namespace TMIAutomation.ViewModel
         private double progress;
         public double Progress
         {
-            get { return progress; }
-            set { Set(ref progress, value); }
+            get => progress;
+            set => Set(ref progress, value);
         }
 
         public LowerViewModel(ModelBase modelBase)
