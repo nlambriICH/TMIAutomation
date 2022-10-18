@@ -5,6 +5,8 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:tmir="clr-namespace:TMIAutomation.Runner"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         d:DataContext="{d:DesignInstance Type=tmir:MainViewModel}"
         Title="TMIAutomation: ScriptRunner"
