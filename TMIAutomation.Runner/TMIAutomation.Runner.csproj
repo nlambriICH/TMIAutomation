@@ -145,4 +145,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>robocopy $(SolutionDir)Configuration $(TargetDir)Configuration /mir</PostBuildEvent>
+  </PropertyGroup>
 </Project>
