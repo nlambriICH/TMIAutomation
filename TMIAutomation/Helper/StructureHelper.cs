@@ -8,8 +8,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-
-    static class StructureHelper
+    public static class StructureHelper
     {
         public const string PTV_JUNCTION25 = "PTV_J25%";
         public const string PTV_JUNCTION50 = "PTV_J50%";

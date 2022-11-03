@@ -39,7 +39,7 @@ namespace TMIAutomation.Tests
             return this;
         }
 
-        public void RunTests()
+        public static void RunTests()
         {
             foreach (KeyValuePair<object, List<MethodInfo>> factTests in DiscoveredTests.FactTests)
             {
@@ -80,7 +80,7 @@ namespace TMIAutomation.Tests
                     MemberDataAttribute memberDataAttribute = (MemberDataAttribute)theoryTest.GetCustomAttribute(typeof(MemberDataAttribute));
                     if (memberDataAttribute != null)
                     {
-                        object testDataGenerator = testInstance.GetType().GetMethod(memberDataAttribute.MemberName).Invoke(this, null);
+                        object testDataGenerator = testInstance.GetType().GetMethod(memberDataAttribute.MemberName).Invoke(null, null);
                         if (testDataGenerator is IEnumerable<object[]> dataItems)
                         {
                             foreach (object[] data in dataItems)

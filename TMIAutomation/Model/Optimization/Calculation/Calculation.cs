@@ -8,7 +8,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    static class Calculation
+    public static class Calculation
     {
         private static string OPTIMIZATION_ALGORITHM;
         private static string DOSE_CALCULATION_ALGORITHM;
@@ -17,7 +17,7 @@ namespace TMIAutomation
         private static string NUMBER_OF_FRACTIONS;
         private static readonly ILogger logger = Log.ForContext(typeof(Calculation));
 
-        public static void OptimizationSetup(this ExternalPlanSetup externalPlanSetup)
+        public static void SetupOptimization(this ExternalPlanSetup externalPlanSetup)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string optOptionsPath = Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");

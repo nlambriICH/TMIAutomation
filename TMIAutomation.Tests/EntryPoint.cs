@@ -2,9 +2,11 @@
 using TMIAutomation.Async;
 using TMIAutomation.StructureCreation;
 using VMS.TPS.Common.Model.API;
-using TMIAutomation.Tests.ReadOnlyTests;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+
+[assembly: ESAPIScript(IsWriteable = true)]
 
 namespace TMIAutomation.Tests
 {
@@ -19,15 +21,27 @@ namespace TMIAutomation.Tests
             EclipseApp = Application.CreateApplication();
             string patientID = testData["PatientID"];
             Patient patient = EclipseApp.OpenPatientById(patientID);
+            patient.BeginModifications();
             PluginScriptContext scriptContext = new PluginScriptContext
             {
-                Patient = patient
+                Patient = patient,
+                Course = patient.Courses.FirstOrDefault(c => c.Id == testData["CourseID"]),
+                PlanSetup = patient.Courses.SelectMany(c => c.PlanSetups).FirstOrDefault(ps => ps.Id == testData["PlanID"])
             };
             EsapiWorker esapiWorker = new EsapiWorker(scriptContext);
 
-            TestBuilder.Create()
-                .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
-                .RunTests();
+            try
+            {
+                TestBuilder.Create()
+                        .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
+                        .Add<ObjectiveSetupTests>(scriptContext.PlanSetup.OptimizationSetup, scriptContext)
+                        .Add<CalculationTests>(scriptContext.PlanSetup, scriptContext);
+                TestBase.RunTests();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Test execution failed.\n{e}");
+            }
         }
 
         private static Dictionary<string, string> InitializeTestData()
@@ -36,7 +50,7 @@ namespace TMIAutomation.Tests
             /* Read from txt file sensitive data
             * This file is added to .gitignore to exclude it from commits
             **/
-            foreach (string line in File.ReadLines("SensitiveData.txt"))
+            foreach (string line in File.ReadLines(Path.Combine("Configuration", "SensitiveData.txt")))
             {
                 if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
                 string[] settingValue = line.Split(new char[] { '\t' }, 2);

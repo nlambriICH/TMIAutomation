@@ -363,4 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Custom files
-TMIAutomation.Tests/SensitiveData.txt
+TMIAutomation.Tests/Configuration/SensitiveData.txt

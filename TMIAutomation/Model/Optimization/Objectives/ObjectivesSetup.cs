@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +8,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    static public class ObjectivesSetup
+    public static class ObjectivesSetup
     {
         private static readonly ILogger logger = Log.ForContext(typeof(ObjectivesSetup));
 

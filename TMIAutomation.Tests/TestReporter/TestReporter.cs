@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace TMIAutomation.Tests
@@ -19,7 +20,15 @@ namespace TMIAutomation.Tests
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Failed {testInstance.GetType()}:{testMethod.Name}");
             Console.ResetColor();
-            Console.WriteLine(e.InnerException.Message);
+
+            List<string> messages = new List<string>();
+            do
+            {
+                messages.Add(e.Message);
+                e = e.InnerException;
+            }
+            while (e != null);
+            Console.WriteLine(string.Join("\n", messages));
             FailedTests++;
         }
     }

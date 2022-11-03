@@ -199,7 +199,7 @@ namespace TMIAutomation.ViewModel
             {
                 if (this.isJunctionChecked)
                 {
-                    bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValid(this.selectedUpperPlanId);
+                    bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValidAsync(this.selectedUpperPlanId);
                     if (!isUpperPlanDoseValid)
                     {
                         throw new InvalidOperationException($"The selected upper-body plan {this.selectedUpperPlanId} has invalid dose." +

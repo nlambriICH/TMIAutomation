@@ -43,12 +43,14 @@
     <Compile Include="Attributes\MemberDataAttribute.cs" />
     <Compile Include="Attributes\TheoryAttribute.cs" />
     <Compile Include="EntryPoint.cs" />
+    <Compile Include="Tests\CalculationTests.cs" />
+    <Compile Include="Tests\ObjectiveSetupTests.cs" />
     <Compile Include="TestRunner\ITestBase.cs" />
     <Compile Include="TestRunner\TestBase.cs" />
-    <Compile Include="ReadOnlyTests\ModelBaseTests.cs" />
-    <Compile Include="TestRunner\TestBuilder.cs" />
+    <Compile Include="Tests\ModelBaseTests.cs" />
+    <Compile Include="TestBuilder\TestBuilder.cs" />
     <Compile Include="TestRunner\DiscoveredTests.cs" />
-    <Compile Include="TestRunner\TestReporter.cs" />
+    <Compile Include="TestReporter\TestReporter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64">
@@ -70,10 +72,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SensitiveData.txt" />
+    <Content Include="Configuration\EUDOptimizationObjectives.txt" />
+    <Content Include="Configuration\OptimizationOptions.txt" />
+    <Content Include="Configuration\PointOptimizationObjectives.txt" />
+    <Content Include="Configuration\SensitiveData.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy $(ProjectDir) $(TargetDir) SensitiveData.txt</PostBuildEvent>
+    <PostBuildEvent>robocopy $(ProjectDir)Configuration $(TargetDir)Configuration /mir</PostBuildEvent>
   </PropertyGroup>
 </Project>
