@@ -8,8 +8,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-
-    static class StructureHelper
+    public static class StructureHelper
     {
         public const string PTV_JUNCTION25 = "PTV_J25%";
         public const string PTV_JUNCTION50 = "PTV_J50%";
@@ -152,23 +151,6 @@ namespace TMIAutomation
             message.Report("Removing small contours from Body_Free_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {BodyFree}", BODY_FREE);
             ss.RemoveSmallContoursFromStructure(bodyFree, message);
-        }
-
-        private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure)
-        {
-            foreach (int slice in ss.GetStructureSlices(structure))
-            {
-                foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
-                {
-                    Structure removeSmall = ss.AddStructure("CONTROL", "tempRemoveSmall");
-                    removeSmall.AddContourOnImagePlane(contour, slice);
-                    if (removeSmall.Volume < 0.5 * (ss.Image.ZRes / 10))
-                    {
-                        structure.SubtractContourOnImagePlane(contour, slice);
-                    }
-                    ss.RemoveStructure(removeSmall);
-                }
-            }
         }
 
         private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure, IProgress<string> message)

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMIAutomation.Runner", "..\
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6} = {29868CDC-424E-4E86-974E-635A1FBFD3D6}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMIAutomation.Tests", "..\TMIAutomation.Tests\TMIAutomation.Tests.csproj", "{BDCE0C89-6913-4AE2-973B-F15DC6851F88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -26,8 +28,10 @@ Global
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Release|x64.ActiveCfg = Release|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Release|x64.Build.0 = Release|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug|x64.ActiveCfg = Debug|x64
-		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug|x64.Build.0 = Debug|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Release|x64.ActiveCfg = Release|x64
+		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug|x64.ActiveCfg = Debug|x64
+		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug|x64.Build.0 = Debug|x64
+		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

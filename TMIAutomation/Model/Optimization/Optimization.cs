@@ -34,7 +34,7 @@ namespace TMIAutomation
                 message.Report("Placing isocenters...");
                 lowerPlan.SetIsocenters(this.machineName);
 
-                lowerPlan.OptimizationSetup(); // must set dose prescription before adding objectives
+                lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
 
                 OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
                 StructureSet lowerSS = lowerPlan.StructureSet;
