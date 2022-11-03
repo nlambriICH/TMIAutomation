@@ -24,44 +24,45 @@ namespace TMIAutomation.StructureCreation
 
         public Task<List<string>> GetPlansAsync(PlanType planType)
         {
-            return this.esapiWorker.RunAsync(scriptContext =>
+            return this.esapiWorker.RunAsync(scriptContext => GetPlans(scriptContext, planType), isWriteable: false);
+        }
+
+        public List<string> GetPlans(PluginScriptContext scriptContext, PlanType planType)
+        {
+            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            List<string> orderedPlans = new List<string>();
+            switch (planType)
             {
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                List<string> orderedPlans = new List<string>();
-                switch (planType)
-                {
-                    case PlanType.Up:
-                        orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
-                                            .OrderByDescending(p => p.CreationDateTime)
-                                            .Select(s => s.Id)
-                                            .ToList();
-                        break;
-                    case PlanType.Down:
-                        orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine)
-                                            .OrderByDescending(p => p.CreationDateTime)
-                                            .Select(s => s.Id)
-                                            .ToList();
-                        break;
-                }
-                return orderedPlans;
-            },
-            isWriteable: false);
+                case PlanType.Up:
+                    orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
+                                        .OrderByDescending(p => p.CreationDateTime)
+                                        .Select(s => s.Id)
+                                        .ToList();
+                    break;
+                case PlanType.Down:
+                    orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine)
+                                        .OrderByDescending(p => p.CreationDateTime)
+                                        .Select(s => s.Id)
+                                        .ToList();
+                    break;
+            }
+            return orderedPlans;
         }
 
         public Task<List<string>> GetPTVsFromPlanAsync(string planId)
         {
-            return this.esapiWorker.RunAsync(scriptContext =>
-            {
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
-                PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-                return selectedPlan == null ? new List<string>()
-                : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
-                                                      .OrderByDescending(s => s.Volume)
-                                                      .Select(s => s.Id)
-                                                      .ToList();
+            return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromPlan(scriptContext, planId), isWriteable: false);
+        }
 
-            },
-            isWriteable: false);
+        public List<string> GetPTVsFromPlan(PluginScriptContext scriptContext, string planId)
+        {
+            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
+            return selectedPlan == null ? new List<string>()
+            : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
+                                                  .OrderByDescending(s => s.Volume)
+                                                  .Select(s => s.Id)
+                                                  .ToList();
         }
 
         public Task<List<string>> GetPTVsFromImgOrientationAsync(PatientOrientation patientOrientation)

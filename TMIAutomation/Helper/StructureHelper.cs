@@ -154,23 +154,6 @@ namespace TMIAutomation
             ss.RemoveSmallContoursFromStructure(bodyFree, message);
         }
 
-        private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure)
-        {
-            foreach (int slice in ss.GetStructureSlices(structure))
-            {
-                foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
-                {
-                    Structure removeSmall = ss.AddStructure("CONTROL", "tempRemoveSmall");
-                    removeSmall.AddContourOnImagePlane(contour, slice);
-                    if (removeSmall.Volume < 0.5 * (ss.Image.ZRes / 10))
-                    {
-                        structure.SubtractContourOnImagePlane(contour, slice);
-                    }
-                    ss.RemoveStructure(removeSmall);
-                }
-            }
-        }
-
         private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure, IProgress<string> message)
         {
             List<int> structureSlices = ss.GetStructureSlices(structure).ToList();
