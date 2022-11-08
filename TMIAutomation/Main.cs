@@ -27,7 +27,7 @@ namespace VMS.TPS
 #if DEBUG
                 .MinimumLevel.Verbose()
 #else
-				.MinimumLevel.Debug()
+                .MinimumLevel.Debug()
 #endif
                 .WriteTo.File(Path.Combine(directory.FullName, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
