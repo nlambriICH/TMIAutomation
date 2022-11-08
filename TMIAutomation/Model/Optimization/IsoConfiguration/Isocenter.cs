@@ -8,19 +8,19 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    static class Isocenter
+    public static class Isocenter
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Isocenter));
 
-        public static void SetIsocenters(this ExternalPlanSetup lowerPlan, string machineName)
+        public static void SetIsocenters(this ExternalPlanSetup targetPlan, string machineName)
         {
-            foreach (Beam beam in lowerPlan.Beams)
+            foreach (Beam beam in targetPlan.Beams)
             {
                 logger.Information("Removing existing beam: {beamID}", beam.Id);
-                lowerPlan.RemoveBeam(beam);
+                targetPlan.RemoveBeam(beam);
             }
 
-            StructureSet lowerSS = lowerPlan.StructureSet;
+            StructureSet lowerSS = targetPlan.StructureSet;
             Structure lowerPTVTotal = lowerSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
 
             // The Rect3D X, Y, Z are placed near the feet
@@ -71,7 +71,7 @@ namespace TMIAutomation
 
                 logger.Information("Field {first}. Jaw position [mm]: {@jawPosition}", (2 * i) + 1, jawPositions[i].Item1);
 
-                lowerPlan.AddArcBeam(
+                targetPlan.AddArcBeam(
                     new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
                     jawPositions[i].Item1,
                     90,
@@ -84,7 +84,7 @@ namespace TMIAutomation
 
                 logger.Information("Field {second}. Jaw position [mm]: {@jawPosition}", (2 * i) + 2, jawPositions[i].Item2);
 
-                lowerPlan.AddArcBeam(
+                targetPlan.AddArcBeam(
                     new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
                     jawPositions[i].Item2,
                     90,
@@ -94,6 +94,57 @@ namespace TMIAutomation
                     0,
                     isoPositions[i]
                 );
+            }
+        }
+
+        public static void CopyCaudalIsocenter(this ExternalPlanSetup targetPlan,
+                                               ExternalPlanSetup sourcePlan,
+                                               Registration registration,
+                                               string machineName)
+        {
+            IEnumerable<Beam> beamsCaudalIso = sourcePlan.Beams.Skip(Math.Max(0, sourcePlan.Beams.Count() - 2));
+            foreach (Beam beam in beamsCaudalIso)
+            {
+                VVector beamIso = beam.IsocenterPosition;
+                VVector transformedIso = sourcePlan.StructureSet.Image.FOR == registration.SourceFOR
+                    ? registration.TransformPoint(beamIso)
+                    : registration.InverseTransformPoint(beamIso);
+
+                BeamParameters beamParams = beam.GetEditableParameters();
+                List<ControlPointParameters> cpParams = beamParams.ControlPoints.ToList();
+
+                double collAngle = cpParams.First().CollimatorAngle;
+                double transformedCollAngle =  collAngle > 180 ? collAngle - 180 : 180 + collAngle;
+                double transformedGantryAngle = cpParams.Last().GantryAngle;
+                double transformedGantryStop = cpParams.First().GantryAngle;
+
+                Beam newBeam = targetPlan.AddVMATBeam(
+                    new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
+                    cpParams.Select(cp => cp.MetersetWeight),
+                    transformedCollAngle,
+                    transformedGantryAngle,
+                    transformedGantryStop,
+                    beamParams.GantryDirection == GantryDirection.Clockwise ? GantryDirection.CounterClockwise : GantryDirection.Clockwise,
+                    0,
+                    transformedIso
+                );
+
+                newBeam.Id = beam.Id;
+
+                BeamParameters newBeamParams = newBeam.GetEditableParameters();
+                /* ISSUE: CalculateDoseWithPresetValues does not work for VMAT
+                 * set expected MUs with weight factor
+                 */
+                newBeamParams.WeightFactor = beam.WeightFactor;
+                VRect<double> jawPos = cpParams.First().JawPositions; // assuming no jaw tracking
+                newBeamParams.SetJawPositions(jawPos);
+                List<ControlPointParameters> newBeamCPParams = newBeamParams.ControlPoints.ToList();
+                foreach (ControlPointParameters cpUpperBeam in cpParams)
+                {
+                    newBeamCPParams.FirstOrDefault(cpNewBeam => cpNewBeam.Index == cpUpperBeam.Index).LeafPositions = cpUpperBeam.LeafPositions;
+                }
+                newBeam.ApplyParameters(newBeamParams);
+                logger.Information("Caudal field {beam} copied to lower dose-base plan", newBeam.Id);
             }
         }
     }

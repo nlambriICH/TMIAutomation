@@ -17,6 +17,15 @@ namespace TMIAutomation
         private static string NUMBER_OF_FRACTIONS;
         private static readonly ILogger logger = Log.ForContext(typeof(Calculation));
 
+        public static ExternalPlanSetup GenerateBasePlan(this Course targetCourse, StructureSet targetSS)
+        {
+            ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+            int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("LowerBase"));
+            newPlan.Id = numOfAutoPlans == 0 ? "LowerBase" : string.Concat("LowerBase", numOfAutoPlans);
+            logger.Information("Created lower dose-base plan {lowerPlanBase}", newPlan.Id);
+            return newPlan;
+        }
+
         public static void SetupOptimization(this ExternalPlanSetup externalPlanSetup)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -24,6 +33,7 @@ namespace TMIAutomation
             logger.Verbose("Reading optimization options from {optOptionsPath}", optOptionsPath);
             foreach (string line in File.ReadLines(optOptionsPath).Skip(3))
             {
+                if (line.StartsWith("#")) continue;
                 string[] optSetup = line.Split('\t');
                 logger.Verbose("Read parameters: {@optSetup}", optSetup);
 

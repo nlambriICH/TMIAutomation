@@ -31,7 +31,8 @@ namespace VMS.TPS
 #endif
                 .WriteTo.File(Path.Combine(directory.FullName, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
-                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
+                              shared: true)
                 .CreateLogger();
 
             this.logger = Log.ForContext<Script>();

@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Custom files
 TMIAutomation.Tests/Configuration/SensitiveData.txt
+TMIAutomation/Library/

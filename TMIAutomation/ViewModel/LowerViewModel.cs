@@ -224,7 +224,16 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isOptimizationChecked)
                 {
+#if ESAPI16
+                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                                                       this.selectedRegistrationId,
+                                                       this.selectedLowerPlanId,
+                                                       this.machineName,
+                                                       progress,
+                                                       message);
+#else
                     await this.modelBase.OptimizeAsync(this.selectedLowerPlanId, this.machineName, progress, message);
+#endif
                 }
             }
             finally

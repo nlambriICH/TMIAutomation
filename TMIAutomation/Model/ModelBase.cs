@@ -173,6 +173,18 @@ namespace TMIAutomation.StructureCreation
                 : selectedPlan.Beams.Select(b => b.TreatmentUnit.Id).FirstOrDefault();
         }
 
+#if ESAPI16
+        public Task OptimizeAsync(string upperPlanId,
+                                  string registrationId,
+                                  string lowerPlanId,
+                                  string machineName,
+                                  IProgress<double> progress,
+                                  IProgress<string> message)
+        {
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId, machineName);
+            return optimization.ComputeAsync(progress, message);
+        }
+#else
         public Task OptimizeAsync(string lowerPlanId,
                                   string machineName,
                                   IProgress<double> progress,
@@ -181,5 +193,6 @@ namespace TMIAutomation.StructureCreation
             Optimization optimization = new Optimization(this.esapiWorker, lowerPlanId, machineName);
             return optimization.ComputeAsync(progress, message);
         }
+#endif
     }
 }

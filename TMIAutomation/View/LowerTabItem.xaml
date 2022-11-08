@@ -34,9 +34,13 @@
                 <Style TargetType="{x:Type TextBlock}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding  ElementName=Junction, Path=IsChecked}" Value="False">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </TextBlock.Style>
@@ -57,9 +61,13 @@
                 <Style TargetType="{x:Type ComboBox}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </ComboBox.Style>
@@ -117,7 +125,6 @@
             </ComboBox.Style>
         </ComboBox>
 
-
         <TextBlock Text="Select Registration"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
@@ -131,9 +138,13 @@
                 <Style TargetType="{x:Type TextBlock}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding  ElementName=Junction, Path=IsChecked}" Value="False">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </TextBlock.Style>
@@ -154,9 +165,13 @@
                 <Style TargetType="{x:Type ComboBox}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding  ElementName=Junction, Path=IsChecked}" Value="False">
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
                             <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </ComboBox.Style>
@@ -204,60 +219,6 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-
-        <TextBlock Text="Select Lower Plan"
-                   VerticalAlignment="Top"
-                   HorizontalAlignment="Left"
-                   Margin="230,185,0,0"
-                   FontSize="16"
-                   Height="25"
-                   FontFamily="Serif"
-                   Foreground="#FDFDFD"
-                   Padding="3">
-            <TextBlock.Style>
-                <Style TargetType="{x:Type TextBlock}">
-                    <Setter Property="Visibility" Value="Hidden"/>
-                    <Style.Triggers>
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
-                                <Condition Binding="{Binding ElementName=Control, Path=IsChecked}" Value="False"/>
-                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="True"/>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Visible" />
-                        </MultiDataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
-
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="430,185,0,0"
-                  Width="140"
-                  Height="25"
-                  FontSize="12"
-                  FontFamily="Serif"
-                  Foreground="#2A324F"
-                  ItemsSource="{Binding LowerPlans}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedLowerPlanId}">
-            <ComboBox.Style>
-                <Style TargetType="{x:Type ComboBox}">
-                    <Setter Property="Visibility" Value="Hidden"/>
-                    <Style.Triggers>
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
-                                <Condition Binding="{Binding ElementName=Control, Path=IsChecked}" Value="False"/>
-                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="True"/>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Visible" />
-                        </MultiDataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ComboBox.Style>
-        </ComboBox>
 
         <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
