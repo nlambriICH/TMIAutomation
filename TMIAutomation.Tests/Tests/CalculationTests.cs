@@ -4,20 +4,35 @@ using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using Xunit;
+using Xunit.Sdk;
 
 namespace TMIAutomation.Tests
 {
     public class CalculationTests : TestBase
     {
         private ExternalPlanSetup externalPlanSetup;
-        private PluginScriptContext scriptContext;
+
         public override ITestBase Init(object testObject, params object[] optParams)
         {
             this.externalPlanSetup = testObject as ExternalPlanSetup;
-            this.scriptContext = optParams.OfType<PluginScriptContext>().FirstOrDefault();
-            return this.scriptContext == null
-                ? throw new ArgumentException($"A PluginScriptContext must be provided to instantiate {this.GetType()}")
-                : this;
+            return this;
+        }
+
+        [Theory]
+        [InlineData("LowerBase")]
+        [InlineData("LowerBase1")]
+        private void GenerateBasePlan(string expectedPlanId)
+        {
+            Course targetCourse = externalPlanSetup.Course;
+            ExternalPlanSetup newPlan = targetCourse.GenerateBasePlan(externalPlanSetup.StructureSet);
+            try
+            {
+                Assert.Equal(expectedPlanId, newPlan.Id);
+            }
+            catch (EqualException e)
+            {
+                throw new Exception($"Input parameters: {expectedPlanId}", e);
+            }
         }
 
         [Fact]

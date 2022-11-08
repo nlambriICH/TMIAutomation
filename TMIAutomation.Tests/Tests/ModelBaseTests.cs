@@ -13,15 +13,9 @@ namespace TMIAutomation.Tests
     {
         private ModelBase modelBase;
         private PluginScriptContext scriptContext;
-        private static bool firstInitialization = true;
 
         public override ITestBase Init(object testObject, params object[] optParams)
         {
-            if (!firstInitialization)
-            {
-                throw new InvalidOperationException($"{this.GetType()} is already initialized");
-            }
-            firstInitialization = false;
             this.modelBase = testObject as ModelBase;
             this.scriptContext = optParams.OfType<PluginScriptContext>().FirstOrDefault();
             return this.scriptContext == null
@@ -31,16 +25,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetPlans_Data))]
-        private void GetPlans(ModelBase.PlanType planType, int index, string expected)
+        private void GetPlans(ModelBase.PlanType planType, int index, string expectedPlanId)
         {
             List<string> plans = modelBase.GetPlans(scriptContext, planType);
             try
             {
-                Assert.Equal(expected, plans[index]);
+                Assert.Equal(expectedPlanId, plans[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planType}, {index}", e);
+                throw new Exception($"Input parameters: {planType}, {index}, {expectedPlanId}", e);
             }
         }
 
@@ -55,16 +49,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetPTVsFromPlan_Data))]
-        private void GetPTVsFromPlan(string planId, int index, string expected)
+        private void GetPTVsFromPlan(string planId, int index, string expectedPlanId)
         {
             List<string> ptvs = modelBase.GetPTVsFromPlan(scriptContext, planId);
             try
             {
-                Assert.Equal(expected, ptvs[index]);
+                Assert.Equal(expectedPlanId, ptvs[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planId}, {index}", e);
+                throw new Exception($"Input parameters: {planId}, {index}, {expectedPlanId}", e);
             }
         }
 
@@ -80,16 +74,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetPTVsFromImgOrientation_Data))]
-        private void GetPTVsFromImgOrientation(PatientOrientation patientOrientation, int index, string expected)
+        private void GetPTVsFromImgOrientation(PatientOrientation patientOrientation, int index, string expectedPTVId)
         {
             List<string> ptvs = modelBase.GetPTVsFromImgOrientation(scriptContext, patientOrientation);
             try
             {
-                Assert.Equal(expected, ptvs[index]);
+                Assert.Equal(expectedPTVId, ptvs[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {patientOrientation}, {index}", e);
+                throw new Exception($"Input parameters: {patientOrientation}, {index}, {expectedPTVId}", e);
             }
         }
 
@@ -103,16 +97,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetRegistrations_Data))]
-        private void GetRegistrations(int index, string expected)
+        private void GetRegistrations(int index, string expectedRegId)
         {
             List<string> registrations = modelBase.GetRegistrations(scriptContext);
             try
             {
-                Assert.Equal(expected, registrations[index]);
+                Assert.Equal(expectedRegId, registrations[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {index}", e);
+                throw new Exception($"Input parameters: {index}, {expectedRegId}", e);
             }
         }
 
@@ -135,7 +129,7 @@ namespace TMIAutomation.Tests
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planId}", e);
+                throw new Exception($"Input parameters: {planId}, {expected}", e);
             }
         }
 
@@ -148,16 +142,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetMachineName_Data))]
-        private void GetMachineName(string planId, string expected)
+        private void GetMachineName(string planId, string expectedMachineName)
         {
             string machineName = modelBase.GetMachineName(scriptContext, planId);
             try
             {
-                Assert.Equal(expected, machineName);
+                Assert.Equal(expectedMachineName, machineName);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planId}", e);
+                throw new Exception($"Input parameters: {planId}, {expectedMachineName}", e);
             }
         }
 

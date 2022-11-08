@@ -11,14 +11,14 @@ namespace TMIAutomation.Tests
     public class ObjectiveSetupTests : TestBase
     {
         private OptimizationSetup optSetup;
-        private PluginScriptContext scriptContext;
+        private PlanSetup planSetup;
 
         public override ITestBase Init(object testObject, params object[] optParams)
         {
             this.optSetup = testObject as OptimizationSetup;
-            this.scriptContext = optParams.OfType<PluginScriptContext>().FirstOrDefault();
-            return this.scriptContext == null
-                ? throw new ArgumentException($"A PluginScriptContext must be provided to instantiate {this.GetType()}")
+            this.planSetup = optParams.OfType<PlanSetup>().FirstOrDefault();
+            return this.planSetup == null
+                ? throw new ArgumentException($"A PlanSetup must be provided to instantiate {this.GetType()}")
                 : this;
         }
 
@@ -32,7 +32,7 @@ namespace TMIAutomation.Tests
         [Fact]
         private void AddPointObjectives_NoPrescription_Exception()
         {
-            ArgumentException exception = Assert.Throws<ArgumentException>(() => optSetup.AddPointObjectives(this.scriptContext.PlanSetup.StructureSet));
+            ArgumentException exception = Assert.Throws<ArgumentException>(() => optSetup.AddPointObjectives(this.planSetup.StructureSet));
             Assert.Equal("Dose prescription must be defined\nbefore starting optimization.\r\n", exception.Message, ignoreLineEndingDifferences: true);
         }
 
@@ -45,8 +45,8 @@ namespace TMIAutomation.Tests
                 "HT2_AUTO", "Body_Free_AUTO"
             };
             // Need to set the prescription before adding optimization objectives
-            this.scriptContext.PlanSetup.SetPrescription(1, new DoseValue(1, DoseValue.DoseUnit.Gy), 1);
-            optSetup.AddPointObjectives(this.scriptContext.PlanSetup.StructureSet);
+            this.planSetup.SetPrescription(1, new DoseValue(1, DoseValue.DoseUnit.Gy), 1);
+            optSetup.AddPointObjectives(this.planSetup.StructureSet);
             List<string> structureIds = optSetup.Objectives.OfType<OptimizationPointObjective>().Select(obj => obj.StructureId).ToList();
             Assert.Equal(expectedIds, structureIds);
         }
@@ -58,8 +58,8 @@ namespace TMIAutomation.Tests
                 "Dose_100%", "HT_AUTO", "HT2_AUTO", "Body_Free_AUTO", "REM_AUTO"
             };
             // Need to set the prescription before adding optimization objectives
-            this.scriptContext.PlanSetup.SetPrescription(1, new DoseValue(1, DoseValue.DoseUnit.Gy), 1);
-            optSetup.AddEUDObjectives(this.scriptContext.PlanSetup.StructureSet);
+            this.planSetup.SetPrescription(1, new DoseValue(1, DoseValue.DoseUnit.Gy), 1);
+            optSetup.AddEUDObjectives(this.planSetup.StructureSet);
             List<string> structureIds = optSetup.Objectives.OfType<OptimizationEUDObjective>().Select(obj => obj.StructureId).ToList();
             Assert.Equal(expectedIds, structureIds);
         }
