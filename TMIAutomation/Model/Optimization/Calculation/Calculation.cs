@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
@@ -54,6 +55,17 @@ namespace TMIAutomation
 
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, DOSE_CALCULATION_ALGORITHM);
             externalPlanSetup.SetPrescription(int.Parse(NUMBER_OF_FRACTIONS), new DoseValue(double.Parse(DOSE_PER_FRACTION_GY), DoseValue.DoseUnit.Gy), 1.0);
+#if ESAPI16
+            StringBuilder errorHint = new StringBuilder();
+            bool success = externalPlanSetup.SetTargetStructureIfNoDose(
+                externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION),
+                errorHint);
+            if (!success)
+            {
+                logger.Warning($"Could not set target structure {StructureHelper.LOWER_PTV_NO_JUNCTION}.\n" +
+                    $"{errorHint}");
+            }
+#endif
         }
 
         public static bool OptimizePlan(this ExternalPlanSetup externalPlanSetup)

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Serilog;
+using System.Windows;
 using TMIAutomation.ViewModel;
 
 namespace TMIAutomation.View
@@ -11,9 +12,12 @@ namespace TMIAutomation.View
         public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
-
             this.DataContext = viewModel;
-            Closed += viewModel.MainView_Closed;
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Log.CloseAndFlush();
         }
     }
 }

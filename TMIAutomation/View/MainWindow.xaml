@@ -9,7 +9,8 @@
         mc:Ignorable="d"
         Title="ESAPI" Height="550" Width="800"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanMinimize">
+        ResizeMode="CanMinimize"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <ResourceDictionary>

@@ -48,7 +48,6 @@ namespace TMIAutomation
 #endif
                 Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
-
 #if ESAPI16
                 ExternalPlanSetup lowerPlanBase = targetCourse.GenerateBasePlan(lowerPlan.StructureSet);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);

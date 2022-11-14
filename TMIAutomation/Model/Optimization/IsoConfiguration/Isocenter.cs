@@ -102,7 +102,15 @@ namespace TMIAutomation
                                                Registration registration,
                                                string machineName)
         {
-            IEnumerable<Beam> beamsCaudalIso = sourcePlan.Beams.Skip(Math.Max(0, sourcePlan.Beams.Count() - 2));
+            List<Beam> sourcePlanBeams = sourcePlan.Beams.ToList();
+            double minIsoPos = sourcePlanBeams.First().IsocenterPosition.z;
+            foreach (Beam beam in sourcePlanBeams.Skip(1))
+            {
+                if (beam.IsocenterPosition.z < minIsoPos) minIsoPos = beam.IsocenterPosition.z;
+            }
+
+            IEnumerable<Beam> beamsCaudalIso = sourcePlanBeams.Where(beam => beam.IsocenterPosition.z == minIsoPos);
+
             foreach (Beam beam in beamsCaudalIso)
             {
                 VVector beamIso = beam.IsocenterPosition;

@@ -5,7 +5,7 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    static class PostCalculation
+    public static class PostCalculation
     {
         private static readonly ILogger logger = Log.ForContext(typeof(PostOptimization));
 

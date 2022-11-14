@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
@@ -45,6 +44,7 @@ namespace TMIAutomation.Tests
             string expectedDoseValue = "2.000";
             string expectedDoseUnit = "Gy";
             int expectedNumFractions = 1;
+            string expectedTargetVolumeId = StructureHelper.LOWER_PTV_NO_JUNCTION;
 
             this.externalPlanSetup.SetupOptimization();
             string optAlgo = this.externalPlanSetup.GetCalculationModel(CalculationType.PhotonVMATOptimization);
@@ -52,6 +52,7 @@ namespace TMIAutomation.Tests
             this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionName, out string optionValue);
             DoseValue dosePerFraction = this.externalPlanSetup.DosePerFraction;
             int? numFractions = this.externalPlanSetup.NumberOfFractions;
+            string targetVolumeId = this.externalPlanSetup.TargetVolumeID;
 
             Assert.Equal(expectedOptAlgo, optAlgo);
             Assert.Equal(expectedDoseAlgo, doseAlgo);
@@ -59,6 +60,7 @@ namespace TMIAutomation.Tests
             Assert.Equal(expectedDoseValue, dosePerFraction.ValueAsString);
             Assert.Equal(expectedDoseUnit, dosePerFraction.UnitAsString);
             Assert.Equal(expectedNumFractions, numFractions);
+            Assert.Equal(expectedTargetVolumeId, targetVolumeId);
         }
     }
 }

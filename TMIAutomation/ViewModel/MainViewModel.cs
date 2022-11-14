@@ -17,10 +17,5 @@ namespace TMIAutomation.ViewModel
             UpperVM = new UpperViewModel(modelBase);
             LowerVM = new LowerViewModel(modelBase);
         }
-
-        public void MainView_Closed(object sender, EventArgs e)
-        {
-            Log.CloseAndFlush();
-        }
     }
 }

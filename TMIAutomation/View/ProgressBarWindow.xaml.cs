@@ -17,13 +17,11 @@ namespace TMIAutomation.View
 
             this.DataContext = pbViewModel;
 
-            Closed += pbViewModel.ProgressBar_Closed;
-
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                     .MinimumLevel.Verbose()
 #else
-					.MinimumLevel.Debug()
+                    .MinimumLevel.Debug()
 #endif
                     .Destructure.ByTransforming<VVector>(vv => new
                     {
@@ -41,6 +39,11 @@ namespace TMIAutomation.View
                 .WriteTo.Logger(Log.Logger)
                 .WriteTo.RichTextBox(TMIAutomationLogs)
                 .CreateLogger();
+        }
+
+        private void TMIAutomationLogs_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            TMIAutomationLogs.ScrollToEnd();
         }
     }
 }
