@@ -88,19 +88,6 @@ namespace TMIAutomation.ViewModel
             }
         }
 
-        private string machineName;
-        public string MachineName
-        {
-            get => machineName;
-            set
-            {
-                if (machineName != value)
-                {
-                    Set(ref machineName, value);
-                }
-            }
-        }
-
         private List<string> lowerPlans;
         public List<string> LowerPlans
         {
@@ -173,7 +160,6 @@ namespace TMIAutomation.ViewModel
             Task<List<string>> lowerPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
             UpperPlans = await upperPlansTask;
-            MachineName = await this.modelBase.GetMachineNameAsync(this.selectedUpperPlanId);
             LowerPlans = await lowerPlansTask;
             LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
                 ? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
@@ -243,14 +229,12 @@ namespace TMIAutomation.ViewModel
                     await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
                                                        this.selectedRegistrationId,
                                                        this.selectedLowerPlanId,
-                                                       this.machineName,
                                                        progress,
                                                        message);
 #else
                     await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
                                                        this.selectedRegistrationId,
                                                        this.selectedLowerPlanId,
-                                                       this.machineName,
                                                        generateBaseDosePlanOnly,
                                                        progress,
                                                        message);

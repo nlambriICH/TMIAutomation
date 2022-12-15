@@ -24,7 +24,7 @@
                    Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="230,25,0,0"
+                   Margin="230,50,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -48,7 +48,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,25,0,0"
+                  Margin="430,50,0,0"
                   Height="25"
                   FontSize="12"
                   FontFamily="Serif"
@@ -76,7 +76,7 @@
         <TextBlock Text="Select Lower PTV"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="230,65,0,0"
+                   Margin="230,90,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -100,7 +100,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,65,0,0"
+                  Margin="430,90,0,0"
                   Width="140"
                   Height="25"
                   FontSize="12"
@@ -128,7 +128,7 @@
         <TextBlock Text="Select Registration"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="230,105,0,0"
+                   Margin="230,130,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -152,7 +152,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,105,0,0"
+                  Margin="430,130,0,0"
                   Width="140"
                   Height="25"
                   FontSize="12"
@@ -176,49 +176,6 @@
                 </Style>
             </ComboBox.Style>
         </ComboBox>
-
-        <TextBlock VerticalAlignment="Top"
-                   HorizontalAlignment="Left"
-                   Margin="230,145,0,0"
-                   FontSize="16"
-                   Height="25"
-                   FontFamily="Serif"
-                   Foreground="#FDFDFD"
-                   Padding="3"
-                   Text="Insert Machine Name">
-            <TextBlock.Style>
-                <Style TargetType="{x:Type TextBlock}">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsChecked, ElementName=Optimization}" Value="False">
-                            <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
-
-        <TextBox HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 Margin="430,145,0,0"
-                 Width="140"
-                 Height="25"
-                 FontSize="12"
-                 FontFamily="Serif"
-                 Foreground="#2A324F"
-                 VerticalContentAlignment="Center"
-                 Text="{Binding MachineName}">
-            <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}">
-                    <Setter Property="Visibility" Value="Visible"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsChecked, ElementName=Optimization}" Value="False">
-                            <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
 
         <CheckBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"

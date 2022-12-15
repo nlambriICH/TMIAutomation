@@ -12,7 +12,7 @@ namespace TMIAutomation
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Isocenter));
 
-        public static void SetIsocenters(this ExternalPlanSetup targetPlan, string machineName)
+        public static void SetIsocenters(this ExternalPlanSetup targetPlan, ExternalPlanSetup sourcePlan)
         {
             foreach (Beam beam in targetPlan.Beams)
             {
@@ -65,6 +65,14 @@ namespace TMIAutomation
             logger.Information("Overlap between fields same isocenter [mm]: {overlapSameIso}", 20);
             logger.Information("Overlap between fields adjacent isocenters [mm]: {overlapAdjIso}", Math.Round(isoStep * .2, MidpointRounding.AwayFromZero));
 
+            Beam beamSourcePlan = sourcePlan.Beams.FirstOrDefault(b => !b.IsSetupField);
+            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(beamSourcePlan.TreatmentUnit.Name,
+                                                                                                   beamSourcePlan.EnergyModeDisplayName,
+                                                                                                   beamSourcePlan.DoseRate,
+                                                                                                   beamSourcePlan.Technique.Id,
+                                                                                                   "");
+            logger.Information("Using beam machine parameters: {@sourcePlanBeamParams} retrieved from plan {sourcePlan}", sourcePlanBeamParams, sourcePlan.Id);
+
             for (int i = 0; i < isoPositions.Count(); ++i)
             {
                 logger.Information("Adding fields at isocenter {num}. Isocenter coordinates [mm]: {@isocenter}", i + 1, isoPositions[i]);
@@ -72,7 +80,7 @@ namespace TMIAutomation
                 logger.Information("Field {first}. Jaw position [mm]: {@jawPosition}", (2 * i) + 1, jawPositions[i].Item1);
 
                 targetPlan.AddArcBeam(
-                    new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
+                    sourcePlanBeamParams,
                     jawPositions[i].Item1,
                     90,
                     180.1,
@@ -85,7 +93,7 @@ namespace TMIAutomation
                 logger.Information("Field {second}. Jaw position [mm]: {@jawPosition}", (2 * i) + 2, jawPositions[i].Item2);
 
                 targetPlan.AddArcBeam(
-                    new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
+                    sourcePlanBeamParams,
                     jawPositions[i].Item2,
                     90,
                     179.9,
@@ -99,10 +107,9 @@ namespace TMIAutomation
 
         public static void CopyCaudalIsocenter(this ExternalPlanSetup targetPlan,
                                                ExternalPlanSetup sourcePlan,
-                                               Registration registration,
-                                               string machineName)
+                                               Registration registration)
         {
-            List<Beam> sourcePlanBeams = sourcePlan.Beams.ToList();
+            List<Beam> sourcePlanBeams = sourcePlan.Beams.Where(b => !b.IsSetupField).ToList();
             double minIsoPos = sourcePlanBeams.First().IsocenterPosition.z;
             foreach (Beam beam in sourcePlanBeams.Skip(1))
             {
@@ -122,12 +129,12 @@ namespace TMIAutomation
                 List<ControlPointParameters> cpParams = beamParams.ControlPoints.ToList();
 
                 double collAngle = cpParams.First().CollimatorAngle;
-                double transformedCollAngle =  collAngle > 180 ? collAngle - 180 : 180 + collAngle;
+                double transformedCollAngle = collAngle > 180 ? collAngle - 180 : 180 + collAngle;
                 double transformedGantryAngle = cpParams.Last().GantryAngle;
                 double transformedGantryStop = cpParams.First().GantryAngle;
 
                 Beam newBeam = targetPlan.AddVMATBeam(
-                    new ExternalBeamMachineParameters(machineName, "6X", 600, "ARC", ""),
+                    new ExternalBeamMachineParameters(beam.TreatmentUnit.Name, beam.EnergyModeDisplayName, beam.DoseRate, beam.Technique.Id, ""),
                     cpParams.Select(cp => cp.MetersetWeight),
                     transformedCollAngle,
                     transformedGantryAngle,

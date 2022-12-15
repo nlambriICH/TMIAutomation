@@ -177,23 +177,21 @@ namespace TMIAutomation
         public Task OptimizeAsync(string upperPlanId,
                                   string registrationId,
                                   string lowerPlanId,
-                                  string machineName,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId, machineName);
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId);
             return optimization.ComputeAsync(progress, message);
         }
 #else
         public Task OptimizeAsync(string upperPlanId,
                                   string registrationId,
                                   string lowerPlanId,
-                                  string machineName,
                                   bool generateBaseDosePlanOnly,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, lowerPlanId, registrationId, machineName, generateBaseDosePlanOnly);
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, lowerPlanId, registrationId, generateBaseDosePlanOnly);
             return optimization.ComputeAsync(progress, message);
         }
 #endif

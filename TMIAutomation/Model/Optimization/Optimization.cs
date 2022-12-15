@@ -16,33 +16,29 @@ namespace TMIAutomation
         private readonly string upperPlanId;
         private readonly string registrationId;
         private readonly string lowerPlanId;
-        private readonly string machineName;
 #if ESAPI15
         private readonly bool generateBaseDosePlanOnly;
 #endif
 
 #if ESAPI16
-        public Optimization(EsapiWorker esapiWorker, string upperPlanId, string registrationId, string lowerPlanId, string machineName)
+        public Optimization(EsapiWorker esapiWorker, string upperPlanId, string registrationId, string lowerPlanId)
         {
             this.esapiWorker = esapiWorker;
             this.upperPlanId = upperPlanId;
             this.registrationId = registrationId;
             this.lowerPlanId = lowerPlanId;
-            this.machineName = machineName;
         }
 #else
         public Optimization(EsapiWorker esapiWorker,
                             string upperPlanId,
                             string registrationId,
                             string lowerPlanId,
-                            string machineName,
                             bool generateBaseDosePlanOnly)
         {
             this.esapiWorker = esapiWorker;
             this.upperPlanId = upperPlanId;
             this.registrationId = registrationId;
             this.lowerPlanId = lowerPlanId;
-            this.machineName = machineName;
             this.generateBaseDosePlanOnly = generateBaseDosePlanOnly;
         }
 #endif
@@ -52,9 +48,9 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
 #if ESAPI16
-                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.machineName });
+                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId });
 #else
-                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.machineName, this.generateBaseDosePlanOnly.ToString() });
+                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
 #endif
                 Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
@@ -63,16 +59,16 @@ namespace TMIAutomation
 #if ESAPI15
                 if (this.generateBaseDosePlanOnly)
                 {
-                    GenerateBaseDosePlan(targetCourse, lowerPlan, upperPlan, registration, progress, message);
+                    GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
                 }
                 else
                 {
-                    PerformLowerPlanOptimizationCommon(targetCourse, lowerPlan, progress, message);
+                    PerformLowerPlanOptimizationCommon(targetCourse, upperPlan, lowerPlan, progress, message);
                 }
 #else
-                ExternalPlanSetup lowerPlanBase = GenerateBaseDosePlan(targetCourse, lowerPlan, upperPlan, registration, progress, message);
+                ExternalPlanSetup lowerPlanBase = GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
                 lowerPlan.BaseDosePlanningItem = lowerPlanBase;
-                ExternalPlanSetup optimizedLowerPlan = PerformLowerPlanOptimizationCommon(targetCourse, lowerPlan, progress, message);
+                ExternalPlanSetup optimizedLowerPlan = PerformLowerPlanOptimizationCommon(targetCourse, upperPlan, lowerPlan, progress, message);
                 PlanSum planSum = targetCourse.CreatePlanSum(new List<PlanSetup> { optimizedLowerPlan, upperPlan }, optimizedLowerPlan.StructureSet.Image);
                 planSum.Id = "PSAutoOpt1";
 
@@ -122,8 +118,8 @@ namespace TMIAutomation
         }
 
         private ExternalPlanSetup GenerateBaseDosePlan(Course targetCourse,
-                                                       ExternalPlanSetup lowerPlan,
                                                        ExternalPlanSetup upperPlan,
+                                                       ExternalPlanSetup lowerPlan,
                                                        Registration registration,
                                                        IProgress<double> progress,
                                                        IProgress<string> message)
@@ -134,7 +130,7 @@ namespace TMIAutomation
              * The dose is lost once the plan is changed to FFS
              */
             ExternalPlanSetup lowerPlanBase = targetCourse.AddBaseDosePlan(lowerPlan.StructureSet);
-            lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration, this.machineName);
+            lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration);
 
             progress.Report(0.10);
             message.Report("Calculating dose of base-dose plan...");
@@ -145,13 +141,14 @@ namespace TMIAutomation
         }
 
         private ExternalPlanSetup PerformLowerPlanOptimizationCommon(Course targetCourse,
+                                                                     ExternalPlanSetup upperPlan,
                                                                      ExternalPlanSetup lowerPlan,
                                                                      IProgress<double> progress,
                                                                      IProgress<string> message)
         {
             progress.Report(0.05);
             message.Report("Placing isocenters...");
-            lowerPlan.SetIsocenters(this.machineName);
+            lowerPlan.SetIsocenters(upperPlan);
 
             lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
 

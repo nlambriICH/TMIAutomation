@@ -37,25 +37,32 @@ namespace TMIAutomation.View
                         Y1 = Math.Round(vr.Y1, 1, MidpointRounding.AwayFromZero),
                         Y2 = Math.Round(vr.Y2, 1, MidpointRounding.AwayFromZero)
                     })
-                .WriteTo.Logger(Log.Logger)
-                .WriteTo.RichTextBox(TMIAutomationLogs)
-                .Filter.ByExcluding(logEvent =>
-                {
-                    if (logEvent.Properties["SourceContext"].ToString() == "\"SerilogTraceListener.SerilogTraceListener\"")
+                    .Destructure.ByTransforming<ExternalBeamMachineParameters>(ebmp => new
                     {
-                        if (logEvent.MessageTemplate.Text == latestLogMessage)
+                        Machine = ebmp.MachineId,
+                        EnergyMode = ebmp.EnergyModeId,
+                        DoseRate = ebmp.DoseRate,
+                        Technique = ebmp.TechniqueId
+                    })
+                    .WriteTo.Logger(Log.Logger)
+                    .WriteTo.RichTextBox(TMIAutomationLogs)
+                    .Filter.ByExcluding(logEvent =>
+                    {
+                        if (logEvent.Properties["SourceContext"].ToString() == "\"SerilogTraceListener.SerilogTraceListener\"")
                         {
-                            return true;
+                            if (logEvent.MessageTemplate.Text == latestLogMessage)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                latestLogMessage = logEvent.MessageTemplate.Text;
+                            }
                         }
-                        else
-                        {
-                            latestLogMessage = logEvent.MessageTemplate.Text;
-                        }
-                    }
 
-                    return false;
-                })
-                .CreateLogger();
+                        return false;
+                    })
+                    .CreateLogger();
         }
 
         private void TMIAutomationLogs_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
