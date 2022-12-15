@@ -11,6 +11,7 @@ namespace TMIAutomation.View
     /// </summary>
     public partial class ProgressBarWindow : Window
     {
+        private static string latestLogMessage = string.Empty;
         public ProgressBarWindow(ProgressBarViewModel pbViewModel)
         {
             InitializeComponent();
@@ -38,6 +39,22 @@ namespace TMIAutomation.View
                     })
                 .WriteTo.Logger(Log.Logger)
                 .WriteTo.RichTextBox(TMIAutomationLogs)
+                .Filter.ByExcluding(logEvent =>
+                {
+                    if (logEvent.Properties["SourceContext"].ToString() == "\"SerilogTraceListener.SerilogTraceListener\"")
+                    {
+                        if (logEvent.MessageTemplate.Text == latestLogMessage)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            latestLogMessage = logEvent.MessageTemplate.Text;
+                        }
+                    }
+
+                    return false;
+                })
                 .CreateLogger();
         }
 

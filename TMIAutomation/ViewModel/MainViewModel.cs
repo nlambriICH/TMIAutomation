@@ -1,8 +1,5 @@
 ﻿using GalaSoft.MvvmLight;
-using Serilog;
-using System;
 using TMIAutomation.Async;
-using TMIAutomation.StructureCreation;
 
 namespace TMIAutomation.ViewModel
 {

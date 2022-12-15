@@ -1,5 +1,6 @@
-﻿# Move this file into the same folder where the executable runs. OptimizerModel, DoseAlgorithm, and MLCID must be tab separated
-### DO NOT DELETE THIS LINE ###
+﻿# Values must be tab separated
+# Lines starting with a hash sign '#' are ignored
+# Empty lines are ignored
 OptimizationAlgorithm	DoseAlgorithm	MLCID	DosePerFraction	NumberOfFractions
-PO_15.6.06	AAA 15.06.06	MLC0010	2	1
-#PO 16.1.0	AAA 16.1.1	MLC0010	2	1
+#PO_15.6.06	AAA 15.06.06	MLC0010	2	1
+PO 16.1.0	AAA 15.06.06	MLC0010	2	1

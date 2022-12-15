@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TMIAutomation.StructureCreation;
 using TMIAutomation.View;
 using System.Linq;
 using VMS.TPS.Common.Model.Types;
+#if ESAPI15
+using System.Windows;
+#endif
 
 namespace TMIAutomation.ViewModel
 {
@@ -197,6 +199,19 @@ namespace TMIAutomation.ViewModel
 
             try
             {
+#if ESAPI15
+                bool generateBaseDosePlanOnly = false;
+                if (this.isOptimizationChecked)
+                {
+                    MessageBoxResult response = MessageBox.Show("Yes: compute base-dose plan only\n"
+                                                                + "No: perform automatic optimization using junction substructures",
+                                                                "Lower-extremities optimization",
+                                                                MessageBoxButton.YesNo,
+                                                                MessageBoxImage.Question);
+                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes ? true : false;
+                }
+#endif
+
                 if (this.isJunctionChecked)
                 {
                     bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValidAsync(this.selectedUpperPlanId);
@@ -232,7 +247,13 @@ namespace TMIAutomation.ViewModel
                                                        progress,
                                                        message);
 #else
-                    await this.modelBase.OptimizeAsync(this.selectedLowerPlanId, this.machineName, progress, message);
+                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                                                       this.selectedRegistrationId,
+                                                       this.selectedLowerPlanId,
+                                                       this.machineName,
+                                                       generateBaseDosePlanOnly,
+                                                       progress,
+                                                       message);
 #endif
                 }
             }

@@ -75,9 +75,9 @@ namespace TMIAutomation
 
             if (upperPlan.DoseValuePresentation == DoseValuePresentation.Absolute)
             {
-                double dosePerFraction = upperPlan.DosePerFraction.Dose;
+                double totalDose = upperPlan.TotalDose.Dose;
                 doseValues = new List<double> { 0.25, 0.50, 0.75, 1.0 };
-                doseValues.ForEach(d => Math.Round(d * dosePerFraction, 2, MidpointRounding.AwayFromZero));
+                doseValues.ForEach(d => Math.Round(d * totalDose, 2, MidpointRounding.AwayFromZero));
                 doseUnit = DoseValue.DoseUnit.Gy;
             }
             else

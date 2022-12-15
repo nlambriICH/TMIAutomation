@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
-using TMIAutomation.StructureCreation;
 using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel

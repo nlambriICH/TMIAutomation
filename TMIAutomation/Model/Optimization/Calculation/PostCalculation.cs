@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
@@ -9,29 +10,83 @@ namespace TMIAutomation
     {
         private static readonly ILogger logger = Log.ForContext(typeof(PostOptimization));
 
-        // 98% covers 98% of the target volume
-        public static void Normalize(this ExternalPlanSetup externalPlanSetup)
+        public static void Normalize(this ExternalPlanSetup externalPlanSetup, DoseValue doseValueNormTarget, double volumeNormalizationTarget)
         {
-            Structure ptvTotNoJunction = externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
-
-            if (ptvTotNoJunction == null)
+            Structure lowerPTVNoJ = externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
+            if (lowerPTVNoJ == null)
             {
                 logger.Warning("Could not find structure: {ptvTotNoJunction}. Skip plan normalization", StructureHelper.LOWER_PTV_NO_JUNCTION);
                 return;
             }
 
             externalPlanSetup.PlanNormalizationValue = 100.0; // no plan normalization
-            double targetDose = externalPlanSetup.TotalDose.Dose;
-            double doseNormalizationTarget = 98.0 / 100.0 * targetDose;
-            DoseValue doseValue = new DoseValue(doseNormalizationTarget, "Gy");
 
-            double volumeNormalizationTarget = 98.0;
-            double volume = externalPlanSetup.GetVolumeAtDose(ptvTotNoJunction, doseValue, VolumePresentation.Relative);
+            double volume = externalPlanSetup.GetVolumeAtDose(lowerPTVNoJ, doseValueNormTarget, VolumePresentation.Relative);
 
-            if (volume < volumeNormalizationTarget)
+            DoseValue doseValue = externalPlanSetup.GetDoseAtVolume(lowerPTVNoJ, volumeNormalizationTarget, VolumePresentation.Relative, DoseValuePresentation.Absolute);
+            externalPlanSetup.PlanNormalizationValue = 100.0 * doseValue.Dose / doseValueNormTarget.Dose;
+        }
+
+        public static bool NeedAdditionalOptimizationCycle(this PlanningItem planninItem, OptimizationCycleTarget optCycleTarget)
+        {
+            DoseValue totalDose;
+            switch (planninItem)
             {
-                doseValue = externalPlanSetup.GetDoseAtVolume(ptvTotNoJunction, volumeNormalizationTarget, VolumePresentation.Relative, DoseValuePresentation.Absolute);
-                externalPlanSetup.PlanNormalizationValue = 100.0 * doseValue.Dose / doseNormalizationTarget;
+                case ExternalPlanSetup externalPlanSetup:
+                    externalPlanSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
+                    totalDose = externalPlanSetup.TotalDose;
+                    break;
+                case PlanSum planSum:
+                    PlanSetup planSetup = planSum.PlanSetups.FirstOrDefault();
+                    planSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
+                    totalDose = planSetup.TotalDose;
+                    break;
+                default:
+                    totalDose = new DoseValue();
+                    break;
+            }
+
+            switch (optCycleTarget)
+            {
+                case OptimizationCycleTarget.LowerPTVNoJ:
+                    Structure lowerPTVNoJ = planninItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
+                    DoseValue meanDose = planninItem.GetDVHCumulativeData(lowerPTVNoJ,
+                                                                          DoseValuePresentation.Relative,
+                                                                          VolumePresentation.Relative,
+                                                                          0.001).MeanDose;
+                    if (meanDose.Dose > 105.0)
+                    {
+                        logger.Information("Mean dose was {meanDose} (>105%). Performing additional optimization cycle",
+                                           Math.Round(meanDose.Dose, 2, MidpointRounding.AwayFromZero));
+                        return true;
+                    }
+                    else
+                    {
+                        logger.Information("Mean dose was {meanDose} (<=105%). Skip additional optimization cycle",
+                                           Math.Round(meanDose.Dose, 2, MidpointRounding.AwayFromZero));
+                        return false;
+                    }
+                case OptimizationCycleTarget.LowerPTV_J:
+                    Structure lowerPTVJ = planninItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
+                    double lowerPTVJVolumeCoverage = planninItem.GetVolumeAtDose(lowerPTVJ,
+                                                                                 totalDose,
+                                                                                 VolumePresentation.Relative);
+                    if (lowerPTVJVolumeCoverage < 98.0)
+                    {
+                        logger.Information("V100%-{lowerPTVJId} was {lowerPTVJVolumeCoverage} (<98%). Performing additional optimization cycle",
+                                           lowerPTVJ.Id,
+                                           Math.Round(lowerPTVJVolumeCoverage, 2, MidpointRounding.AwayFromZero));
+                        return true;
+                    }
+                    else
+                    {
+                        logger.Information("V100%-{lowerPTVJId} was {lowerPTVJVolumeCoverage} (>=98%). Skip additional optimization cycle",
+                                           lowerPTVJ.Id,
+                                           Math.Round(lowerPTVJVolumeCoverage, 2, MidpointRounding.AwayFromZero));
+                        return false;
+                    }
+                default:
+                    return false;
             }
         }
     }

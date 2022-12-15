@@ -99,7 +99,7 @@ namespace TMIAutomation
                 int topSliceIsodose25 = slicesIsodose25.LastOrDefault();
                 int bottomSliceRem = slicesIsodose25.FirstOrDefault() - 2;
 
-                Structure body = upperSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY);
+                Structure body = upperSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.BODY || s.Id == StructureHelper.EXTERNAL);
                 Structure bodyShrunk = upperSS.TryAddStructure("AVOIDANCE", "tempBody", logger);
                 bodyShrunk.SegmentVolume = body.Margin(-20);
 

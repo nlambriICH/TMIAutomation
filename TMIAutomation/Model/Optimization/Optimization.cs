@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
+using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
@@ -12,12 +13,13 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<Optimization>();
         private readonly EsapiWorker esapiWorker;
-#if ESAPI16
         private readonly string upperPlanId;
         private readonly string registrationId;
-#endif
         private readonly string lowerPlanId;
         private readonly string machineName;
+#if ESAPI15
+        private readonly bool generateBaseDosePlanOnly;
+#endif
 
 #if ESAPI16
         public Optimization(EsapiWorker esapiWorker, string upperPlanId, string registrationId, string lowerPlanId, string machineName)
@@ -29,12 +31,20 @@ namespace TMIAutomation
             this.machineName = machineName;
         }
 #else
-        public Optimization(EsapiWorker esapiWorker, string lowerPlanId, string machineName)
-                {
-                    this.esapiWorker = esapiWorker;
-                    this.lowerPlanId = lowerPlanId;
-                    this.machineName = machineName;
-                }
+        public Optimization(EsapiWorker esapiWorker,
+                            string upperPlanId,
+                            string registrationId,
+                            string lowerPlanId,
+                            string machineName,
+                            bool generateBaseDosePlanOnly)
+        {
+            this.esapiWorker = esapiWorker;
+            this.upperPlanId = upperPlanId;
+            this.registrationId = registrationId;
+            this.lowerPlanId = lowerPlanId;
+            this.machineName = machineName;
+            this.generateBaseDosePlanOnly = generateBaseDosePlanOnly;
+        }
 #endif
 
         public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
@@ -44,79 +54,174 @@ namespace TMIAutomation
 #if ESAPI16
                 logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.machineName });
 #else
-                logger.Information("Optimization context: {@context}", new List<string> { this.lowerPlanId, this.machineName });
+                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.machineName, this.generateBaseDosePlanOnly.ToString() });
 #endif
                 Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
-#if ESAPI16
-                ExternalPlanSetup lowerPlanBase = targetCourse.GenerateBasePlan(lowerPlan.StructureSet);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 Registration registration = scriptContext.Patient.Registrations.FirstOrDefault(reg => reg.Id == this.registrationId);
-
-                progress.Report(0.05);
-                message.Report("Copying caudal isocenter's fields of upper-body...");
-                /* CopyPlanSetup creates a plan with correct fields but in HFS
-                 * The dose is lost once the plan is changed to FFS
-                 */
-                lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration, this.machineName);
-
-                progress.Report(0.1);
-                message.Report("Calculating dose of base-dose plan...");
-                lowerPlanBase.SetupOptimization();
-                bool baseDoseSuccess = lowerPlanBase.CalculatePlanDose();
-                if (!baseDoseSuccess)
+#if ESAPI15
+                if (this.generateBaseDosePlanOnly)
                 {
-                    logger.Error("An error occured during dose calculation");
-                    throw new Exception("Dose calculation was not successful");
+                    GenerateBaseDosePlan(targetCourse, lowerPlan, upperPlan, registration, progress, message);
                 }
-
+                else
+                {
+                    PerformLowerPlanOptimizationCommon(targetCourse, lowerPlan, progress, message);
+                }
+#else
+                ExternalPlanSetup lowerPlanBase = GenerateBaseDosePlan(targetCourse, lowerPlan, upperPlan, registration, progress, message);
                 lowerPlan.BaseDosePlanningItem = lowerPlanBase;
-#endif
-                progress.Report(0.2);
-                message.Report("Placing isocenters...");
-                lowerPlan.SetIsocenters(this.machineName);
+                ExternalPlanSetup optimizedLowerPlan = PerformLowerPlanOptimizationCommon(targetCourse, lowerPlan, progress, message);
+                PlanSum planSum = targetCourse.CreatePlanSum(new List<PlanSetup> { optimizedLowerPlan, upperPlan }, optimizedLowerPlan.StructureSet.Image);
+                planSum.Id = "PSAutoOpt1";
 
-                lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
-
-                OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
-                StructureSet lowerSS = lowerPlan.StructureSet;
-
-                optSetup.ClearObjectives();
-                optSetup.AddPointObjectives(lowerSS);
-                optSetup.AddEUDObjectives(lowerSS);
-                optSetup.UseJawTracking = false;
-                optSetup.AddAutomaticNormalTissueObjective(150);
-                //optSetup.ExcludeStructuresFromOptimization(ss);
-
-                progress.Report(0.35);
-                message.Report("Optimizing plan...");
-                bool optSuccess = lowerPlan.OptimizePlan();
-                if (!optSuccess)
+                if (planSum.NeedAdditionalOptimizationCycle(OptimizationCycleTarget.LowerPTV_J))
                 {
-                    logger.Error("An error occured during optimization");
-                    throw new Exception("Optimization was not successful");
+                    progress.Report(0.05);
+                    message.Report("Performing additional optimization cycle...");
+                    PlanSetup latestLowerPlan = planSum.PlanSetups.FirstOrDefault(ps => ps.TreatmentOrientation == PatientOrientation.FeetFirstSupine);
+                    StructureSet lowerSS = latestLowerPlan.StructureSet;
+                    Structure lowerPTVJ = lowerSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
+                    lowerSS.CreateIsodoseOptStructures(planSum,
+                                                       lowerPTVJ,
+                                                       OptimizationCycleTarget.LowerPTV_J,
+                                                       logger,
+                                                       message);
+                    Structure isodose100PlanSum = lowerSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100_PS);
+                    if (isodose100PlanSum.Volume > 0)
+                    {
+                        ExternalPlanSetup lowerPlanAddOpt = targetCourse.CopyPlanSetup(latestLowerPlan) as ExternalPlanSetup;
+                        lowerPlanAddOpt.Id = "LowerOptJ";
+                        lowerPlanAddOpt.OptimizationSetup.ClearObjectives();
+                        lowerPlanAddOpt.OptimizationSetup.AddPointObjectives(lowerSS);
+                        lowerPlanAddOpt.OptimizationSetup.AddEUDObjectives(lowerSS);
+                        lowerPlanAddOpt.OptimizationSetup.AddPointObjectivesAdditionalOptCycle(lowerSS,
+                                                                                               lowerPlanAddOpt.TotalDose,
+                                                                                               OptimizationCycleTarget.LowerPTV_J);
+                        message.Report("Continue plan optimization with intermediate dose...");
+                        progress.Report(0.10);
+                        lowerPlanAddOpt.ContinueOptimization();
+                        progress.Report(0.10);
+                        message.Report("Calculating dose...");
+                        lowerPlanAddOpt.CalculatePlanDose();
+
+                        message.Report($"Normalize plan: {StructureHelper.LOWER_PTV_NO_JUNCTION}-98%=98%...");
+                        lowerPlanAddOpt.Normalize(0.98 * lowerPlanAddOpt.TotalDose, 98);
+
+                        planSum = targetCourse.CreatePlanSum(new List<PlanSetup> { lowerPlanAddOpt, upperPlan }, lowerPlanAddOpt.StructureSet.Image);
+                        planSum.Id = "PSAutoOpt2";
+                    }
+                    else
+                    {
+                        logger.Warning("Could not perform additional optimization because {DOSE_100_PS} volume was {volume}", StructureHelper.DOSE_100_PS, isodose100PlanSum.Volume);
+                    }
                 }
-
-                message.Report("Adjusting jaw y-size to MLC shape...");
-                lowerPlan.AdjustYJawToMLCShape();
-
-                progress.Report(0.35);
-                message.Report("Calculating dose...");
-                bool doseSuccess = lowerPlan.CalculatePlanDose();
-                if (!doseSuccess)
-                {
-                    logger.Error("An error occured during dose calculation");
-                    throw new Exception("Dose calculation was not successful");
-                }
-
-                message.Report($"Normalize plan: {StructureHelper.LOWER_PTV_NO_JUNCTION}-98%=98%...");
-                lowerPlan.Normalize();
-#if ESAPI16
-                PlanSum planSum = targetCourse.CreatePlanSum(new List<PlanSetup> { lowerPlan, upperPlan }, lowerPlan.StructureSet.Image);
-                planSum.Id = "PlanSumAuto";
 #endif
             });
+        }
 
+        private ExternalPlanSetup GenerateBaseDosePlan(Course targetCourse,
+                                                       ExternalPlanSetup lowerPlan,
+                                                       ExternalPlanSetup upperPlan,
+                                                       Registration registration,
+                                                       IProgress<double> progress,
+                                                       IProgress<string> message)
+        {
+            progress.Report(0.10);
+            message.Report("Copying caudal isocenter's fields of upper-body...");
+            /* CopyPlanSetup creates a plan with correct fields but in HFS
+             * The dose is lost once the plan is changed to FFS
+             */
+            ExternalPlanSetup lowerPlanBase = targetCourse.AddBaseDosePlan(lowerPlan.StructureSet);
+            lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration, this.machineName);
+
+            progress.Report(0.10);
+            message.Report("Calculating dose of base-dose plan...");
+            lowerPlanBase.SetupOptimization();
+            lowerPlanBase.CalculatePlanDose();
+           
+            return lowerPlanBase;
+        }
+
+        private ExternalPlanSetup PerformLowerPlanOptimizationCommon(Course targetCourse,
+                                                                     ExternalPlanSetup lowerPlan,
+                                                                     IProgress<double> progress,
+                                                                     IProgress<string> message)
+        {
+            progress.Report(0.05);
+            message.Report("Placing isocenters...");
+            lowerPlan.SetIsocenters(this.machineName);
+
+            lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
+
+            OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
+            StructureSet lowerSS = lowerPlan.StructureSet;
+
+            optSetup.ClearObjectives();
+            optSetup.AddPointObjectives(lowerSS);
+            optSetup.AddEUDObjectives(lowerSS);
+            optSetup.UseJawTracking = false;
+            optSetup.AddAutomaticNormalTissueObjective(150);
+            //optSetup.ExcludeStructuresFromOptimization(ss);
+
+            progress.Report(0.05);
+            message.Report("Optimizing plan...");
+            lowerPlan.OptimizePlan();
+
+            progress.Report(0.05);
+            message.Report("Adjusting jaw y-size to MLC shape...");
+            lowerPlan.AdjustYJawToMLCShape();
+
+            progress.Report(0.10);
+            message.Report("Calculating dose...");
+            lowerPlan.CalculatePlanDose();
+
+            message.Report($"Normalize plan: {StructureHelper.LOWER_PTV_NO_JUNCTION}-98%=98%...");
+            lowerPlan.Normalize(new DoseValue(0.98 * lowerPlan.TotalDose.Dose, "Gy"), 98);
+
+            if (!lowerPlan.NeedAdditionalOptimizationCycle(OptimizationCycleTarget.LowerPTVNoJ))
+            {
+                return lowerPlan;
+            }
+            else
+            {
+                progress.Report(0.05);
+                message.Report("Performing additional optimization cycle...");
+                ExternalPlanSetup lowerPlanAddOpt = targetCourse.CopyPlanSetup(lowerPlan) as ExternalPlanSetup;
+                /* Error thrown by ExternalPlanSetup.dll:
+                 * Plan IDs without a revision number have a maximum length of 13 characters.
+                 * The revision number may not exceed 2 digits
+                */
+                lowerPlanAddOpt.Id = "LowerOptPTV";
+
+                StructureSet lowerSSAddOpt = lowerPlanAddOpt.StructureSet;
+                Structure lowerPTVNoJ = lowerSSAddOpt.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
+                lowerPlanAddOpt.PlanNormalizationValue = 100; // no plan normalization
+                lowerPlanAddOpt.PlanNormalizationValue = lowerPlanAddOpt.GetDoseAtVolume(lowerPTVNoJ,
+                                                                                         50,
+                                                                                         VolumePresentation.Relative,
+                                                                                         DoseValuePresentation.Relative).Dose; // 100% in Target Mean
+                lowerSSAddOpt.CreateIsodoseOptStructures(lowerPlanAddOpt,
+                                                         lowerPTVNoJ,
+                                                         OptimizationCycleTarget.LowerPTVNoJ,
+                                                         logger,
+                                                         message);
+                lowerPlanAddOpt.OptimizationSetup.AddPointObjectivesAdditionalOptCycle(lowerSSAddOpt,
+                                                                                       lowerPlanAddOpt.TotalDose,
+                                                                                       OptimizationCycleTarget.LowerPTVNoJ);
+                progress.Report(0.10);
+                message.Report("Continue plan optimization with intermediate dose...");
+                lowerPlanAddOpt.ContinueOptimization();
+                progress.Report(0.10);
+                message.Report("Calculating dose...");
+                lowerPlanAddOpt.CalculatePlanDose();
+
+                message.Report($"Normalize plan: {StructureHelper.LOWER_PTV_NO_JUNCTION}-98%=98%...");
+                lowerPlanAddOpt.Normalize(0.98 * lowerPlanAddOpt.TotalDose, 98);
+
+                return lowerPlanAddOpt;
+            }
         }
     }
 }

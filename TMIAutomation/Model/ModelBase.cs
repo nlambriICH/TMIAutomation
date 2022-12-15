@@ -6,7 +6,7 @@ using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIAutomation.StructureCreation
+namespace TMIAutomation
 {
     public class ModelBase
     {
@@ -185,12 +185,15 @@ namespace TMIAutomation.StructureCreation
             return optimization.ComputeAsync(progress, message);
         }
 #else
-        public Task OptimizeAsync(string lowerPlanId,
+        public Task OptimizeAsync(string upperPlanId,
+                                  string registrationId,
+                                  string lowerPlanId,
                                   string machineName,
+                                  bool generateBaseDosePlanOnly,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, lowerPlanId, machineName);
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, lowerPlanId, registrationId, machineName, generateBaseDosePlanOnly);
             return optimization.ComputeAsync(progress, message);
         }
 #endif
