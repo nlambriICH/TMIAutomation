@@ -176,6 +176,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy $(SolutionDir)Configuration $(TargetDir)Configuration /mir</PostBuildEvent>
+    <PostBuildEvent>robocopy $(SolutionDir)Configuration $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+exit 0</PostBuildEvent>
   </PropertyGroup>
 </Project>
