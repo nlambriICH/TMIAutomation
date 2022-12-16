@@ -20,10 +20,10 @@ namespace TMIAutomation.Tests
         [Theory]
         [InlineData("LowerBase")]
         [InlineData("LowerBase1")]
-        private void GenerateBasePlan(string expectedPlanId)
+        private void AddBaseDosePlan(string expectedPlanId)
         {
             Course targetCourse = externalPlanSetup.Course;
-            ExternalPlanSetup newPlan = targetCourse.GenerateBasePlan(externalPlanSetup.StructureSet);
+            ExternalPlanSetup newPlan = targetCourse.AddBaseDosePlan(externalPlanSetup.StructureSet);
             try
             {
                 Assert.Equal(expectedPlanId, newPlan.Id);
@@ -37,8 +37,13 @@ namespace TMIAutomation.Tests
         [Fact]
         private void OptimizationSetup_Algorithm()
         {
+#if ESAPI16
+            string optionName = "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart";
+            string expectedOptAlgo = "PO 16.1.0";
+#else
             string optionName = "/PhotonOptCalculationOptions/@MRLevelAtRestart";
             string expectedOptAlgo = "PO_15.6.06";
+#endif
             string expectedDoseAlgo = "AAA 15.06.06";
             string expectedOptValue = "MR3";
             string expectedDoseValue = "2.000";

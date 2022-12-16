@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMIAutomation.StructureCreation;
 using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.Types;
 using Xunit;

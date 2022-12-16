@@ -1,6 +1,5 @@
 ﻿using System;
 using TMIAutomation.Async;
-using TMIAutomation.StructureCreation;
 using VMS.TPS.Common.Model.API;
 using System.IO;
 using System.Collections.Generic;
@@ -22,11 +21,14 @@ namespace TMIAutomation.Tests
             {
                 string patientID = testData["PatientID"];
                 Patient patient = EclipseApp.OpenPatientById(patientID);
+                Course course = patient.Courses.FirstOrDefault(c => c.Id == testData["CourseID"]);
+                PlanSetup planSetup = course.PlanSetups.FirstOrDefault(ps => ps.Id == testData["PlanID"]);
                 PluginScriptContext scriptContext = new PluginScriptContext
                 {
                     Patient = patient,
-                    Course = patient.Courses.FirstOrDefault(c => c.Id == testData["CourseID"]),
-                    PlanSetup = patient.Courses.FirstOrDefault(c => c.Id == testData["CourseID"]).PlanSetups.FirstOrDefault(ps => ps.Id == testData["PlanID"]),
+                    Course = course,
+                    PlanSetup = planSetup,
+                    StructureSet = planSetup.StructureSet
                 };
                 EsapiWorker esapiWorker = new EsapiWorker(scriptContext);
 
@@ -37,7 +39,8 @@ namespace TMIAutomation.Tests
                             .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
                             .Add<ObjectiveSetupTests>(scriptContext.PlanSetup.OptimizationSetup, scriptContext.PlanSetup)
                             .Add<CalculationTests>(scriptContext.PlanSetup, scriptContext)
-                            .Add<IsocenterTests>(scriptContext.PlanSetup, scriptContext);
+                            .Add<IsocenterTests>(scriptContext.PlanSetup, scriptContext)
+                            .Add<StructureHelperTests>(scriptContext.StructureSet);
                     TestBase.RunTests();
                 }
                 catch (Exception e)

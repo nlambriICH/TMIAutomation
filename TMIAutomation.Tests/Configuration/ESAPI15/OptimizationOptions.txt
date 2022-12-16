@@ -1,0 +1,5 @@
+﻿# Values must be tab separated
+# Lines starting with a hash sign '#' are ignored
+# Empty lines are ignored
+OptimizationAlgorithm	DoseAlgorithm	MLCID	DosePerFraction	NumberOfFractions
+PO_15.6.06	AAA 15.06.06	MLC0010	2	1

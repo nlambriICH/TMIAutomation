@@ -136,7 +136,7 @@ namespace TMIAutomation
             message.Report("Calculating dose of base-dose plan...");
             lowerPlanBase.SetupOptimization();
             lowerPlanBase.CalculatePlanDose();
-           
+
             return lowerPlanBase;
         }
 

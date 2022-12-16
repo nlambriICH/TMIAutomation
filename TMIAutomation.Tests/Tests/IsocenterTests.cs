@@ -27,7 +27,6 @@ namespace TMIAutomation.Tests
         [MemberData(nameof(CopyCaudalIsocenter_Data))]
         private void CopyCaudalIsocenter(string sourcePlanId,
                                          string registrationId,
-                                         string machineName,
                                          int index,
                                          string expectedBeamId,
                                          GantryDirection expectedGantryDir,
@@ -38,7 +37,7 @@ namespace TMIAutomation.Tests
             ExternalPlanSetup sourcePlan = this.scriptContext.Course.ExternalPlanSetups.FirstOrDefault(ps => ps.Id == sourcePlanId);
             Registration registration = this.scriptContext.Patient.Registrations.FirstOrDefault(reg => reg.Id == registrationId);
 
-            targetPlan.CopyCaudalIsocenter(sourcePlan, registration, machineName);
+            targetPlan.CopyCaudalIsocenter(sourcePlan, registration);
 
             Beam newBeam = targetPlan.Beams.ElementAt(index);
             try
@@ -52,7 +51,7 @@ namespace TMIAutomation.Tests
             catch (EqualException e)
             {
                 throw new Exception(
-                    $"Input parameters: {sourcePlanId}, {registrationId}, {machineName}, {index}, " +
+                    $"Input parameters: {sourcePlanId}, {registrationId}, {index}, " +
                     $"{expectedBeamId}, {expectedGantryDir}, {expectedGantryAngleStart}, " +
                     $"{expectedGantryAngleStop}, {expectedCollRtn}",
                     e);
@@ -66,8 +65,8 @@ namespace TMIAutomation.Tests
 
         public static IEnumerable<object[]> CopyCaudalIsocenter_Data()
         {
-            yield return new object[] { "RA_TMLIup3", "REGISTRATION", "TrueBeamSN1015", 0, "Field 9", GantryDirection.Clockwise, 180.1, 179.9, 175 };
-            yield return new object[] { "RA_TMLIup3", "REGISTRATION", "TrueBeamSN1015", 1, "Field 10", GantryDirection.CounterClockwise, 179.9, 180.1, 185 };
+            yield return new object[] { "RA_TMLIup3", "REGISTRATION", 0, "Field 9", GantryDirection.Clockwise, 180.1, 179.9, 175 };
+            yield return new object[] { "RA_TMLIup3", "REGISTRATION", 1, "Field 10", GantryDirection.CounterClockwise, 179.9, 180.1, 185 };
         }
     }
 }

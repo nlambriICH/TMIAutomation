@@ -1,5 +1,6 @@
-﻿# Move this file into the same folder where the executable runs. Values must be tab separated
-### DO NOT DELETE THIS LINE ###
+﻿# Values must be tab separated
+# Lines starting with a hash sign '#' are ignored
+# Empty lines are ignored
 Structure	Limit	DoseValue	DoseUnit	Priority	gEUD a
 Dose_100%	upper	0.15	Gy	100	40
 HT_AUTO	upper	1.9	Gy	70	40

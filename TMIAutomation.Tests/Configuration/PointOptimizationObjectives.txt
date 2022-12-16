@@ -1,5 +1,6 @@
-﻿# Move this file into the same folder where the executable runs. Values must be tab separated
-### DO NOT DELETE THIS LINE ###
+﻿# Values must be tab separated
+# Lines starting with a hash sign '#' are ignored
+# Empty lines are ignored
 Structure	Limit	Volume[%]	DoseValue	DoseUnit	Priority
 Dose_100%	upper	0	0.25	Gy	100
 PTV_J25%	upper	0	0.7	Gy	100

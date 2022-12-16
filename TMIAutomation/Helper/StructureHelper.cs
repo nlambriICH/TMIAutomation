@@ -34,8 +34,11 @@ namespace TMIAutomation
         public const string DOSE_95 = "Dose_95%";
         public const string DOSE_100_PS = "Dose_100%_PS";
 
-        public static Structure CreateStructureFromIsodose(this StructureSet ss, string junctionId,
-            Structure ptvWithJunction, Structure isodose, ILogger logger)
+        public static Structure CreateStructureFromIsodose(this StructureSet ss,
+                                                           string junctionId,
+                                                           Structure ptvWithJunction,
+                                                           Structure isodose,
+                                                           ILogger logger)
         {
             IEnumerable<int> juncSlices = ss.GetStructureSlices(ptvWithJunction);
             IEnumerable<int> isoSlices = ss.GetStructureSlices(isodose);
@@ -45,8 +48,12 @@ namespace TMIAutomation
             return junction;
         }
 
-        public static void AddJunctionContoursFromIsodose(this StructureSet ss, Structure wholeJunction,
-            IEnumerable<int> juncSlices, IEnumerable<int> isoSlices, Structure isodose, Structure subJunction)
+        public static void AddJunctionContoursFromIsodose(this StructureSet ss,
+                                                          Structure wholeJunction,
+                                                          IEnumerable<int> juncSlices,
+                                                          IEnumerable<int> isoSlices,
+                                                          Structure isodose,
+                                                          Structure subJunction)
         {
             foreach (int slice in juncSlices.Intersect(isoSlices))
             {
@@ -60,7 +67,10 @@ namespace TMIAutomation
             }
         }
 
-        public static bool IsEmptyContourIntersection(this StructureSet ss, Structure structure, Structure other, int slice)
+        public static bool IsEmptyContourIntersection(this StructureSet ss,
+                                                      Structure structure,
+                                                      Structure other,
+                                                      int slice)
         {
             Structure ptvSlice = ss.AddStructure("PTV", "tempPTV");
             foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
@@ -225,7 +235,11 @@ namespace TMIAutomation
             else
             {
                 logger.Warning("Found existing Sructure {Id} in current StructureSet {ssId}", id, ss.Id);
+#if ESAPI16
+                string newId = id.Length >= 63 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
+#else
                 string newId = id.Length >= 15 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
+#endif
                 logger.Warning("Renaming existing Structure {Id} to {newId}", id, newId);
                 ss.Structures.FirstOrDefault(s => s.Id == id).Id = newId;
                 logger.Warning("Add new structure Structure {Id}", id);
