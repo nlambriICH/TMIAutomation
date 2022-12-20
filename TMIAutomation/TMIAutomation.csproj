@@ -205,16 +205,30 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Configuration\EUDOptimizationObjectives.txt" />
-    <Resource Include="Configuration\PointOptimizationObjectives.txt" />
+    <Resource Include="Configuration\ESAPI16\EUDOptimizationObjectives.txt" />
+    <Resource Include="Configuration\ESAPI16\PointOptimizationObjectives.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Configuration\OptimizationOptions.txt" />
+    <Resource Include="Configuration\ESAPI16\OptimizationOptions.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Configuration\ESAPI15\EUDOptimizationObjectives.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\ESAPI15\OptimizationOptions.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\ESAPI15\PointOptimizationObjectives.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy $(ProjectDir)Configuration $(TargetDir)Configuration /mir
+    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Release-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Debug-15.6 OR $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>

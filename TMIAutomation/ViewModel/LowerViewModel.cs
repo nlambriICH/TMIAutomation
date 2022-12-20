@@ -180,9 +180,6 @@ namespace TMIAutomation.ViewModel
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
 
-            await this.modelBase.GenerateLowerPlanAsync();
-            LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
-
             try
             {
 #if ESAPI15
@@ -194,9 +191,17 @@ namespace TMIAutomation.ViewModel
                                                                 "Lower-extremities optimization",
                                                                 MessageBoxButton.YesNo,
                                                                 MessageBoxImage.Question);
-                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes ? true : false;
+                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes;
                 }
+
+                if (!generateBaseDosePlanOnly)
+                {
+                    await this.modelBase.GenerateLowerPlanAsync();
+                }
+#elif ESAPI16
+                await this.modelBase.GenerateLowerPlanAsync();
 #endif
+                LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
                 if (this.isJunctionChecked)
                 {

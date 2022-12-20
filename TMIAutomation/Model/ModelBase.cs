@@ -191,7 +191,7 @@ namespace TMIAutomation
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, lowerPlanId, registrationId, generateBaseDosePlanOnly);
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId, generateBaseDosePlanOnly);
             return optimization.ComputeAsync(progress, message);
         }
 #endif
