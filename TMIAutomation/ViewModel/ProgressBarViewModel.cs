@@ -1,6 +1,4 @@
 ﻿using GalaSoft.MvvmLight;
-using Serilog;
-using System;
 
 namespace TMIAutomation.ViewModel
 {
@@ -49,11 +47,6 @@ namespace TMIAutomation.ViewModel
         public void UpdateMessage(string m)
         {
             Message = m;
-        }
-
-        public void ProgressBar_Closed(object sender, EventArgs e)
-        {
-            Log.CloseAndFlush();
         }
     }
 }

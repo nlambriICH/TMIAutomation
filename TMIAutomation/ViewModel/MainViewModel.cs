@@ -1,8 +1,5 @@
 ﻿using GalaSoft.MvvmLight;
-using Serilog;
-using System;
 using TMIAutomation.Async;
-using TMIAutomation.StructureCreation;
 
 namespace TMIAutomation.ViewModel
 {
@@ -16,11 +13,6 @@ namespace TMIAutomation.ViewModel
             ModelBase modelBase = new ModelBase(esapiWorker);
             UpperVM = new UpperViewModel(modelBase);
             LowerVM = new LowerViewModel(modelBase);
-        }
-
-        public void MainView_Closed(object sender, EventArgs e)
-        {
-            Log.CloseAndFlush();
         }
     }
 }

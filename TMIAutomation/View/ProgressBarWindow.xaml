@@ -81,7 +81,8 @@
                      Foreground="LightGray"
                      FontFamily="Cascadia Mono, Consolas, Courier New, monospace"
                      VerticalScrollBarVisibility="Auto"
-                     x:Name="TMIAutomationLogs"/>
+                     x:Name="TMIAutomationLogs"
+                     TextChanged="TMIAutomationLogs_TextChanged"/>
 
     </Grid>
 </Window>

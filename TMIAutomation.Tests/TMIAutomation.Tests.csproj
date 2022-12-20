@@ -13,9 +13,9 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug-15.6|x64' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>bin\x64\Debug-15.6\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -23,8 +23,28 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-15.6|x64' ">
+    <OutputPath>bin\x64\Release-15.6\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-16.1|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug-16.1\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ESAPI16</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-16.1|x64'">
+    <OutputPath>bin\x64\Release-16.1\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -44,6 +64,7 @@
     <Compile Include="Attributes\TheoryAttribute.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="Tests\CalculationTests.cs" />
+    <Compile Include="Tests\IsocenterTests.cs" />
     <Compile Include="Tests\ObjectiveSetupTests.cs" />
     <Compile Include="TestRunner\ITestBase.cs" />
     <Compile Include="TestRunner\TestBase.cs" />
@@ -51,19 +72,43 @@
     <Compile Include="TestBuilder\TestBuilder.cs" />
     <Compile Include="TestRunner\DiscoveredTests.cs" />
     <Compile Include="TestReporter\TestReporter.cs" />
+    <Compile Include="Tests\StructureHelperTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64">
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\TMIAutomation\packages\Serilog.2.12.0\lib\net46\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-15.6' Or '$(Configuration)'=='Release-15.6'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Varian\RTM\15.6\esapi\API\VMS.TPS.Common.Model.API.dll</HintPath>
     </Reference>
-    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64">
+    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.450.29, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-16.1' Or '$(Configuration)'=='Release-16.1'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Varian\RTM\16.1\esapi\API\VMS.TPS.Common.Model.API.dll</HintPath>
+    </Reference>
+    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-15.6' Or '$(Configuration)'=='Release-15.6'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Varian\RTM\15.6\esapi\API\VMS.TPS.Common.Model.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.450.29, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-16.1' Or '$(Configuration)'=='Release-16.1'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Varian\RTM\16.1\esapi\API\VMS.TPS.Common.Model.Types.dll</HintPath>
     </Reference>
     <Reference Include="xunit.assert, Version=2.4.2.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\TMIAutomation\packages\xunit.assert.2.4.2\lib\netstandard1.1\xunit.assert.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Configuration\EUDOptimizationObjectives.txt" />
+    <Content Include="Configuration\ESAPI15\OptimizationOptions.txt" />
+    <Content Include="Configuration\ESAPI16\OptimizationOptions.txt" />
+    <Content Include="Configuration\PointOptimizationObjectives.txt" />
+    <Content Include="Configuration\SensitiveData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TMIAutomation\TMIAutomation.csproj">
@@ -71,14 +116,13 @@
       <Name>TMIAutomation</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Configuration\EUDOptimizationObjectives.txt" />
-    <Content Include="Configuration\OptimizationOptions.txt" />
-    <Content Include="Configuration\PointOptimizationObjectives.txt" />
-    <Content Include="Configuration\SensitiveData.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>robocopy $(ProjectDir)Configuration $(TargetDir)Configuration /mir</PostBuildEvent>
+    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration PointOptimizationObjectives.txt EUDOptimizationObjectives.txt SensitiveData.txt 
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+exit 0</PostBuildEvent>
   </PropertyGroup>
 </Project>

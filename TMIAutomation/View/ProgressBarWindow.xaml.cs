@@ -11,19 +11,18 @@ namespace TMIAutomation.View
     /// </summary>
     public partial class ProgressBarWindow : Window
     {
+        private static string latestLogMessage = string.Empty;
         public ProgressBarWindow(ProgressBarViewModel pbViewModel)
         {
             InitializeComponent();
 
             this.DataContext = pbViewModel;
 
-            Closed += pbViewModel.ProgressBar_Closed;
-
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                     .MinimumLevel.Verbose()
 #else
-					.MinimumLevel.Debug()
+                    .MinimumLevel.Debug()
 #endif
                     .Destructure.ByTransforming<VVector>(vv => new
                     {
@@ -38,9 +37,37 @@ namespace TMIAutomation.View
                         Y1 = Math.Round(vr.Y1, 1, MidpointRounding.AwayFromZero),
                         Y2 = Math.Round(vr.Y2, 1, MidpointRounding.AwayFromZero)
                     })
-                .WriteTo.Logger(Log.Logger)
-                .WriteTo.RichTextBox(TMIAutomationLogs)
-                .CreateLogger();
+                    .Destructure.ByTransforming<ExternalBeamMachineParameters>(ebmp => new
+                    {
+                        Machine = ebmp.MachineId,
+                        EnergyMode = ebmp.EnergyModeId,
+                        DoseRate = ebmp.DoseRate,
+                        Technique = ebmp.TechniqueId
+                    })
+                    .WriteTo.Logger(Log.Logger)
+                    .WriteTo.RichTextBox(TMIAutomationLogs)
+                    .Filter.ByExcluding(logEvent =>
+                    {
+                        if (logEvent.Properties["SourceContext"].ToString() == "\"SerilogTraceListener.SerilogTraceListener\"")
+                        {
+                            if (logEvent.MessageTemplate.Text == latestLogMessage)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                latestLogMessage = logEvent.MessageTemplate.Text;
+                            }
+                        }
+
+                        return false;
+                    })
+                    .CreateLogger();
+        }
+
+        private void TMIAutomationLogs_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            TMIAutomationLogs.ScrollToEnd();
         }
     }
 }

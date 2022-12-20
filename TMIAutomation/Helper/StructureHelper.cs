@@ -24,14 +24,21 @@ namespace TMIAutomation
         public const string UPPER_PTV_NO_JUNCTION = "UpperPTVNoJ";
         public const string LOWER_PTV_NO_JUNCTION = "LowerPTVNoJ";
         public const string PTV_TOTAL = "PTV_Total";
-        public const string BODY = "BODY";
+        public const string BODY = "BODY"; // ECLIPSE default name for patient outline
+        public const string EXTERNAL = "External"; // RayStation default name for patient outline
         public const string REM = "REM_AUTO";
         public const string HEALTHY_TISSUE = "HT_AUTO";
         public const string HEALTHY_TISSUE2 = "HT2_AUTO";
         public const string BODY_FREE = "Body_Free_AUTO";
+        public const string DOSE_105 = "Dose_105%";
+        public const string DOSE_95 = "Dose_95%";
+        public const string DOSE_100_PS = "Dose_100%_PS";
 
-        public static Structure CreateStructureFromIsodose(this StructureSet ss, string junctionId,
-            Structure ptvWithJunction, Structure isodose, ILogger logger)
+        public static Structure CreateStructureFromIsodose(this StructureSet ss,
+                                                           string junctionId,
+                                                           Structure ptvWithJunction,
+                                                           Structure isodose,
+                                                           ILogger logger)
         {
             IEnumerable<int> juncSlices = ss.GetStructureSlices(ptvWithJunction);
             IEnumerable<int> isoSlices = ss.GetStructureSlices(isodose);
@@ -41,8 +48,12 @@ namespace TMIAutomation
             return junction;
         }
 
-        public static void AddJunctionContoursFromIsodose(this StructureSet ss, Structure wholeJunction,
-            IEnumerable<int> juncSlices, IEnumerable<int> isoSlices, Structure isodose, Structure subJunction)
+        public static void AddJunctionContoursFromIsodose(this StructureSet ss,
+                                                          Structure wholeJunction,
+                                                          IEnumerable<int> juncSlices,
+                                                          IEnumerable<int> isoSlices,
+                                                          Structure isodose,
+                                                          Structure subJunction)
         {
             foreach (int slice in juncSlices.Intersect(isoSlices))
             {
@@ -56,7 +67,10 @@ namespace TMIAutomation
             }
         }
 
-        public static bool IsEmptyContourIntersection(this StructureSet ss, Structure structure, Structure other, int slice)
+        public static bool IsEmptyContourIntersection(this StructureSet ss,
+                                                      Structure structure,
+                                                      Structure other,
+                                                      int slice)
         {
             Structure ptvSlice = ss.AddStructure("PTV", "tempPTV");
             foreach (VVector[] contour in structure.GetContoursOnImagePlane(slice))
@@ -106,7 +120,7 @@ namespace TMIAutomation
                                                IProgress<double> progress,
                                                IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
+            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT_AUTO...");
@@ -135,7 +149,7 @@ namespace TMIAutomation
                                           IProgress<double> progress,
                                           IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY);
+            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure Body_Free_AUTO...");
@@ -151,6 +165,46 @@ namespace TMIAutomation
             message.Report("Removing small contours from Body_Free_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {BodyFree}", BODY_FREE);
             ss.RemoveSmallContoursFromStructure(bodyFree, message);
+        }
+
+        public static void CreateIsodoseOptStructures(this StructureSet ss,
+                                                      PlanningItem planningItem,
+                                                      Structure targetVolume,
+                                                      OptimizationCycleTarget optCycleTarget,
+                                                      ILogger logger,
+                                                      IProgress<string> message)
+        {
+            switch (optCycleTarget)
+            {
+                case OptimizationCycleTarget.LowerPTVNoJ:
+                    message.Report("Generating isodose Dose_105%...");
+                    Structure isodose105 = ss.TryAddStructure("CONTROL", DOSE_105, logger);
+                    planningItem.DoseValuePresentation = DoseValuePresentation.Relative;
+                    isodose105.ConvertDoseLevelToStructure(planningItem.Dose, new DoseValue(105.0, DoseValue.DoseUnit.Percent));
+                    isodose105.SegmentVolume = targetVolume.Sub(isodose105);
+                    logger.Information("RemoveSmallContoursFromStructure: {Dose_105}", DOSE_105);
+                    ss.RemoveSmallContoursFromStructure(isodose105, message);
+
+                    message.Report("Generating isodose Dose_95%...");
+                    Structure isodose95 = ss.TryAddStructure("CONTROL", DOSE_95, logger);
+                    isodose95.ConvertDoseLevelToStructure(planningItem.Dose, new DoseValue(95.0, DoseValue.DoseUnit.Percent));
+                    isodose95.SegmentVolume = targetVolume.Sub(isodose95);
+                    logger.Information("RemoveSmallContoursFromStructure: {Dose_95}", DOSE_95);
+                    ss.RemoveSmallContoursFromStructure(isodose95, message);
+
+                    break;
+                case OptimizationCycleTarget.LowerPTV_J:
+                    message.Report("Generating isodose Dose_100%_PS...");
+                    Structure isodose100PlanSum = ss.TryAddStructure("CONTROL", DOSE_100_PS, logger);
+                    isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, new DoseValue(2.0, DoseValue.DoseUnit.Gy));
+                    isodose100PlanSum.SegmentVolume = targetVolume.Sub(isodose100PlanSum);
+                    logger.Information("RemoveSmallContoursFromStructure: {Dose_100_PS}", DOSE_100_PS);
+                    ss.RemoveSmallContoursFromStructure(isodose100PlanSum, message);
+
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void RemoveSmallContoursFromStructure(this StructureSet ss, Structure structure, IProgress<string> message)
@@ -180,8 +234,18 @@ namespace TMIAutomation
             }
             else
             {
-                logger.Warning("Using already existing Sructure {Id} in current StructureSet {ssId}", id, ss.Id);
-                return ss.Structures.FirstOrDefault(s => s.Id == id);
+                logger.Warning("Found existing Sructure {Id} in current StructureSet {ssId}", id, ss.Id);
+#if ESAPI16
+                string newId = id.Length >= 63 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
+#else
+                string newId = id.Length >= 15 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
+#endif
+                logger.Warning("Renaming existing Structure {Id} to {newId}", id, newId);
+                Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
+                oldStructure.Id = newId;
+
+                logger.Warning("Add new structure Structure {Id}", id);
+                return ss.AddStructure(dicomType, id);
             }
         }
 

@@ -6,7 +6,7 @@ using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-namespace TMIAutomation.StructureCreation
+namespace TMIAutomation
 {
     public class ModelBase
     {
@@ -173,13 +173,27 @@ namespace TMIAutomation.StructureCreation
                 : selectedPlan.Beams.Select(b => b.TreatmentUnit.Id).FirstOrDefault();
         }
 
-        public Task OptimizeAsync(string lowerPlanId,
-                                  string machineName,
+#if ESAPI16
+        public Task OptimizeAsync(string upperPlanId,
+                                  string registrationId,
+                                  string lowerPlanId,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, lowerPlanId, machineName);
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId);
             return optimization.ComputeAsync(progress, message);
         }
+#else
+        public Task OptimizeAsync(string upperPlanId,
+                                  string registrationId,
+                                  string lowerPlanId,
+                                  bool generateBaseDosePlanOnly,
+                                  IProgress<double> progress,
+                                  IProgress<string> message)
+        {
+            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId, generateBaseDosePlanOnly);
+            return optimization.ComputeAsync(progress, message);
+        }
+#endif
     }
 }

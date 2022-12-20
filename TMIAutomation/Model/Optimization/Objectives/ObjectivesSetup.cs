@@ -26,8 +26,10 @@ namespace TMIAutomation
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string pointObjPath = Path.Combine(assemblyDir, "Configuration", "PointOptimizationObjectives.txt");
             logger.Verbose("Reading PointObjectives from {pointObjPath}", pointObjPath);
-            foreach (string line in File.ReadLines(pointObjPath).Skip(3))
+            foreach (string line in File.ReadLines(pointObjPath).Skip(4))
             {
+                if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
+
                 string[] pointObjectiveParams = line.Split('\t');
                 logger.Verbose("Read parameters: {@pointObjectiveParams}", pointObjectiveParams);
                 Structure structure = ss.Structures.FirstOrDefault(s => s.Id == pointObjectiveParams[0]);
@@ -35,7 +37,7 @@ namespace TMIAutomation
                 if (structure == null)
                 {
                     logger.Error(new InvalidOperationException($"Cannot add PointObjective for {pointObjectiveParams[0]} because is not present in the given structure set."),
-                        "The following error occured during the script execution");
+                                 "The following error occured during the script execution");
                     continue;
                 }
 
@@ -59,8 +61,10 @@ namespace TMIAutomation
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string eudObjPath = Path.Combine(assemblyDir, "Configuration", "EUDOptimizationObjectives.txt");
             logger.Verbose("Reading EUDObjectives from {pointObjPath}", eudObjPath);
-            foreach (var line in File.ReadLines(eudObjPath).Skip(3))
+            foreach (string line in File.ReadLines(eudObjPath).Skip(4))
             {
+                if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
+
                 string[] eudObjectiveParams = line.Split('\t');
                 logger.Verbose("Read parameters: {@eudObjectiveParams}", eudObjectiveParams);
                 Structure structure = ss.Structures.FirstOrDefault(s => s.Id == eudObjectiveParams[0]);
@@ -68,7 +72,7 @@ namespace TMIAutomation
                 if (structure == null)
                 {
                     logger.Error(new InvalidOperationException($"Cannot add EUDObjective for {eudObjectiveParams[0]} because is not present in the given structure set."),
-                  "The following error occured during the script execution");
+                                 "The following error occured during the script execution");
                     continue;
                 }
 
@@ -84,6 +88,25 @@ namespace TMIAutomation
                 {
                     logger.Error(new InvalidDataException($"Fail parsing EUDObjectives: {line}"), "The following error occured during the script execution");
                 }
+            }
+        }
+
+        public static void AddPointObjectivesAdditionalOptCycle(this OptimizationSetup optSetup,
+                                                                StructureSet ss,
+                                                                DoseValue totalDose,
+                                                                OptimizationCycleTarget optCycleTarget)
+        {
+            switch (optCycleTarget)
+            {
+                case OptimizationCycleTarget.LowerPTVNoJ:
+                    optSetup.AddPointObjective(ss.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_105), OptimizationObjectiveOperator.Upper, 1.1 * totalDose, 100, 100);
+                    optSetup.AddPointObjective(ss.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_95), OptimizationObjectiveOperator.Lower, totalDose, 100, 150);
+                    break;
+                case OptimizationCycleTarget.LowerPTV_J:
+                    optSetup.AddPointObjective(ss.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100_PS), OptimizationObjectiveOperator.Lower, 1.1 * totalDose, 100, 150);
+                    break;
+                default:
+                    break;
             }
         }
 

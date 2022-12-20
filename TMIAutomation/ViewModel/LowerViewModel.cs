@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using TMIAutomation.StructureCreation;
 using TMIAutomation.View;
 using System.Linq;
 using VMS.TPS.Common.Model.Types;
+#if ESAPI15
+using System.Windows;
+#endif
 
 namespace TMIAutomation.ViewModel
 {
@@ -86,19 +88,6 @@ namespace TMIAutomation.ViewModel
             }
         }
 
-        private string machineName;
-        public string MachineName
-        {
-            get => machineName;
-            set
-            {
-                if (machineName != value)
-                {
-                    Set(ref machineName, value);
-                }
-            }
-        }
-
         private List<string> lowerPlans;
         public List<string> LowerPlans
         {
@@ -171,7 +160,6 @@ namespace TMIAutomation.ViewModel
             Task<List<string>> lowerPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
             UpperPlans = await upperPlansTask;
-            MachineName = await this.modelBase.GetMachineNameAsync(this.selectedUpperPlanId);
             LowerPlans = await lowerPlansTask;
             LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
                 ? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
@@ -192,11 +180,29 @@ namespace TMIAutomation.ViewModel
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
 
-            await this.modelBase.GenerateLowerPlanAsync();
-            LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
-
             try
             {
+#if ESAPI15
+                bool generateBaseDosePlanOnly = false;
+                if (this.isOptimizationChecked)
+                {
+                    MessageBoxResult response = MessageBox.Show("Yes: compute base-dose plan only\n"
+                                                                + "No: perform automatic optimization using junction substructures",
+                                                                "Lower-extremities optimization",
+                                                                MessageBoxButton.YesNo,
+                                                                MessageBoxImage.Question);
+                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes;
+                }
+
+                if (!generateBaseDosePlanOnly)
+                {
+                    await this.modelBase.GenerateLowerPlanAsync();
+                }
+#elif ESAPI16
+                await this.modelBase.GenerateLowerPlanAsync();
+#endif
+                LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
+
                 if (this.isJunctionChecked)
                 {
                     bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValidAsync(this.selectedUpperPlanId);
@@ -224,7 +230,20 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isOptimizationChecked)
                 {
-                    await this.modelBase.OptimizeAsync(this.selectedLowerPlanId, this.machineName, progress, message);
+#if ESAPI16
+                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                                                       this.selectedRegistrationId,
+                                                       this.selectedLowerPlanId,
+                                                       progress,
+                                                       message);
+#else
+                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                                                       this.selectedRegistrationId,
+                                                       this.selectedLowerPlanId,
+                                                       generateBaseDosePlanOnly,
+                                                       progress,
+                                                       message);
+#endif
                 }
             }
             finally

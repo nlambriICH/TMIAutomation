@@ -1,30 +1,50 @@
 ﻿using System;
-using System.Linq;
 using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using Xunit;
+using Xunit.Sdk;
 
 namespace TMIAutomation.Tests
 {
     public class CalculationTests : TestBase
     {
         private ExternalPlanSetup externalPlanSetup;
-        private PluginScriptContext scriptContext;
+
         public override ITestBase Init(object testObject, params object[] optParams)
         {
             this.externalPlanSetup = testObject as ExternalPlanSetup;
-            this.scriptContext = optParams.OfType<PluginScriptContext>().FirstOrDefault();
-            return this.scriptContext == null
-                ? throw new ArgumentException($"A PluginScriptContext must be provided to instantiate {this.GetType()}")
-                : this;
+            return this;
+        }
+
+        [Theory]
+        [InlineData("LowerBase")]
+        [InlineData("LowerBase1")]
+        private void AddBaseDosePlan(string expectedPlanId)
+        {
+            Course targetCourse = externalPlanSetup.Course;
+            ExternalPlanSetup newPlan = targetCourse.AddBaseDosePlan(externalPlanSetup.StructureSet);
+            try
+            {
+                Assert.Equal(expectedPlanId, newPlan.Id);
+            }
+            catch (EqualException e)
+            {
+                throw new Exception($"Input parameters: {expectedPlanId}", e);
+            }
         }
 
         [Fact]
         private void OptimizationSetup_Algorithm()
         {
+#if ESAPI16
+            string optionName = "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart";
+            string expectedOptAlgo = "PO 16.1.0";
+            string expectedTargetVolumeId = StructureHelper.LOWER_PTV_NO_JUNCTION;
+#else
             string optionName = "/PhotonOptCalculationOptions/@MRLevelAtRestart";
             string expectedOptAlgo = "PO_15.6.06";
+#endif
             string expectedDoseAlgo = "AAA 15.06.06";
             string expectedOptValue = "MR3";
             string expectedDoseValue = "2.000";
@@ -37,6 +57,9 @@ namespace TMIAutomation.Tests
             this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionName, out string optionValue);
             DoseValue dosePerFraction = this.externalPlanSetup.DosePerFraction;
             int? numFractions = this.externalPlanSetup.NumberOfFractions;
+#if ESAPI16
+            string targetVolumeId = this.externalPlanSetup.TargetVolumeID;
+#endif
 
             Assert.Equal(expectedOptAlgo, optAlgo);
             Assert.Equal(expectedDoseAlgo, doseAlgo);
@@ -44,6 +67,9 @@ namespace TMIAutomation.Tests
             Assert.Equal(expectedDoseValue, dosePerFraction.ValueAsString);
             Assert.Equal(expectedDoseUnit, dosePerFraction.UnitAsString);
             Assert.Equal(expectedNumFractions, numFractions);
+#if ESAPI16
+            Assert.Equal(expectedTargetVolumeId, targetVolumeId);
+#endif
         }
     }
 }
