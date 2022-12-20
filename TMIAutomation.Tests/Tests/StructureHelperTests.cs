@@ -7,7 +7,7 @@ using Xunit;
 
 namespace TMIAutomation.Tests
 {
-    class StructureHelperTests : TestBase
+    public class StructureHelperTests : TestBase
     {
         private StructureSet structureSet;
         private readonly ILogger logger = Log.ForContext<StructureHelperTests>();
@@ -39,7 +39,7 @@ namespace TMIAutomation.Tests
                 "LongStructureName64Characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
             };
 #else
-            yield return new object[] { "CONTROL", ""16CharactersName"", "16CharactersName", "16CharactersNa_0" };
+            yield return new object[] { "CONTROL", "16CharactersName", "16CharactersName", "16CharactersNa_0" };
 #endif
         }
 

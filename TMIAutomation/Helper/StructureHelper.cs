@@ -241,7 +241,9 @@ namespace TMIAutomation
                 string newId = id.Length >= 15 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
 #endif
                 logger.Warning("Renaming existing Structure {Id} to {newId}", id, newId);
-                ss.Structures.FirstOrDefault(s => s.Id == id).Id = newId;
+                Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
+                oldStructure.Id = newId;
+
                 logger.Warning("Add new structure Structure {Id}", id);
                 return ss.AddStructure(dicomType, id);
             }
