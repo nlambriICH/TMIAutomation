@@ -1,0 +1,25 @@
+name: Releases
+
+on: 
+  push:
+    #tags:
+    #- '*'
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build app for release (ESAPI-v15.6)
+      run: msbuild TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
+    - name: Build app for release (ESAPI-v16.1)
+      run: msbuild TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
+    #- uses: ncipollo/release-action@v1
+    #  with:
+    #    artifacts: "release.tar.gz,foo/*.txt"
+    #    bodyFile: "body.md"
