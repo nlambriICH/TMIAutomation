@@ -17,16 +17,16 @@ jobs:
         uses: nuget/setup-nuget@v1
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
-      - name: Install nuget packages
-        run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
-      - name: Build app for release ESAPI-v15.6
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
-      - name: Build app for release ESAPI-v16.1
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
-      - name: Set artifact names
+      #- name: Install nuget packages
+      #  run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
+      #- name: Build app for release ESAPI-v15.6
+      #  run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
+      #- name: Build app for release ESAPI-v16.1
+      #  run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
+      - name: Set artifact name
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
-          echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
+      #echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
       - run: |
           echo "${{ env.ESAPI15_RELEASE_ZIP }}"
       #- name: Create artifacts for relase ESAPI-v15.6
