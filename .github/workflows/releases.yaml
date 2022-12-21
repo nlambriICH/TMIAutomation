@@ -1,4 +1,4 @@
-name: Releases
+name: Release
 
 on:
   push:
@@ -6,8 +6,10 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
+  release:
     runs-on: windows-2019
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v2
       - name: Add nuget to PATH
@@ -18,13 +20,6 @@ jobs:
         run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
       - name: Build app for release ESAPI-v15.6
         run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
-   
-  release:
-    needs: build
-    runs-on: windows-2019
-    permissions:
-      contents: write
-    steps:
       - name: Set artifact names
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ env.GITHUB_REF_NAME }}.zip" >> $GITHUB_ENV
