@@ -25,17 +25,27 @@ jobs:
       - name: Set artifact names
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
-          echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-$${{ github.ref_name }}.zip" >> $GITHUB_ENV
+          echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
       - name: Create artifacts for relase ESAPI-v15.6
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-15.6\
           dest: ${{ env.ESAPI15_RELEASE_ZIP }}
+      - name: Check artifact was created successfully ESAPI-v15.6
+        uses: actions/upload-artifact@v1
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}\${{ env.ESAPI15_RELEASE_ZIP }}
       - name: Create artifacts for relase ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-16.1\
           dest: ${{ env.ESAPI16_RELEASE_ZIP }}
+      - name: Check artifact was created successfully ESAPI-v16.1
+        uses: actions/upload-artifact@v1
+        with:
+          name: my-artifact
+          path: ${{ github.workspace }}\${{ env.ESAPI16_RELEASE_ZIP }}
       - uses: ncipollo/release-action@v1
         with:
           artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }}
