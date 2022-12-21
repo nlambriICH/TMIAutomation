@@ -1,42 +1,40 @@
 name: Releases
 
-on: 
-  push:
-    #tags:
-    #- 'v*.*.*'
+on:
+  push: null
 
 jobs:
-
   build:
     runs-on: windows-2019
     permissions:
       contents: write
     steps:
-    - uses: actions/checkout@v2
-    - name: Add nuget to PATH
-      uses: nuget/setup-nuget@v1
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
-    - name: Install nuget packages
-      run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
-    - name: Build app for release (ESAPI-v15.6)
-      run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
-    - name: Create artifacts for relase (ESAPI-v15.6)
-      uses: vimtor/action-zip@v1
+      - uses: actions/checkout@v2
+      - name: Add nuget to PATH
+        uses: nuget/setup-nuget@v1
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Install nuget packages
+        run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory
+          packages
+      - name: Build app for release (ESAPI-v15.6)
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild
+          -p:Configuration=Release-15.6
+      - name: Create artifacts for relase (ESAPI-v15.6)
+        uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-15.6\
           dest: ESAPI15\TMIAutomation-v0.0.0.zip
-          #dest: ESAPI15\TMIAutomation-v${{ github.ref_name }}.zip
-    - name: Build app for release (ESAPI-v16.1)
-      run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
-    - name: Create artifacts for relase (ESAPI-v16.1)
-      uses: vimtor/action-zip@v1
+      - name: Build app for release (ESAPI-v16.1)
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild
+          -p:Configuration=Release-16.1
+      - name: Create artifacts for relase (ESAPI-v16.1)
+        uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-116.1\
           dest: ESAPI16\TMIAutomation-v0.0.0.zip
-          #dest: ESAPI15\TMIAutomation-v${{ github.ref_name }}.zip
-    - uses: ncipollo/release-action@v1
-      with:
-        artifacts: "ESAPI15\,ESAPI16\"
-        draft: true
-        name: "Test"
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: ESAPI15,ESAPI16
+          draft: true
+          name: Test
