@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
+  release:
     runs-on: windows-2019
     permissions:
       contents: write
@@ -20,20 +20,26 @@ jobs:
         run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
       - name: Build app for release ESAPI-v15.6
         run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
+      - name: Set artifact names
+        run: |
+          set ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ env.GITHUB_REF_NAME }}.zip
+          echo ${{ ESAPI15_RELEASE_ZIP }}
+          set ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ env.GITHUB_REF_NAME }}.zip
+          echo ${{ ESAPI16_RELEASE_ZIP }}
       - name: Create artifacts for relase ESAPI-v15.6
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-15.6\
-          dest: ESAPI15_TMIAutomation-$GITHUB_REF_NAME.zip
+          dest: ${{ ESAPI15_RELEASE_ZIP }}
       - name: Build app for release ESAPI-v16.1
         run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
       - name: Create artifacts for relase ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-16.1\
-          dest: ESAPI16_TMIAutomation-$GITHUB_REF_NAME.zip
+          dest: ${{ ESAPI16_RELEASE_ZIP }}
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: ESAPI15_TMIAutomation-$GITHUB_REF_NAME.zip,ESAPI16_TMIAutomation-$GITHUB_REF_NAME.zip
+          artifacts: ${{ ESAPI15_RELEASE_ZIP }},${{ ESAPI16_RELEASE_ZIP }}
           draft: true
           name: Test
