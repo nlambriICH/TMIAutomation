@@ -24,16 +24,16 @@ jobs:
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-15.6\
-          dest: ESAPI15_TMIAutomation-v0.0.0.zip
+          dest: ESAPI15_TMIAutomation-$GITHUB_REF_NAME.zip
       - name: Build app for release ESAPI-v16.1
         run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
       - name: Create artifacts for relase ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-16.1\
-          dest: ESAPI16_TMIAutomation-v0.0.0.zip
+          dest: ESAPI16_TMIAutomation-$GITHUB_REF_NAME.zip
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: ESAPI15_TMIAutomation-v0.0.0.zip,ESAPI16_TMIAutomation-v0.0.0.zip
+          artifacts: ESAPI15_TMIAutomation-$GITHUB_REF_NAME.zip,ESAPI16_TMIAutomation-$GITHUB_REF_NAME.zip
           draft: true
           name: Test
