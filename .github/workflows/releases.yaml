@@ -18,7 +18,7 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     - name: Install nuget packages
-      run: nuget restore TMIAutomation\TMIAutomation.csproj
+      run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
     - name: Build app for release (ESAPI-v15.6)
       run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
     - name: Build app for release (ESAPI-v16.1)
