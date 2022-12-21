@@ -25,13 +25,13 @@ jobs:
       #  run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
       - name: Set artifact name
         run: |
-          echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
+          echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
       #echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $GITHUB_ENV
       - run: |
           echo "${{ env.ESAPI15_RELEASE_ZIP }}"
       - name: Set the value
         run: |
-          echo "action_state=yellow" >> $GITHUB_ENV
+          echo "action_state=yellow" >> $env:GITHUB_ENV
       - name: Use the value
         run: |
           echo "${{ env.action_state }}" # This will output 'yellow'
