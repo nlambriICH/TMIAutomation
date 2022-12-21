@@ -17,26 +17,23 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Install nuget packages
-        run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory
-          packages
-      - name: Build app for release (ESAPI-v15.6)
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild
-          -p:Configuration=Release-15.6
-      - name: Create artifacts for relase (ESAPI-v15.6)
+        run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
+      - name: Build app for release: ESAPI-v15.6
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
+      - name: Create artifacts for relase: ESAPI-v15.6
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-15.6\
-          dest: ESAPI15\TMIAutomation-v0.0.0.zip
-      - name: Build app for release (ESAPI-v16.1)
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild
-          -p:Configuration=Release-16.1
-      - name: Create artifacts for relase (ESAPI-v16.1)
+          dest: ESAPI15_TMIAutomation-v0.0.0.zip
+      - name: Build app for release: ESAPI-v16.1
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
+      - name: Create artifacts for relase: ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
           files: TMIAutomation\Library\Release-16.1\
-          dest: ESAPI16\TMIAutomation-v0.0.0.zip
+          dest: ESAPI16_TMIAutomation-v0.0.0.zip
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: ESAPI15\TMIAutomation-v0.0.0.zip,ESAPI16\TMIAutomation-v0.0.0.zip
+          artifacts: ESAPI15_TMIAutomation-v0.0.0.zip,ESAPI16_TMIAutomation-v0.0.0.zip
           draft: true
           name: Test
