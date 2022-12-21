@@ -13,8 +13,12 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
+    - name: Add nuget to PATH
+      uses: nuget/setup-nuget@v1
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
+    - name: Install nuget packages
+      uses: nuget restore TMIAutomation\TMIAutomation.csproj
     - name: Build app for release (ESAPI-v15.6)
       run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
     - name: Build app for release (ESAPI-v16.1)
