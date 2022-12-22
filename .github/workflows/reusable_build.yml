@@ -31,3 +31,4 @@ jobs:
           path: |
             TMIAutomation\Library\Release-15.6\
             TMIAutomation\Library\Release-16.1\
+          if-no-files-found: error
