@@ -22,6 +22,7 @@ jobs:
         run: echo "${{ steps.tag-on-pr-merge.outputs.tag }}"
   
   call-build:
+    needs: tag-on-PR
     uses: ./.github/workflows/reusable_build.yml
     with:
       upload-artifacts: true
