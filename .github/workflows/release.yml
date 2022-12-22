@@ -28,7 +28,7 @@ jobs:
       upload-artifacts: true
       
   release:
-    needs: [tag-on-PR,call-build]
+    needs: [tag-on-PR, call-build]
     runs-on: windows-2019
     permissions:
       contents: write
@@ -51,3 +51,4 @@ jobs:
           artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }}
           draft: true
           name: Test
+          tag: ${{ needs.tag-on-PR.outputs.tag }}
