@@ -25,10 +25,10 @@ jobs:
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
           echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
-      - name: Rename artifacts
+      - name: Zip artifacts
         run: |
-          Rename-Item -Path Release-15.6 -NewName ${{ env.ESAPI15_RELEASE_ZIP }}
-          Rename-Item -Path Release-16.1 -NewName ${{ env.ESAPI16_RELEASE_ZIP }}
+          Compress-Archive -Path Release-15.6 -DestinationPath ${{ env.ESAPI15_RELEASE_ZIP }}
+          Compress-Archive -Path Release-16.1 -DestinationPath ${{ env.ESAPI16_RELEASE_ZIP }}
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
