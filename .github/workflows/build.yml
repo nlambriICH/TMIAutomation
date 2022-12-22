@@ -3,7 +3,8 @@ name: Build
 on:
   push:
     branches-ignore:
-      - master
+      #- master
+      - automatic_release
 
 jobs:
   call-build:

@@ -18,7 +18,6 @@ jobs:
         uses: David-Lor/action-tag-on-pr-merge@main
         with:
           push-tag: true
-          tag-regex: ^v(\d+\.)?(\d+\.)?(\*|\d+)$
       - name: Print fetched tag
         run: echo "${{ steps.tag-on-pr-merge.outputs.tag }}"
   
