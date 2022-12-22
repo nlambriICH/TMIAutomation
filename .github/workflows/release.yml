@@ -1,18 +1,34 @@
 name: Release
 
 on:
-  push:
-    #tags:
-    #  - 'v*.*.*'
+  pull_request:
+    types:
+      - closed
+    branches:
+      #- master
+      - automatic_release
 
 jobs:
+  tag-on-PR:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Tag on PR merge
+        id: tag-on-pr-merge
+        uses: David-Lor/action-tag-on-pr-merge@main
+        with:
+          push-tag: true
+          tag-regex: ^v(\d+\.)?(\d+\.)?(\*|\d+)$
+      - name: Print fetched tag
+        run: echo "${{ steps.tag-on-pr-merge.outputs.tag }}"
+  
   call-build:
     uses: ./.github/workflows/reusable_build.yml
     with:
       upload-artifacts: true
       
   release:
-    needs: call-build
+    needs: [tag-on-PR,call-build]
     runs-on: windows-2019
     permissions:
       contents: write
