@@ -3,9 +3,7 @@ name: Build
 on:
   push:
     branches-ignore:
-      #- master
-      - automatic_release
-      - test_pull_request
+      - master
 
 jobs:
   call-build:

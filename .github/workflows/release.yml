@@ -5,8 +5,7 @@ on:
     types:
       - closed
     branches:
-      # -master
-      - automatic_release
+      - master
 
 jobs:
   call-build:
