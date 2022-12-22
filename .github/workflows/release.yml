@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    #tags:
+    #  - 'v*.*.*'
 
 jobs:
   call-build:
@@ -21,19 +21,19 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Library
-      - name: Set artifacts name
+      - name: Define zip names
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
           echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
       - name: Create artifacts for relase ESAPI-v15.6
         uses: vimtor/action-zip@v1
         with:
-          files: Library\Release-15.6\
+          files: TMIAutomation\Library\Release-15.6\
           dest: ${{ env.ESAPI15_RELEASE_ZIP }}
       - name: Create artifacts for relase ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
-          files: Library\Release-16.1\
+          files: TMIAutomation\Library\Release-16.1\
           dest: ${{ env.ESAPI16_RELEASE_ZIP }}
       - uses: ncipollo/release-action@v1
         with:
