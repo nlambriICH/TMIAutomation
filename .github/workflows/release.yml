@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+jobs:
+  call-build:
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/reusable_build.yml
+    with:
+      upload-artifacts: true
+
+  tag-on-PR:
+    needs: call-build
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag-on-pr-merge.outputs.tag }}
+    steps:
+      - name: Tag on PR merge
+        id: tag-on-pr-merge
+        uses: David-Lor/action-tag-on-pr-merge@main
+        with:
+          push-tag: true
+
+  release:
+    needs: tag-on-PR
+    runs-on: windows-2019
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Library
+      - name: Define zip names
+        run: |
+          echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ needs.tag-on-PR.outputs.tag }}.zip" >> $env:GITHUB_ENV
+          echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ needs.tag-on-PR.outputs.tag }}.zip" >> $env:GITHUB_ENV
+      - name: Zip artifacts
+        run: |
+          Compress-Archive -Path Release-15.6 -DestinationPath ${{ env.ESAPI15_RELEASE_ZIP }}
+          Compress-Archive -Path Release-16.1 -DestinationPath ${{ env.ESAPI16_RELEASE_ZIP }}
+      - name: Build Changelog
+        id: release_changelog
+        uses: mikepenz/release-changelog-builder-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }}
+          draft: true
+          name: ${{ needs.tag-on-PR.outputs.tag }}
+          tag: ${{ needs.tag-on-PR.outputs.tag }}
+          body: ${{steps.release_changelog.outputs.changelog}}
