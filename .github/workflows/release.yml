@@ -6,14 +6,20 @@ on:
       - 'v*.*.*'
 
 jobs:
-  release:
+  call-build:
     runs-on: windows-2019
     permissions:
       contents: write
     uses: ./.github/workflows/reusable_build.yml
     with:
       upload-artifacts: true
+      
+  release:
     steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: Library
       - name: Set artifacts name
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
@@ -21,12 +27,12 @@ jobs:
       - name: Create artifacts for relase ESAPI-v15.6
         uses: vimtor/action-zip@v1
         with:
-          files: TMIAutomation\Library\Release-15.6\
+          files: Library\Release-15.6\
           dest: ${{ env.ESAPI15_RELEASE_ZIP }}
       - name: Create artifacts for relase ESAPI-v16.1
         uses: vimtor/action-zip@v1
         with:
-          files: TMIAutomation\Library\Release-16.1\
+          files: Library\Release-16.1\
           dest: ${{ env.ESAPI16_RELEASE_ZIP }}
       - uses: ncipollo/release-action@v1
         with:
