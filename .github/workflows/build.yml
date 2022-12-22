@@ -1,0 +1,10 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  call-build:
+    uses: ./.github/workflows/reusable_build.yml
+    with:
+      upload-artifacts: true

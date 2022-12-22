@@ -10,19 +10,10 @@ jobs:
     runs-on: windows-2019
     permissions:
       contents: write
+    uses: ./.github/workflows/reusable_build.yml
+    with:
+      upload-artifacts: true
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Add nuget to PATH
-        uses: nuget/setup-nuget@v1
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
-      - name: Install nuget packages
-        run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
-      - name: Build app for release ESAPI-v15.6
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
-      - name: Build app for release ESAPI-v16.1
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
       - name: Set artifacts name
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
