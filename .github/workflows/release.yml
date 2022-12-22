@@ -27,8 +27,6 @@ jobs:
           echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ github.ref_name }}.zip" >> $env:GITHUB_ENV
       - name: Unzip and rename artifacts
         run: |
-          Get-ChildItem
-          Expand-Archive -Path Library.zip
           Rename-Item -Path Release-15.6 -NewName ${{ env.ESAPI15_RELEASE_ZIP }}
           Rename-Item -Path Release-16.1 -NewName ${{ env.ESAPI16_RELEASE_ZIP }}
       - uses: ncipollo/release-action@v1
