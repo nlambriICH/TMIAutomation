@@ -9,9 +9,15 @@ on:
       - automatic_release
 
 jobs:
-  tag-on-PR:
-    runs-on: ubuntu-latest
+  call-build:
     if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/reusable_build.yml
+    with:
+      upload-artifacts: true
+
+  tag-on-PR:
+  needs: call-build
+    runs-on: ubuntu-latest
     steps:
       - name: Tag on PR merge
         id: tag-on-pr-merge
@@ -20,15 +26,9 @@ jobs:
           push-tag: true
       - name: Print fetched tag
         run: echo "${{ steps.tag-on-pr-merge.outputs.tag }}"
-  
-  call-build:
-    needs: tag-on-PR
-    uses: ./.github/workflows/reusable_build.yml
-    with:
-      upload-artifacts: true
-      
+
   release:
-    needs: [tag-on-PR, call-build]
+    needs: tag-on-PR
     runs-on: windows-2019
     permissions:
       contents: write
@@ -51,4 +51,5 @@ jobs:
           artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }}
           draft: true
           name: Test
-          tag: ${{ needs.tag-on-PR.outputs.tag }}
+          #tag: ${{ needs.tag-on-PR.outputs.tag }}
+          tag: v0.0.0
