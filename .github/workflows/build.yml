@@ -5,6 +5,7 @@ on:
     branches-ignore:
       #- master
       - automatic_release
+      - test_pull_request
 
 jobs:
   call-build:

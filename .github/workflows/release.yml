@@ -16,7 +16,7 @@ jobs:
       upload-artifacts: true
 
   tag-on-PR:
-  needs: call-build
+    needs: call-build
     runs-on: ubuntu-latest
     steps:
       - name: Tag on PR merge
