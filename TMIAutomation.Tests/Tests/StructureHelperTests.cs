@@ -52,5 +52,13 @@ namespace TMIAutomation.Tests
             Assert.Equal(firstSlice, slices.First());
             Assert.Equal(lastSlice, slices.Last());
         }
+
+        [Fact]
+        private void GetExternal()
+        {
+            Structure structure = structureSet.GetExternal(this.logger);
+            Assert.Equal("EXTERNAL", structure.DicomType);
+            Assert.Equal("BODY", structure.Id);
+        }
     }
 }

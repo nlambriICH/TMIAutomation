@@ -24,8 +24,6 @@ namespace TMIAutomation
         public const string UPPER_PTV_NO_JUNCTION = "UpperPTVNoJ";
         public const string LOWER_PTV_NO_JUNCTION = "LowerPTVNoJ";
         public const string PTV_TOTAL = "PTV_Total";
-        public const string BODY = "BODY"; // ECLIPSE default name for patient outline
-        public const string EXTERNAL = "External"; // RayStation default name for patient outline
         public const string REM = "REM_AUTO";
         public const string HEALTHY_TISSUE = "HT_AUTO";
         public const string HEALTHY_TISSUE2 = "HT2_AUTO";
@@ -33,6 +31,10 @@ namespace TMIAutomation
         public const string DOSE_105 = "Dose_105%";
         public const string DOSE_95 = "Dose_95%";
         public const string DOSE_100_PS = "Dose_100%_PS";
+
+        // BODY : ECLIPSE default name for patient outline
+        // External : RayStation default name for patient outline
+        private static readonly List<string> externals = new List<string> { "BODY", "EXTERNAL" };
 
         public static Structure CreateStructureFromIsodose(this StructureSet ss,
                                                            string junctionId,
@@ -120,7 +122,7 @@ namespace TMIAutomation
                                                IProgress<double> progress,
                                                IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
+            Structure body = ss.GetExternal(logger);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT_AUTO...");
@@ -149,7 +151,7 @@ namespace TMIAutomation
                                           IProgress<double> progress,
                                           IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
+            Structure body = ss.GetExternal(logger);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure Body_Free_AUTO...");
@@ -247,6 +249,15 @@ namespace TMIAutomation
                 logger.Warning("Add new structure Structure {Id}", id);
                 return ss.AddStructure(dicomType, id);
             }
+        }
+
+        public static Structure GetExternal(this StructureSet ss, ILogger logger)
+        {
+            Structure body = ss.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL")
+                ?? ss.Structures.FirstOrDefault(s => externals.Contains(s.Id.ToUpper()));
+            logger.Information("Found structure EXTERNAL: {body}", body);
+
+            return body;
         }
 
     }
