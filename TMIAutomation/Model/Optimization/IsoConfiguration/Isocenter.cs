@@ -22,48 +22,9 @@ namespace TMIAutomation
 
             StructureSet lowerSS = targetPlan.StructureSet;
             Structure lowerPTVTotal = lowerSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
-
-            // The Rect3D X, Y, Z are placed near the feet
-            Rect3D rect = lowerPTVTotal.MeshGeometry.Bounds;
-            double isoStep = rect.SizeZ / 4;
-
-            logger.Information("Using isocenter step [mm]: {isoStep}", Math.Round(isoStep, MidpointRounding.AwayFromZero));
-
-            // Isocenter positions in CC direction
-            List<VVector> isoPositions = new List<VVector>
-            {
-                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y, rect.Z + rect.SizeZ - (0.75 * isoStep)),
-                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y, rect.Z + rect.SizeZ - (2 * isoStep)),
-                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y - 30, rect.Z + rect.SizeZ - (3.35 * isoStep)) // shift y for the feet
-            };
-
-            double fieldY = (rect.SizeX / 2) + 15; // Y1 and Y2 jaw aperture
-            double feetFieldY = (rect.SizeX / 2) + 30; // Y1 and Y2 jaw aperture
-
-            if (feetFieldY > 200) feetFieldY = 200; // maximum field aperture
-
-            double fieldXIso12 = (1.25 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
-            double fieldXIso23 = (1.35 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
-
-            // Jaw positions for the isocenters. X1 towards the head
-            List<Tuple<VRect<double>, VRect<double>>> jawPositions = new List<Tuple<VRect<double>, VRect<double>>>
-            {
-                Tuple.Create(
-                    new VRect<double>(-isoStep, -fieldY, 10, fieldY),
-                    new VRect<double>(-10, -fieldY, fieldXIso12, fieldY)
-                    ),
-                Tuple.Create(
-                    new VRect<double>(-fieldXIso12, -fieldY, 10, fieldY),
-                    new VRect<double>(-10, -fieldY, fieldXIso23, fieldY)
-                    ),
-                Tuple.Create(
-                    new VRect<double>(-fieldXIso23, -fieldY, 10, fieldY),
-                    new VRect<double>(-10, -feetFieldY, isoStep, feetFieldY)
-                    )
-            };
-
-            logger.Information("Overlap between fields same isocenter [mm]: {overlapSameIso}", 20);
-            logger.Information("Overlap between fields adjacent isocenters [mm]: {overlapAdjIso}", Math.Round(isoStep * .2, MidpointRounding.AwayFromZero));
+            DefineIsocentersAndJaws(lowerPTVTotal,
+                                    out List<VVector> isoPositions,
+                                    out List<Tuple<VRect<double>, VRect<double>>> jawPositions);
 
             Beam beamSourcePlan = sourcePlan.Beams.FirstOrDefault(b => !b.IsSetupField);
             ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(beamSourcePlan.TreatmentUnit.Name,
@@ -103,6 +64,55 @@ namespace TMIAutomation
                     isoPositions[i]
                 );
             }
+        }
+
+        private static void DefineIsocentersAndJaws(Structure lowerPTVTotal,
+                                                    out List<VVector> isoPositions,
+                                                    out List<Tuple<VRect<double>, VRect<double>>> jawPositions)
+        {
+            // The Rect3D X, Y, Z are placed near the feet
+            Rect3D rect = lowerPTVTotal.MeshGeometry.Bounds;
+            double isoStep = rect.SizeZ / 4;
+            logger.Information("Using isocenter step [mm]: {isoStep}", Math.Round(isoStep, MidpointRounding.AwayFromZero));
+
+            // Isocenter positions in CC direction
+            isoPositions = new List<VVector>
+            {
+                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y, rect.Z + rect.SizeZ - (0.75 * isoStep)),
+                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y, rect.Z + rect.SizeZ - (2 * isoStep)),
+                new VVector(lowerPTVTotal.CenterPoint.x, lowerPTVTotal.CenterPoint.y - 30, rect.Z + rect.SizeZ - (3.35 * isoStep)) // shift y for the feet
+            };
+            double fieldY = (rect.SizeX / 2) + 15; // Y1 and Y2 jaw aperture
+            double feetFieldY = (rect.SizeX / 2) + 30; // Y1 and Y2 jaw aperture
+
+            if (feetFieldY > 200)
+            {
+                logger.Information("Reducing feet Y-field aperture [mm] from {feetFieldY} to 200", Math.Round(feetFieldY, MidpointRounding.AwayFromZero));
+                feetFieldY = 200; // maximum field aperture
+            }
+
+            double fieldXIso12 = (1.25 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
+            double fieldXIso23 = (1.35 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
+
+            // Jaw positions for the isocenters. X1 towards the head
+            jawPositions = new List<Tuple<VRect<double>, VRect<double>>>
+            {
+                Tuple.Create(
+                    new VRect<double>(-isoStep, -fieldY, 10, fieldY),
+                    new VRect<double>(-10, -fieldY, fieldXIso12, fieldY)
+                    ),
+                Tuple.Create(
+                    new VRect<double>(-fieldXIso12, -fieldY, 10, fieldY),
+                    new VRect<double>(-10, -fieldY, fieldXIso23, fieldY)
+                    ),
+                Tuple.Create(
+                    new VRect<double>(-fieldXIso23, -fieldY, 10, fieldY),
+                    new VRect<double>(-10, -feetFieldY, isoStep, feetFieldY)
+                    )
+            };
+
+            logger.Information("Overlap between fields same isocenter [mm]: {overlapSameIso}", 20);
+            logger.Information("Overlap between fields adjacent isocenters [mm]: {overlapAdjIso}", Math.Round(isoStep * .2, MidpointRounding.AwayFromZero));
         }
 
         public static void CopyCaudalIsocenter(this ExternalPlanSetup targetPlan,

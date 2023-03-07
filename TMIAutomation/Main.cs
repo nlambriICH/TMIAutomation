@@ -37,7 +37,7 @@ namespace VMS.TPS
 
             this.logger = Log.ForContext<Script>();
 
-            logger.Information("TMIJunction script instance created");
+            logger.Verbose("TMIJunction script instance created");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -51,6 +51,11 @@ namespace VMS.TPS
             // The ESAPI worker needs to be created in the main thread
             EsapiWorker esapiWorker = new EsapiWorker(context);
 
+            logger.Information("TMIJunction script context patient: {lastName}, {firstName} ({patientId})",
+                               context.Patient.LastName,
+                               context.Patient.FirstName,
+                               context.Patient.Id
+                               );
             context.Patient.BeginModifications();
 
             // Create and show the main window on a separate thread
