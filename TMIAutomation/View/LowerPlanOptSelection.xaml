@@ -1,0 +1,54 @@
+﻿<Window x:Class="TMIAutomation.View.LowerPlanOptSelection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        SizeToContent="Height"
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        Title="Lower-extremities optimization"
+        ResizeMode="CanMinimize"
+        Closing="Window_Closing">
+
+    <Grid Background="#b6b5bd">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="150"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Width="450"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,0"
+                   TextWrapping="Wrap"
+                   FontSize="14">
+            Select a strategy for the optimization of the lower-extremities:
+            <LineBreak></LineBreak>
+            <LineBreak></LineBreak>
+            1. Perform the complete optimization using junction substructures
+            <LineBreak></LineBreak>
+            <LineBreak></LineBreak>
+            2. Generate a base-dose plan with the dose computed from the most caudal upper isocenter.
+            The base-dose plan can be used for a manual optimization of the lower-extremities
+        </TextBlock>
+        <Button Grid.Row="1"
+                Width="150"
+                Height="35"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Left"
+                Margin="50,5,100,10"
+                FontSize="16"
+                Content="1. Junction structs"
+                Click="Button_Click_Junction"/>
+        <Button Grid.Row="1"
+                Width="150"
+                Height="35"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                Margin="100,5,50,10"
+                FontSize="16"
+                Content="2. Base-dose plan"
+                Click="Button_Click_BaseDose"/>
+    </Grid>
+</Window>

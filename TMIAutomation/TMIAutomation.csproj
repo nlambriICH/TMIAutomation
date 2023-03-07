@@ -146,6 +146,9 @@
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProgressBarViewModel.cs" />
     <Compile Include="ViewModel\UpperViewModel.cs" />
+    <Compile Include="View\LowerPlanOptSelection.xaml.cs">
+      <DependentUpon>LowerPlanOptSelection.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\LowerTabItem.xaml.cs">
       <DependentUpon>LowerTabItem.xaml</DependentUpon>
     </Compile>
@@ -177,6 +180,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Theme\MenuButtonTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\LowerPlanOptSelection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

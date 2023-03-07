@@ -186,21 +186,12 @@ namespace TMIAutomation.ViewModel
                 bool generateBaseDosePlanOnly = false;
                 if (this.isOptimizationChecked)
                 {
-                    MessageBoxResult response = MessageBox.Show("Yes: compute base-dose plan only\n"
-                                                                + "No: perform automatic optimization using junction substructures",
-                                                                "Lower-extremities optimization",
-                                                                MessageBoxButton.YesNo,
-                                                                MessageBoxImage.Question);
-                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes;
+                    LowerPlanOptSelection lowerPlanOptSelWindow = new LowerPlanOptSelection();
+                    lowerPlanOptSelWindow.ShowDialog();
+                    generateBaseDosePlanOnly = lowerPlanOptSelWindow.GenerateBaseDosePlanOnly() ?? false;
                 }
-
-                if (!generateBaseDosePlanOnly)
-                {
-                    await this.modelBase.GenerateLowerPlanAsync();
-                }
-#elif ESAPI16
-                await this.modelBase.GenerateLowerPlanAsync();
 #endif
+                await this.modelBase.GenerateLowerPlanAsync();
                 LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
                 if (this.isJunctionChecked)
@@ -250,6 +241,10 @@ namespace TMIAutomation.ViewModel
             {
                 pbViewModel.ResetProgress();
                 pbWindow.Close();
+                MessageBox.Show("Completed!",
+                    "Lower-extremities optimization",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
         }
     }
