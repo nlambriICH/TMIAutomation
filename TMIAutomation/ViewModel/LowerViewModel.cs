@@ -7,9 +7,7 @@ using System.Windows.Input;
 using TMIAutomation.View;
 using System.Linq;
 using VMS.TPS.Common.Model.Types;
-#if ESAPI15
 using System.Windows;
-#endif
 
 namespace TMIAutomation.ViewModel
 {
