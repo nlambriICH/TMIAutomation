@@ -31,6 +31,7 @@ namespace TMIAutomation.Tests
         {
             yield return new object[] { "CONTROL", "TestStructure", "TestStructure", "TestStructure" };
             yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%", "Dose_25%_0" };
+            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%", "Dose_50%_0" };
 #if ESAPI16
             yield return new object[] {
                 "CONTROL",
