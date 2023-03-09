@@ -45,6 +45,7 @@ namespace TMIAutomation.Tests
 #endif
         }
 
+#if ESAPI15
         [Fact]
         private void TryAddStructure_Approved_Exception()
         {
@@ -53,6 +54,7 @@ namespace TMIAutomation.Tests
                          exception.Message,
                          ignoreLineEndingDifferences: true);
         }
+#endif
 
         [Theory]
         [InlineData(new object[] { "LowerPTV_J", 132, 140 })] // slice count starts from feet (FFS)
