@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Serilog;
 using TMIAutomation.Tests.Attributes;
@@ -42,6 +43,15 @@ namespace TMIAutomation.Tests
 #else
             yield return new object[] { "CONTROL", "16CharactersName", "16CharactersName", "16CharactersNa_0" };
 #endif
+        }
+
+        [Fact]
+        private void TryAddStructure_Approved_Exception()
+        {
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => structureSet.TryAddStructure("CONTROL", "Dose_75%", this.logger));
+            Assert.Equal("Could not change Id of the existing Structure Dose_75%. Please check its status is UnApproved in all StructureSets.",
+                         exception.Message,
+                         ignoreLineEndingDifferences: true);
         }
 
         [Theory]

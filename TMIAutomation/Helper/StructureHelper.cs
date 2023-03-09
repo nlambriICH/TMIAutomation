@@ -248,6 +248,15 @@ namespace TMIAutomation
                 logger.Information("Renaming existing Structure {Id} to {newId}", id, newId);
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
                 oldStructure.Id = newId;
+
+#if ESAPI15
+                // With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                if (oldStructure.Id != newId)
+                {
+                    throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
+                        $"Please check its status is UnApproved in all StructureSets.");
+                }
+#endif
             }
 
             logger.Information("Add new structure Structure {Id}", id);
