@@ -238,6 +238,7 @@ namespace TMIAutomation
 #else
                 string newId = id.Length >= 15 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
 #endif
+                // Assume the structure "_0" was created by the script and remove it
                 if (!ss.CanAddStructure(dicomType, newId))
                 {
                     logger.Warning("Found existing Sructure {newId} in current StructureSet {ssId}", newId, ss.Id);
@@ -247,10 +248,31 @@ namespace TMIAutomation
                 }
                 logger.Information("Renaming existing Structure {Id} to {newId}", id, newId);
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
-                oldStructure.Id = newId;
+
+                /* If the structure "_0" is present in another structure set whose CT
+                 * is registered with the lower-extremities CT, then ESAPI considers
+                 * the structure ID as already existing and will throw the exception:
+                 * "VMS.TPS.Common.Model.API.Structure: This ID is already in use"
+                 */
+                try
+                {
+                    oldStructure.Id = newId;
+                }
+                catch (Exception e)
+                {
+                    IEnumerable<string> candidateSSId = ss.Patient.StructureSets.Where(strSet =>
+                    {
+                        return strSet.Structures.Select(structure => structure.Id).Contains(newId);
+                    }).Select(strSet => strSet.Id);
+                    throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
+                        $"Please remove the structure {newId} from the following StructureSets [{string.Join(", ", candidateSSId)}] " +
+                        $"if the associated CT is registered with the lower-extremities CT.", e);
+                }
 
 #if ESAPI15
-                // With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                 * ESAPI15 won't throw any error, although the structure Id doesn't change
+                 */
                 if (oldStructure.Id != newId)
                 {
                     throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
