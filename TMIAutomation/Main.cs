@@ -17,11 +17,13 @@ namespace VMS.TPS
     public class Script
     {
         private readonly ILogger logger;
+        private readonly string logPath;
 
         public Script()
         {
             string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
+            this.logPath = directory.FullName;
 
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
@@ -29,7 +31,7 @@ namespace VMS.TPS
 #else
                 .MinimumLevel.Debug()
 #endif
-                .WriteTo.File(Path.Combine(directory.FullName, "TMIJunction.log"),
+                .WriteTo.File(Path.Combine(logPath, "TMIJunction.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
                               shared: true)
@@ -69,7 +71,9 @@ namespace VMS.TPS
                 }
                 catch (Exception exc)
                 {
-                    MessageBox.Show(new Form { TopMost = true }, exc.Message, "TMIAutomation - Error");
+                    string msgBoxMessage = exc.Message +
+                    $"\n\nFor more information, please check the logs generated at: {this.logPath}";
+                    MessageBox.Show(new Form { TopMost = true }, msgBoxMessage, "TMIAutomation - Error");
                     logger.Fatal(exc, "The following fatal error occured during the script execution");
                 }
             });

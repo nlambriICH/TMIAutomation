@@ -177,6 +177,7 @@ namespace TMIAutomation.ViewModel
             bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.isOptimizationChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
+            bool success = true; // show "Complete" message box
 
             try
             {
@@ -235,14 +236,22 @@ namespace TMIAutomation.ViewModel
 #endif
                 }
             }
+            catch (Exception e)
+            {
+                success = false;
+                throw new Exception("An error occurred during the lower-extremities workflow.", e);
+            }
             finally
             {
                 pbViewModel.ResetProgress();
                 pbWindow.Close();
-                MessageBox.Show("Completed!",
+                if (success)
+                {
+                    MessageBox.Show("Completed!",
                     "Lower-extremities optimization",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+                }
             }
         }
     }
