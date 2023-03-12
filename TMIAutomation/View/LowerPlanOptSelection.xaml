@@ -34,20 +34,22 @@
         </TextBlock>
         <Button Grid.Row="1"
                 Width="150"
-                Height="35"
+                Height="30"
                 VerticalAlignment="Top"
                 HorizontalAlignment="Left"
+                VerticalContentAlignment="Center"
                 Margin="50,5,100,10"
-                FontSize="16"
+                FontSize="15"
                 Content="1. Junction structs"
                 Click="Button_Click_Junction"/>
         <Button Grid.Row="1"
                 Width="150"
-                Height="35"
+                Height="30"
                 VerticalAlignment="Top"
                 HorizontalAlignment="Right"
+                VerticalContentAlignment="Center"
                 Margin="100,5,50,10"
-                FontSize="16"
+                FontSize="15"
                 Content="2. Base-dose plan"
                 Click="Button_Click_BaseDose"/>
     </Grid>
