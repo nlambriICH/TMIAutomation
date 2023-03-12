@@ -94,11 +94,15 @@ namespace TMIAutomation
             double fieldXIso12 = (1.25 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
             double fieldXIso23 = (1.35 * isoStep / 2) + 20; // half z-distance iso + 20 mm to obtain approx 40 mm of overlap
 
+            // Ensure most cranial and caudal fields have X<=200
+            double field1X1 = isoStep > 200 ? 200 : isoStep;
+            double field3X2 = isoStep > 200 ? 200 : isoStep;
+
             // Jaw positions for the isocenters. X1 towards the head
             jawPositions = new List<Tuple<VRect<double>, VRect<double>>>
             {
                 Tuple.Create(
-                    new VRect<double>(-isoStep, -fieldY, 10, fieldY),
+                    new VRect<double>(-field1X1, -fieldY, 10, fieldY),
                     new VRect<double>(-10, -fieldY, fieldXIso12, fieldY)
                     ),
                 Tuple.Create(
@@ -107,7 +111,7 @@ namespace TMIAutomation
                     ),
                 Tuple.Create(
                     new VRect<double>(-fieldXIso23, -fieldY, 10, fieldY),
-                    new VRect<double>(-10, -feetFieldY, isoStep, feetFieldY)
+                    new VRect<double>(-10, -feetFieldY, field3X2, feetFieldY)
                     )
             };
 
