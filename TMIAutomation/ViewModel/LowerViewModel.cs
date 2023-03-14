@@ -7,9 +7,7 @@ using System.Windows.Input;
 using TMIAutomation.View;
 using System.Linq;
 using VMS.TPS.Common.Model.Types;
-#if ESAPI15
 using System.Windows;
-#endif
 
 namespace TMIAutomation.ViewModel
 {
@@ -179,6 +177,7 @@ namespace TMIAutomation.ViewModel
             bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.isOptimizationChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
+            bool success = true; // show "Complete" message box
 
             try
             {
@@ -186,21 +185,12 @@ namespace TMIAutomation.ViewModel
                 bool generateBaseDosePlanOnly = false;
                 if (this.isOptimizationChecked)
                 {
-                    MessageBoxResult response = MessageBox.Show("Yes: compute base-dose plan only\n"
-                                                                + "No: perform automatic optimization using junction substructures",
-                                                                "Lower-extremities optimization",
-                                                                MessageBoxButton.YesNo,
-                                                                MessageBoxImage.Question);
-                    generateBaseDosePlanOnly = response == MessageBoxResult.Yes;
+                    LowerPlanOptSelection lowerPlanOptSelWindow = new LowerPlanOptSelection();
+                    lowerPlanOptSelWindow.ShowDialog();
+                    generateBaseDosePlanOnly = lowerPlanOptSelWindow.GenerateBaseDosePlanOnly() ?? false;
                 }
-
-                if (!generateBaseDosePlanOnly)
-                {
-                    await this.modelBase.GenerateLowerPlanAsync();
-                }
-#elif ESAPI16
-                await this.modelBase.GenerateLowerPlanAsync();
 #endif
+                await this.modelBase.GenerateLowerPlanAsync();
                 LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
                 if (this.isJunctionChecked)
@@ -246,10 +236,22 @@ namespace TMIAutomation.ViewModel
 #endif
                 }
             }
+            catch (Exception e)
+            {
+                success = false;
+                throw new Exception("An error occurred during the lower-extremities workflow.", e);
+            }
             finally
             {
                 pbViewModel.ResetProgress();
                 pbWindow.Close();
+                if (success)
+                {
+                    MessageBox.Show("Completed!",
+                    "Lower-extremities optimization",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                }
             }
         }
     }

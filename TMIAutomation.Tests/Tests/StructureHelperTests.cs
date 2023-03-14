@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Serilog;
 using TMIAutomation.Tests.Attributes;
@@ -20,28 +21,29 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(TryAddStructure_Data))]
-        private void TryAddStructure(string dicomType, string id, string expectedId, string expectedExistingStructureNewId)
+        private void TryAddStructure(string dicomType, string id, string expectedId)
         {
             Structure newStructure = structureSet.TryAddStructure(dicomType, id, this.logger);
             Assert.Equal(expectedId, newStructure.Id);
-            Assert.Contains(expectedExistingStructureNewId, structureSet.Structures.Select(s => s.Id));
         }
 
         public static IEnumerable<object[]> TryAddStructure_Data()
         {
-            yield return new object[] { "CONTROL", "TestStructure", "TestStructure", "TestStructure" };
-            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%", "Dose_25%_0" };
-#if ESAPI16
-            yield return new object[] {
-                "CONTROL",
-                "LongStructureName64Characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx01",
-                "LongStructureName64Characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx01",
-                "LongStructureName64Characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
-            };
-#else
-            yield return new object[] { "CONTROL", "16CharactersName", "16CharactersName", "16CharactersNa_0" };
-#endif
+            yield return new object[] { "CONTROL", "TestStructure", "TestStructure"};
+            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%"};
+            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%"};
         }
+
+#if ESAPI15
+        [Fact]
+        private void TryAddStructure_Approved_Exception()
+        {
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => structureSet.TryAddStructure("CONTROL", "Dose_75%", this.logger));
+            Assert.Equal("Could not change Id of the existing Structure Dose_75%. Please set its status to UnApproved in all StructureSets.",
+                         exception.Message,
+                         ignoreLineEndingDifferences: true);
+        }
+#endif
 
         [Theory]
         [InlineData(new object[] { "LowerPTV_J", 132, 140 })] // slice count starts from feet (FFS)
@@ -51,6 +53,14 @@ namespace TMIAutomation.Tests
             List<int> slices = structureSet.GetStructureSlices(structure).ToList();
             Assert.Equal(firstSlice, slices.First());
             Assert.Equal(lastSlice, slices.Last());
+        }
+
+        [Fact]
+        private void GetExternal()
+        {
+            Structure structure = structureSet.GetExternal(this.logger);
+            Assert.Equal("EXTERNAL", structure.DicomType);
+            Assert.Equal("BODY", structure.Id);
         }
     }
 }

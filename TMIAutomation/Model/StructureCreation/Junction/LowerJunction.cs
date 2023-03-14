@@ -87,44 +87,33 @@ namespace TMIAutomation
             }
 
             StructureSet upperSS = upperPlan.StructureSet;
-            List<Structure> upperIsodoseStructures = new List<Structure>
-            {
-                upperSS.TryAddStructure("CONTROL", StructureHelper.DOSE_25, logger),
-                upperSS.TryAddStructure("CONTROL", StructureHelper.DOSE_50, logger),
-                upperSS.TryAddStructure("CONTROL", StructureHelper.DOSE_75, logger),
-                upperSS.TryAddStructure("CONTROL", StructureHelper.DOSE_100, logger)
-            };
-
-            for (int i = 0; i < upperIsodoseStructures.Count; ++i)
-            {
-                message.Report($"Generating {upperIsodoseStructures[i].Id} structure...");
-                progress.Report(0.05);
-                upperIsodoseStructures[i].ConvertDoseLevelToStructure(upperPlan.Dose, new DoseValue(doseValues[i], doseUnit));
-            }
-
-            logger.Information("Structures created: {@bodyIsodoseStructures}", upperIsodoseStructures.Select(s => s.Id));
-
-            /*
-             * Copy structures to lower-extremities RTSTRUCT
-             */
             StructureSet lowerSS = lowerPlan.StructureSet;
-            upperIsodoseStructures.ForEach(upperIsoStructure =>
+            List<string> isodoseIds = new List<string> { StructureHelper.DOSE_25, StructureHelper.DOSE_50, StructureHelper.DOSE_75, StructureHelper.DOSE_100 };
+
+            /* TryAddStructure asks the user to insert a new structure Id if already existing,
+             * pausing the script execution to show a window.
+             * Scenario: The script starts with the upper-plan open in the Eclipse context.
+             * Bug: The ConvertDoseLevelToStructure fails to generate the isodoses and the structure remains empty
+             * if the script pauses its execution (e.g., to show a window) after the Structure has been added.
+             * Fix: The whole process of isodose structure creation (add structure and call ConvertDoseLevelToStructure)
+             * is performed before the script can pause again its execution. 
+             */
+            for (int i = 0; i < isodoseIds.Count; ++i)
             {
-                Structure lowerIsoStructure = lowerSS.TryAddStructure(upperIsoStructure.DicomType, upperIsoStructure.Id, logger);
+                Structure upperIsoStructure = upperSS.TryAddStructure("CONTROL", isodoseIds[i], logger);
 
-                // do not modify already existing structure (not empty)
-                if (!lowerIsoStructure.IsEmpty)
-                {
-                    logger.Information("Isodose structure {isodoseId} is not empty. Skip copying contours", upperIsoStructure.Id);
-                    return;
-                }
-
+                message.Report($"Generating {upperIsoStructure.Id} structure...");
                 progress.Report(0.05);
-                logger.Information("Transform contours of {isodoseId}", upperIsoStructure.Id);
+                upperIsoStructure.ConvertDoseLevelToStructure(upperPlan.Dose, new DoseValue(doseValues[i], doseUnit));
+                logger.Information("Structure created: {bodyIsodoseStructure}", upperIsoStructure.Id);
 
+                Structure lowerIsoStructure = lowerSS.TryAddStructure(upperIsoStructure.DicomType, upperIsoStructure.Id, logger);
                 bool stopCopyContour = false;
                 List<int> upperIsoSlices = upperSS.GetStructureSlices(upperIsoStructure).ToList();
                 int maxSliceNum = 0;
+                progress.Report(0.05);
+                logger.Information("Transform contours of {isodoseId}", upperIsoStructure.Id);
+
                 foreach (int slice in upperIsoSlices)
                 {
                     VVector[][] contours = upperIsoStructure.GetContoursOnImagePlane(slice);
@@ -165,7 +154,7 @@ namespace TMIAutomation
                  * applying an asymmetric margin to cover those slices (this also avoids issues when upper-body CT and lower-extremities CT have different ZRes)
                 */
                 lowerIsoStructure.SegmentVolume = lowerIsoStructure.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0, 0, 0, 0, 0, lowerSS.Image.ZRes));
-            });
+            }
 
             logger.Information("Isodose structures copied to lower-extremities StructureSet {ss} using registration: {registration}", lowerSS.Id, registration.Id);
         }
