@@ -27,7 +27,7 @@ namespace TMIAutomation
                                     out List<Tuple<VRect<double>, VRect<double>>> jawPositions);
 
             Beam beamSourcePlan = sourcePlan.Beams.FirstOrDefault(b => !b.IsSetupField);
-            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(beamSourcePlan.TreatmentUnit.Name,
+            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(beamSourcePlan.TreatmentUnit.Id,
                                                                                                    beamSourcePlan.EnergyModeDisplayName,
                                                                                                    beamSourcePlan.DoseRate,
                                                                                                    beamSourcePlan.Technique.Id,
@@ -148,7 +148,7 @@ namespace TMIAutomation
                 double transformedGantryStop = cpParams.First().GantryAngle;
 
                 Beam newBeam = targetPlan.AddVMATBeam(
-                    new ExternalBeamMachineParameters(beam.TreatmentUnit.Name, beam.EnergyModeDisplayName, beam.DoseRate, beam.Technique.Id, ""),
+                    new ExternalBeamMachineParameters(beam.TreatmentUnit.Id, beam.EnergyModeDisplayName, beam.DoseRate, beam.Technique.Id, ""),
                     cpParams.Select(cp => cp.MetersetWeight),
                     transformedCollAngle,
                     transformedGantryAngle,
