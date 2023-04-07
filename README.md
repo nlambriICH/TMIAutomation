@@ -4,7 +4,7 @@ Plug-in script for the Eclipse Treatment Planning System to automate Total Marro
 
 The script was introduced and validated in [this paper](https://doi.org/10.1007/s00066-022-02014-0).
 
-If you liked/used this project, don't forget to give a star! :star:
+If you liked/used this project, don't forget to give it a star! :star:
 
 ## Key features
 
