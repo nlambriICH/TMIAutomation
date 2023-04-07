@@ -15,7 +15,7 @@ If you liked/used this project, don't forget to give a star! :star:
 
 ### Demo
 
-![demo-ESAPI15](demo/short_demo_ESAPI15.gif)
+![demo-ESAPI15](demo/demo_short_ESAPI15.gif)
 
 ### Requirements
 
