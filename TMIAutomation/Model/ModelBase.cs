@@ -22,14 +22,32 @@ namespace TMIAutomation
             this.esapiWorker = esapiWorker;
         }
 
-        public Task<List<string>> GetPlansAsync(PlanType planType)
+        public Task<List<string>> GetCoursesAsync()
         {
-            return this.esapiWorker.RunAsync(scriptContext => GetPlans(scriptContext, planType), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => GetCourses(scriptContext), isWriteable: false);
         }
 
-        public List<string> GetPlans(PluginScriptContext scriptContext, PlanType planType)
+        public List<string> GetCourses(PluginScriptContext scriptContext)
         {
-            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            List<Course> orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.HistoryDateTime).ToList();
+
+            Course courseInScope = scriptContext.Course;
+            if (orderedCourses.Remove(courseInScope))
+            {
+                orderedCourses.Insert(0, courseInScope);
+            }
+
+            return orderedCourses.Select(c => c.Id).ToList();
+        }
+
+        public Task<List<string>> GetPlansAsync(string courseId, PlanType planType)
+        {
+            return this.esapiWorker.RunAsync(scriptContext => GetPlans(scriptContext, courseId, planType), isWriteable: false);
+        }
+
+        public List<string> GetPlans(PluginScriptContext scriptContext, string courseId, PlanType planType)
+        {
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             List<string> orderedPlans = new List<string>();
             switch (planType)
             {
@@ -49,14 +67,14 @@ namespace TMIAutomation
             return orderedPlans;
         }
 
-        public Task<List<string>> GetPTVsFromPlanAsync(string planId)
+        public Task<List<string>> GetPTVsFromPlanAsync(string courseId, string planId)
         {
-            return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromPlan(scriptContext, planId), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromPlan(scriptContext, courseId, planId), isWriteable: false);
         }
 
-        public List<string> GetPTVsFromPlan(PluginScriptContext scriptContext, string planId)
+        public List<string> GetPTVsFromPlan(PluginScriptContext scriptContext, string courseId, string planId)
         {
-            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
             return selectedPlan == null ? new List<string>()
             : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
@@ -113,11 +131,11 @@ namespace TMIAutomation
             return upperControl.CreateAsync(progress, message);
         }
 
-        public Task GenerateLowerPlanAsync()
+        public Task GenerateLowerPlanAsync(string courseId)
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
                 StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.FeetFirstSupine);
 
                 ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
@@ -126,14 +144,14 @@ namespace TMIAutomation
             });
         }
 
-        public Task<bool> IsPlanDoseValidAsync(string planId)
+        public Task<bool> IsPlanDoseValidAsync(string courseId, string planId)
         {
-            return this.esapiWorker.RunAsync(scriptContext => IsPlanDoseValid(scriptContext, planId), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => IsPlanDoseValid(scriptContext, courseId, planId), isWriteable: false);
         }
 
-        public bool IsPlanDoseValid(PluginScriptContext scriptContext, string planId)
+        public bool IsPlanDoseValid(PluginScriptContext scriptContext, string courseId, string planId)
         {
-            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup planSetup = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == planId);
 
             return planSetup.IsDoseValid;
@@ -159,14 +177,14 @@ namespace TMIAutomation
             return lowerControl.CreateAsync(progress, message);
         }
 
-        public Task<string> GetMachineNameAsync(string planId)
+        public Task<string> GetMachineNameAsync(string courseId, string planId)
         {
-            return this.esapiWorker.RunAsync(scriptContext => GetMachineName(scriptContext, planId), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => GetMachineName(scriptContext, courseId, planId), isWriteable: false);
         }
 
-        public string GetMachineName(PluginScriptContext scriptContext, string planId)
+        public string GetMachineName(PluginScriptContext scriptContext, string courseId, string planId)
         {
-            Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == planId);
             return selectedPlan == null
                 ? string.Empty

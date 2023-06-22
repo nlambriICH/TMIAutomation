@@ -13,6 +13,32 @@ namespace TMIAutomation.ViewModel
 {
     public class LowerViewModel : ViewModelBase
     {
+        private List<string> courses;
+        public List<string> Courses
+        {
+            get => courses;
+            set
+            {
+                Set(ref courses, value);
+                SelectedCourseId = this.courses.Count != 0 ? this.courses[0] : string.Empty;
+            }
+        }
+
+        private string selectedCourseId;
+        public string SelectedCourseId
+        {
+            get => selectedCourseId;
+            set
+            {
+                if (selectedCourseId != value)
+                {
+                    Set(ref selectedCourseId, value);
+                    this.RetrieveUpperPlans();
+                    this.RetrieveLowerPlans();
+                }
+            }
+        }
+
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
@@ -106,6 +132,7 @@ namespace TMIAutomation.ViewModel
                 if (selectedLowerPlanId != value)
                 {
                     Set(ref selectedLowerPlanId, value);
+                    this.RetrieveLowerPTVs();
                 }
             }
         }
@@ -148,22 +175,33 @@ namespace TMIAutomation.ViewModel
             IsControlChecked = true;
             IsOptimizationChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
-            RetrieveData();
+            this.RetrieveData();
         }
 
         private async void RetrieveData()
         {
-            Task<List<string>> upperPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Up);
+            Task<List<string>> coursesTask = this.modelBase.GetCoursesAsync();
             Task<List<string>> registrationsTask = this.modelBase.GetRegistrationsAsync();
-            Task<List<string>> lowerPlansTask = this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
 
-            UpperPlans = await upperPlansTask;
-            LowerPlans = await lowerPlansTask;
-            LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
-                ? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
-                : await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
-
+            Courses = await coursesTask;
             Registrations = await registrationsTask;
+        }
+
+        private async void RetrieveUpperPlans()
+        {
+            UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+        }
+
+        private async void RetrieveLowerPlans()
+        {
+            LowerPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Down);
+        }
+
+        private async void RetrieveLowerPTVs()
+        {
+            LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
+                            ? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
+                            : await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, this.selectedLowerPlanId);
         }
 
         private async void StartExecution()
@@ -190,12 +228,12 @@ namespace TMIAutomation.ViewModel
                     generateBaseDosePlanOnly = lowerPlanOptSelWindow.GenerateBaseDosePlanOnly() ?? false;
                 }
 #endif
-                await this.modelBase.GenerateLowerPlanAsync();
-                LowerPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Down);
+                await this.modelBase.GenerateLowerPlanAsync(this.selectedCourseId);
+                this.RetrieveLowerPlans();
 
                 if (this.isJunctionChecked)
                 {
-                    bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValidAsync(this.selectedUpperPlanId);
+                    bool isUpperPlanDoseValid = await this.modelBase.IsPlanDoseValidAsync(this.selectedCourseId, this.selectedUpperPlanId);
                     if (!isUpperPlanDoseValid)
                     {
                         throw new InvalidOperationException($"The selected upper-body plan {this.selectedUpperPlanId} has invalid dose." +
@@ -208,7 +246,7 @@ namespace TMIAutomation.ViewModel
                                                                     this.selectedRegistrationId,
                                                                     progress,
                                                                     message);
-                    LowerPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedLowerPlanId);
+                    this.RetrieveLowerPTVs();
                 }
 
                 if (this.isControlChecked)

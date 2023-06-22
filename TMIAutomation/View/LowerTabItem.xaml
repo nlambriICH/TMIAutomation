@@ -20,7 +20,7 @@
     </UserControl.Resources>
 
     <Grid Background="#272537">
-        <TextBlock Text="Select Upper Plan"
+        <TextBlock Text="Select Course"
                    Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
@@ -54,6 +54,59 @@
                   FontFamily="Serif"
                   Foreground="#2A324F"
                   Width="140"
+                  ItemsSource="{Binding Courses}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedCourseId}">
+            <ComboBox.Style>
+                <Style TargetType="{x:Type ComboBox}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
+        
+        <TextBlock Text="Select Upper Plan"
+                   Width="130"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="230,90,0,0"
+                   FontSize="16"
+                   Height="25"
+                   FontFamily="Serif"
+                   Foreground="#FDFDFD"
+                   Padding="3">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=Junction, Path=IsChecked}" Value="False"/>
+                                <Condition Binding="{Binding ElementName=Optimization, Path=IsChecked}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="430,90,0,0"
+                  Height="25"
+                  FontSize="12"
+                  FontFamily="Serif"
+                  Foreground="#2A324F"
+                  Width="140"
                   ItemsSource="{Binding UpperPlans}"
                   IsSynchronizedWithCurrentItem="True"
                   SelectedItem="{Binding SelectedUpperPlanId}">
@@ -76,7 +129,7 @@
         <TextBlock Text="Select Lower PTV"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="230,90,0,0"
+                   Margin="230,130,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -100,7 +153,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,90,0,0"
+                  Margin="430,130,0,0"
                   Width="140"
                   Height="25"
                   FontSize="12"
@@ -128,7 +181,7 @@
         <TextBlock Text="Select Registration"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="230,130,0,0"
+                   Margin="230,170,0,0"
                    FontSize="16"
                    Height="25"
                    FontFamily="Serif"
@@ -152,7 +205,7 @@
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,130,0,0"
+                  Margin="430,170,0,0"
                   Width="140"
                   Height="25"
                   FontSize="12"

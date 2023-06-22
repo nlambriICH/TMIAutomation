@@ -11,6 +11,31 @@ namespace TMIAutomation.ViewModel
 {
     public class UpperViewModel : ViewModelBase
     {
+        private List<string> courses;
+        public List<string> Courses
+        {
+            get => courses;
+            set
+            {
+                Set(ref courses, value);
+                SelectedCourseId = this.courses.Count != 0 ? this.courses[0] : string.Empty;
+            }
+        }
+
+        private string selectedCourseId;
+        public string SelectedCourseId
+        {
+            get => selectedCourseId;
+            set
+            {
+                if (selectedCourseId != value)
+                {
+                    Set(ref selectedCourseId, value);
+                    this.RetrieveUpperPlans();
+                }
+            }
+        }
+
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
@@ -85,17 +110,22 @@ namespace TMIAutomation.ViewModel
             IsJunctionChecked = true;
             IsControlChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
-            RetrieveUpperPlans();
+            RetrieveCourses();
+        }
+
+        private async void RetrieveCourses()
+        {
+            Courses = await this.modelBase.GetCoursesAsync();
         }
 
         private async void RetrieveUpperPlans()
         {
-            UpperPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Up);
+            UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
         }
 
         private async void RetrieveUpperPTVs(string planId)
         {
-            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(planId);
+            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, planId);
         }
 
         private async void StartExecution()
