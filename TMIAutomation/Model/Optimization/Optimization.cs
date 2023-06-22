@@ -60,6 +60,7 @@ namespace TMIAutomation
                 if (this.generateBaseDosePlanOnly)
                 {
                     GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
+                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message);
                 }
                 else
                 {
@@ -146,21 +147,7 @@ namespace TMIAutomation
                                                                      IProgress<double> progress,
                                                                      IProgress<string> message)
         {
-            progress.Report(0.05);
-            message.Report("Placing isocenters...");
-            lowerPlan.SetIsocenters(upperPlan);
-
-            lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
-
-            OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
-            StructureSet lowerSS = lowerPlan.StructureSet;
-
-            optSetup.ClearObjectives();
-            optSetup.AddPointObjectives(lowerSS);
-            optSetup.AddEUDObjectives(lowerSS);
-            optSetup.UseJawTracking = false;
-            optSetup.AddAutomaticNormalTissueObjective(150);
-            //optSetup.ExcludeStructuresFromOptimization(ss);
+            ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message);
 
             progress.Report(0.05);
             message.Report("Optimizing plan...");
@@ -219,6 +206,27 @@ namespace TMIAutomation
 
                 return lowerPlanAddOpt;
             }
+        }
+
+        private void ConfigureLowerPlanSetup(ExternalPlanSetup upperPlan,
+                                             ExternalPlanSetup lowerPlan,
+                                             IProgress<double> progress,
+                                             IProgress<string> message)
+        {
+            progress.Report(0.05);
+            message.Report("Setup isocenters and objectives...");
+            lowerPlan.SetIsocenters(upperPlan);
+            lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
+
+            OptimizationSetup optSetup = lowerPlan.OptimizationSetup;
+            StructureSet lowerSS = lowerPlan.StructureSet;
+
+            optSetup.ClearObjectives();
+            optSetup.AddPointObjectives(lowerSS);
+            optSetup.AddEUDObjectives(lowerSS);
+            optSetup.UseJawTracking = false;
+            optSetup.AddAutomaticNormalTissueObjective(150);
+            //optSetup.ExcludeStructuresFromOptimization(ss);
         }
     }
 }
