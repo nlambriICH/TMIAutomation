@@ -25,7 +25,11 @@ namespace TMIAutomation.Tests
         [Fact]
         private void GetCourses()
         {
+#if ESAPI16
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CLowerAutoAddOpt", "TEst", "CBaseDoseAddOpt", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+#else
             List<string> expectedCourses = new List<string> { "CDemoTest", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+#endif
             List<string> courses = modelBase.GetCourses(scriptContext);
             Assert.Equal(expectedCourses, courses);
         }
