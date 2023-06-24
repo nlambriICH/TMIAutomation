@@ -200,7 +200,13 @@ namespace TMIAutomation
                 case OptimizationCycleTarget.LowerPTV_J:
                     message.Report("Generating isodose Dose_100%_PS...");
                     Structure isodose100PlanSum = ss.TryAddStructure("CONTROL", DOSE_100_PS, logger);
-                    isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, new DoseValue(2.0, DoseValue.DoseUnit.Gy));
+
+                    // Plan sum accepts only absolute dose
+                    PlanSum planSum = planningItem as PlanSum;
+                    PlanSetup planSetup = planSum.PlanSetups.FirstOrDefault();
+                    planSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
+                    isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, planSetup.TotalDose);
+                    
                     isodose100PlanSum.SegmentVolume = targetVolume.Sub(isodose100PlanSum);
                     logger.Information("RemoveSmallContoursFromStructure: {Dose_100_PS}", DOSE_100_PS);
                     ss.RemoveSmallContoursFromStructure(isodose100PlanSum, message);
