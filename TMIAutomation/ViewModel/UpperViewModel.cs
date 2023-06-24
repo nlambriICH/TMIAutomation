@@ -31,7 +31,7 @@ namespace TMIAutomation.ViewModel
                 if (selectedCourseId != value)
                 {
                     Set(ref selectedCourseId, value);
-                    this.RetrieveUpperPlans();
+                    RetrieveUpperPlans(selectedCourseId);
                 }
             }
         }
@@ -113,14 +113,19 @@ namespace TMIAutomation.ViewModel
             RetrieveCourses();
         }
 
+        /*
+         * Async void methods used only to set properties:
+         * they cannot return a Task and need to be async to run on the ESAPI thread
+         * Warning: there is no guarantee that these methods will be awaited
+        */
         private async void RetrieveCourses()
         {
             Courses = await this.modelBase.GetCoursesAsync();
         }
 
-        private async void RetrieveUpperPlans()
+        private async void RetrieveUpperPlans(string courseId)
         {
-            UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+            UpperPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Up);
         }
 
         private async void RetrieveUpperPTVs(string planId)
@@ -145,13 +150,13 @@ namespace TMIAutomation.ViewModel
             {
                 if (this.isJunctionChecked)
                 {
-                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
-                    RetrieveUpperPTVs(this.selectedPlanId);
+                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
+                    UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, this.selectedPlanId);
                 }
 
                 if (this.isControlChecked)
                 {
-                    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                    await this.modelBase.GenerateUpperControlAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
                 }
             }
             catch (Exception e)

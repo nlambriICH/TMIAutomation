@@ -13,6 +13,7 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<Optimization>();
         private readonly EsapiWorker esapiWorker;
+        private readonly string courseId;
         private readonly string upperPlanId;
         private readonly string registrationId;
         private readonly string lowerPlanId;
@@ -21,21 +22,28 @@ namespace TMIAutomation
 #endif
 
 #if ESAPI16
-        public Optimization(EsapiWorker esapiWorker, string upperPlanId, string registrationId, string lowerPlanId)
+        public Optimization(EsapiWorker esapiWorker,
+                            string courseId,
+                            string upperPlanId,
+                            string registrationId,
+                            string lowerPlanId)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.registrationId = registrationId;
             this.lowerPlanId = lowerPlanId;
         }
 #else
         public Optimization(EsapiWorker esapiWorker,
+                            string courseId,
                             string upperPlanId,
                             string registrationId,
                             string lowerPlanId,
                             bool generateBaseDosePlanOnly)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.registrationId = registrationId;
             this.lowerPlanId = lowerPlanId;
@@ -48,11 +56,11 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
 #if ESAPI16
-                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId });
+                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
 #else
-                logger.Information("Optimization context: {@context}", new List<string> { this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
+                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
 #endif
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 Registration registration = scriptContext.Patient.Registrations.FirstOrDefault(reg => reg.Id == this.registrationId);

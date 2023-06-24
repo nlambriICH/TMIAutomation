@@ -119,15 +119,15 @@ namespace TMIAutomation
                                                         .ToList();
         }
 
-        public Task GenerateUpperJunctionAsync(string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
+        public Task GenerateUpperJunctionAsync(string courseId, string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
         {
-            UpperJunction upperJunction = new UpperJunction(this.esapiWorker, upperPlanId, upperPTVId);
+            UpperJunction upperJunction = new UpperJunction(this.esapiWorker, courseId, upperPlanId, upperPTVId);
             return upperJunction.CreateAsync(progress, message);
         }
 
-        public Task GenerateUpperControlAsync(string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
+        public Task GenerateUpperControlAsync(string courseId, string upperPlanId, string upperPTVId, IProgress<double> progress, IProgress<string> message)
         {
-            UpperControl upperControl = new UpperControl(this.esapiWorker, upperPlanId, upperPTVId);
+            UpperControl upperControl = new UpperControl(this.esapiWorker, courseId, upperPlanId, upperPTVId);
             return upperControl.CreateAsync(progress, message);
         }
 
@@ -157,23 +157,25 @@ namespace TMIAutomation
             return planSetup.IsDoseValid;
         }
 
-        public Task GenerateLowerJunctionAsync(string upperPlanId,
+        public Task GenerateLowerJunctionAsync(string courseId,
+                                               string upperPlanId,
                                                string lowerPlanId,
                                                string lowerPTVId,
                                                string registrationId,
                                                IProgress<double> progress,
                                                IProgress<string> message)
         {
-            LowerJunction lowerJunction = new LowerJunction(this.esapiWorker, upperPlanId, lowerPlanId, lowerPTVId, registrationId);
+            LowerJunction lowerJunction = new LowerJunction(this.esapiWorker, courseId, upperPlanId, lowerPlanId, lowerPTVId, registrationId);
             return lowerJunction.CreateAsync(progress, message);
         }
 
-        public Task GenerateLowerControlAsync(string lowerPlanId,
+        public Task GenerateLowerControlAsync(string courseId,
+                                              string lowerPlanId,
                                               string lowerPTVId,
                                               IProgress<double> progress,
                                               IProgress<string> message)
         {
-            LowerControl lowerControl = new LowerControl(this.esapiWorker, lowerPlanId, lowerPTVId);
+            LowerControl lowerControl = new LowerControl(this.esapiWorker, courseId, lowerPlanId, lowerPTVId);
             return lowerControl.CreateAsync(progress, message);
         }
 
@@ -192,24 +194,26 @@ namespace TMIAutomation
         }
 
 #if ESAPI16
-        public Task OptimizeAsync(string upperPlanId,
+        public Task OptimizeAsync(string courseId,
+                                  string upperPlanId,
                                   string registrationId,
                                   string lowerPlanId,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId);
+            Optimization optimization = new Optimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId);
             return optimization.ComputeAsync(progress, message);
         }
 #else
-        public Task OptimizeAsync(string upperPlanId,
+        public Task OptimizeAsync(string courseId,
+                                  string upperPlanId,
                                   string registrationId,
                                   string lowerPlanId,
                                   bool generateBaseDosePlanOnly,
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, upperPlanId, registrationId, lowerPlanId, generateBaseDosePlanOnly);
+            Optimization optimization = new Optimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId, generateBaseDosePlanOnly);
             return optimization.ComputeAsync(progress, message);
         }
 #endif

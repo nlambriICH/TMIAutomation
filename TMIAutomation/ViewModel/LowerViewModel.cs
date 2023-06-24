@@ -33,8 +33,8 @@ namespace TMIAutomation.ViewModel
                 if (selectedCourseId != value)
                 {
                     Set(ref selectedCourseId, value);
-                    this.RetrieveUpperPlans();
-                    this.RetrieveLowerPlans();
+                    RetrieveUpperPlans(selectedCourseId);
+                    RetrieveLowerPlans(selectedCourseId);
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace TMIAutomation.ViewModel
                 if (selectedLowerPlanId != value)
                 {
                     Set(ref selectedLowerPlanId, value);
-                    this.RetrieveLowerPTVs();
+                    RetrieveLowerPTVs();
                 }
             }
         }
@@ -175,26 +175,33 @@ namespace TMIAutomation.ViewModel
             IsControlChecked = true;
             IsOptimizationChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
-            this.RetrieveData();
+            RetrieveCourses();
+            RetrieveRegistrations();
         }
 
-        private async void RetrieveData()
+        /*
+         * Async void methods used only to set properties:
+         * they cannot return a Task and need to be async to run on the ESAPI thread
+         * Warning: there is no guarantee that these methods will be awaited
+        */
+        private async void RetrieveCourses()
         {
-            Task<List<string>> coursesTask = this.modelBase.GetCoursesAsync();
-            Task<List<string>> registrationsTask = this.modelBase.GetRegistrationsAsync();
-
-            Courses = await coursesTask;
-            Registrations = await registrationsTask;
+            Courses = await this.modelBase.GetCoursesAsync();
         }
 
-        private async void RetrieveUpperPlans()
+        private async void RetrieveRegistrations()
         {
-            UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+            Registrations = await this.modelBase.GetRegistrationsAsync();
         }
 
-        private async void RetrieveLowerPlans()
+        private async void RetrieveUpperPlans(string courseId)
         {
-            LowerPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Down);
+            UpperPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Up);
+        }
+
+        private async void RetrieveLowerPlans(string courseId)
+        {
+            LowerPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Down);
         }
 
         private async void RetrieveLowerPTVs()
@@ -229,7 +236,7 @@ namespace TMIAutomation.ViewModel
                 }
 #endif
                 await this.modelBase.GenerateLowerPlanAsync(this.selectedCourseId);
-                this.RetrieveLowerPlans();
+                LowerPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Down);
 
                 if (this.isJunctionChecked)
                 {
@@ -240,26 +247,32 @@ namespace TMIAutomation.ViewModel
                             $"The upper-body plan should have a calculated dose distribution assigned.");
                     }
 
-                    await this.modelBase.GenerateLowerJunctionAsync(this.selectedUpperPlanId,
+                    await this.modelBase.GenerateLowerJunctionAsync(this.selectedCourseId,
+                                                                    this.selectedUpperPlanId,
                                                                     this.selectedLowerPlanId,
                                                                     this.selectedLowerPTVId,
                                                                     this.selectedRegistrationId,
                                                                     progress,
                                                                     message);
-                    this.RetrieveLowerPTVs();
+                    LowerPTVs = string.IsNullOrEmpty(this.selectedLowerPlanId)
+                            ? await this.modelBase.GetPTVsFromImgOrientationAsync(PatientOrientation.FeetFirstSupine)
+                            : await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, this.selectedLowerPlanId);
                 }
 
                 if (this.isControlChecked)
                 {
-                    await this.modelBase.GenerateLowerControlAsync(this.selectedLowerPlanId,
+                    await this.modelBase.GenerateLowerControlAsync(this.selectedCourseId,
+                                                                   this.selectedLowerPlanId,
                                                                    this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
-                                                                   progress, message);
+                                                                   progress,
+                                                                   message);
                 }
 
                 if (this.isOptimizationChecked)
                 {
 #if ESAPI16
-                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                    await this.modelBase.OptimizeAsync(this.selectedCourseId,
+                                                       this.selectedUpperPlanId,
                                                        this.selectedRegistrationId,
                                                        this.selectedLowerPlanId,
                                                        progress,

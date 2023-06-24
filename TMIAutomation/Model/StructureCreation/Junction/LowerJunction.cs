@@ -13,18 +13,21 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<LowerJunction>();
         private readonly EsapiWorker esapiWorker;
+        private readonly string courseId;
         private readonly string upperPlanId;
         private readonly string lowerPlanId;
         private readonly string lowerPTVId;
         private readonly string registrationId;
 
         public LowerJunction(EsapiWorker esapiWorker,
+                            string courseId,
                             string upperPlanId,
                             string lowerPlanId,
                             string lowerPTVId,
                             string registrationId)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.lowerPlanId = lowerPlanId;
             this.lowerPTVId = lowerPTVId;
@@ -35,9 +38,9 @@ namespace TMIAutomation
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("LowerJunction context: {@context}", new List<string> { this.upperPlanId, this.lowerPlanId, this.lowerPTVId, this.registrationId });
+                logger.Information("LowerJunction context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.lowerPTVId, this.registrationId });
 
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 PlanSetup lowerPlan = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 StructureSet lowerSS = lowerPlan.StructureSet;
                 Registration registration = scriptContext.Patient.Registrations.FirstOrDefault(reg => reg.Id == this.registrationId);
