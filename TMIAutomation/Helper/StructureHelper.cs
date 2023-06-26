@@ -1,8 +1,8 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
+using Serilog;
 using TMIAutomation.View;
 using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.API;
@@ -206,7 +206,7 @@ namespace TMIAutomation
                     PlanSetup planSetup = planSum.PlanSetups.FirstOrDefault();
                     planSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
                     isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, planSetup.TotalDose);
-                    
+
                     isodose100PlanSum.SegmentVolume = targetVolume.Sub(isodose100PlanSum);
                     logger.Information("RemoveSmallContoursFromStructure: {Dose_100_PS}", DOSE_100_PS);
                     ss.RemoveSmallContoursFromStructure(isodose100PlanSum, message);

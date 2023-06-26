@@ -1,7 +1,7 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
+﻿using System;
 using System.Windows.Input;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using VMS.TPS.Common.Model.API;
 
 namespace TMIAutomation.ViewModel

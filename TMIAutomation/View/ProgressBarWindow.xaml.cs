@@ -1,6 +1,6 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Windows;
+using Serilog;
 using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.Types;
 

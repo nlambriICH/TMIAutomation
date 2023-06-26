@@ -1,14 +1,14 @@
-using System.Runtime.CompilerServices;
-using VMS.TPS.Common.Model.API;
-using Serilog;
+﻿using System;
 using System.IO;
-using System;
-using TMIAutomation.Async;
-using TMIAutomation.ViewModel;
-using TMIAutomation.View;
-using System.Windows.Forms;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
+using Serilog;
 using TMIAutomation;
+using TMIAutomation.Async;
+using TMIAutomation.View;
+using TMIAutomation.ViewModel;
+using VMS.TPS.Common.Model.API;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 

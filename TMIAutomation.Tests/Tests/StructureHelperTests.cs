@@ -29,9 +29,9 @@ namespace TMIAutomation.Tests
 
         public static IEnumerable<object[]> TryAddStructure_Data()
         {
-            yield return new object[] { "CONTROL", "TestStructure", "TestStructure"};
-            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%"};
-            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%"};
+            yield return new object[] { "CONTROL", "TestStructure", "TestStructure" };
+            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%" };
+            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%" };
         }
 
 #if ESAPI15

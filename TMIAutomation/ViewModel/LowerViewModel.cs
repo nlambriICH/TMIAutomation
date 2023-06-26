@@ -1,13 +1,13 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using TMIAutomation.View;
 using System.Linq;
-using VMS.TPS.Common.Model.Types;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
+using TMIAutomation.View;
+using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation.ViewModel
 {
