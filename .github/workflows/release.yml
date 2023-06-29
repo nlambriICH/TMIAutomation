@@ -45,11 +45,6 @@ jobs:
         run: |
           Compress-Archive -Path Release-15.6 -DestinationPath ${{ env.ESAPI15_RELEASE_ZIP }}
           Compress-Archive -Path Release-16.1 -DestinationPath ${{ env.ESAPI16_RELEASE_ZIP }}
-      - name: Build Changelog
-        id: release_changelog
-        uses: mikepenz/release-changelog-builder-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
@@ -57,4 +52,3 @@ jobs:
           draft: true
           name: ${{ needs.tag-on-PR.outputs.tag }}
           tag: ${{ needs.tag-on-PR.outputs.tag }}
-          body: ${{steps.release_changelog.outputs.changelog}}
