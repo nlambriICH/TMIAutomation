@@ -38,8 +38,12 @@ namespace TMIAutomation.Async
         public Task RunAsync(Action<PluginScriptContext> a, bool isWriteable = true)
         {
             return this.currentThreadWorker.RunAsync(() => a(scriptContext))
-                .ContinueWith(_ =>
+                .ContinueWith(task =>
                 {
+                    if (task.Exception != null)
+                    {
+                        throw task.Exception;
+                    }
                     if (isWriteable)
                     {
                         Thread.Sleep(1000);
@@ -64,13 +68,17 @@ namespace TMIAutomation.Async
         public Task<T> RunAsync<T>(Func<PluginScriptContext, T> f, bool isWriteable = true)
         {
             return this.currentThreadWorker.RunAsync(() => f(scriptContext))
-                .ContinueWith(t =>
+                .ContinueWith(task =>
                 {
+                    if (task.Exception != null)
+                    {
+                        throw task.Exception;
+                    }
                     if (isWriteable)
                     {
                         Thread.Sleep(500);
                     }
-                    return t.Result;
+                    return task.Result;
                 });
         }
     }

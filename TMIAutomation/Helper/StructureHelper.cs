@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
+using TMIAutomation.View;
+using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
@@ -24,8 +26,6 @@ namespace TMIAutomation
         public const string UPPER_PTV_NO_JUNCTION = "UpperPTVNoJ";
         public const string LOWER_PTV_NO_JUNCTION = "LowerPTVNoJ";
         public const string PTV_TOTAL = "PTV_Total";
-        public const string BODY = "BODY"; // ECLIPSE default name for patient outline
-        public const string EXTERNAL = "External"; // RayStation default name for patient outline
         public const string REM = "REM_AUTO";
         public const string HEALTHY_TISSUE = "HT_AUTO";
         public const string HEALTHY_TISSUE2 = "HT2_AUTO";
@@ -33,6 +33,10 @@ namespace TMIAutomation
         public const string DOSE_105 = "Dose_105%";
         public const string DOSE_95 = "Dose_95%";
         public const string DOSE_100_PS = "Dose_100%_PS";
+
+        // BODY : ECLIPSE default name for patient outline
+        // External : RayStation default name for patient outline
+        private static readonly List<string> externals = new List<string> { "BODY", "EXTERNAL" };
 
         public static Structure CreateStructureFromIsodose(this StructureSet ss,
                                                            string junctionId,
@@ -120,7 +124,7 @@ namespace TMIAutomation
                                                IProgress<double> progress,
                                                IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
+            Structure body = ss.GetExternal(logger);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT_AUTO...");
@@ -149,7 +153,7 @@ namespace TMIAutomation
                                           IProgress<double> progress,
                                           IProgress<string> message)
         {
-            Structure body = ss.Structures.FirstOrDefault(s => s.Id == BODY || s.Id == EXTERNAL);
+            Structure body = ss.GetExternal(logger);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure Body_Free_AUTO...");
@@ -228,25 +232,42 @@ namespace TMIAutomation
 
         public static Structure TryAddStructure(this StructureSet ss, string dicomType, string id, ILogger logger)
         {
-            if (ss.CanAddStructure(dicomType, id))
+            try
             {
                 return ss.AddStructure(dicomType, id);
             }
-            else
+            catch (Exception e)
             {
-                logger.Warning("Found existing Sructure {Id} in current StructureSet {ssId}", id, ss.Id);
-#if ESAPI16
-                string newId = id.Length >= 63 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
-#else
-                string newId = id.Length >= 15 ? id.Remove(id.Length - 2, 2) + "_0" : id + "_0";
-#endif
-                logger.Warning("Renaming existing Structure {Id} to {newId}", id, newId);
+                logger.Information("Found existing Sructure {Id} with Dicom type {dicomType} in current StructureSet {ssId}", id, dicomType, ss.Id);
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
-                oldStructure.Id = newId;
-
-                logger.Warning("Add new structure Structure {Id}", id);
-                return ss.AddStructure(dicomType, id);
+                logger.Information("Asking the user to rename the Structure {Id}", id);
+                RenameStructureViewModel renameStructureViewModel = new RenameStructureViewModel(oldStructure, id, e.Message);
+                RenameStructureWindow renameStructureWindow = new RenameStructureWindow(renameStructureViewModel);
+                renameStructureWindow.ShowDialog();
+#if ESAPI15
+                /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                * ESAPI15 won't throw any error, although the structure Id doesn't change
+                */
+                if (oldStructure.Id == id)
+                {
+                    throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
+                        $"Please set its status to UnApproved in all StructureSets.");
+                }
+#endif
+                logger.Information("Structure {Id} renamed to {oldId}", id, oldStructure.Id);
             }
+
+            logger.Information("Add new Structure {Id}", id);
+            return ss.AddStructure(dicomType, id);
+        }
+
+        public static Structure GetExternal(this StructureSet ss, ILogger logger)
+        {
+            Structure body = ss.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL")
+                ?? ss.Structures.FirstOrDefault(s => externals.Contains(s.Id.ToUpper()));
+            logger.Information("Found structure EXTERNAL: {body}", body);
+
+            return body;
         }
 
     }

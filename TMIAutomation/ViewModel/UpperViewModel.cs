@@ -3,6 +3,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using TMIAutomation.View;
 
@@ -108,20 +109,38 @@ namespace TMIAutomation.ViewModel
             bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
+            bool success = true; // show "Complete" message box
 
-            if (this.isJunctionChecked)
+            try
             {
-                await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
-                RetrieveUpperPTVs(this.selectedPlanId);
-            }
+                if (this.isJunctionChecked)
+                {
+                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                    RetrieveUpperPTVs(this.selectedPlanId);
+                }
 
-            if (this.isControlChecked)
+                if (this.isControlChecked)
+                {
+                    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                }
+            }
+            catch (Exception e)
             {
-                await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                success = false;
+                throw new Exception("An error occurred during the upper-extremities workflow.", e);
             }
-
-            pbViewModel.ResetProgress();
-            pbWindow.Close();
+            finally
+            {
+                pbViewModel.ResetProgress();
+                pbWindow.Close();
+                if (success)
+                {
+                    MessageBox.Show("Completed!",
+                    "Lower-extremities optimization",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                }
+            }
         }
     }
 }
