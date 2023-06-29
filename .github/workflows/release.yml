@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Tag on PR merge
         id: tag-on-pr-merge
-        uses: David-Lor/action-tag-on-pr-merge@main
+        uses: nlambriICH/action-tag-on-pr-merge@develop
         with:
           push-tag: true
 
