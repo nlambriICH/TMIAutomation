@@ -288,7 +288,8 @@ namespace TMIAutomation.ViewModel
                                                        progress,
                                                        message);
 #else
-                    await this.modelBase.OptimizeAsync(this.selectedUpperPlanId,
+                    await this.modelBase.OptimizeAsync(this.selectedCourseId,
+                                                       this.selectedUpperPlanId,
                                                        this.selectedRegistrationId,
                                                        this.selectedLowerPlanId,
                                                        generateBaseDosePlanOnly,
