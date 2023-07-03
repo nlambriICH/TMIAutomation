@@ -122,14 +122,26 @@ namespace TMIAutomation
                                                Structure ptv,
                                                ILogger logger,
                                                IProgress<double> progress,
-                                               IProgress<string> message)
+                                               IProgress<string> message,
+                                               bool isBaseDose = false
+                                               )
         {
             Structure body = ss.GetExternal(logger);
 
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT_AUTO...");
             Structure healthyTissue = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE, logger);
-            healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
+
+            if (isBaseDose)
+            {
+                AxisAlignedMargins ptvAsymmMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 15, 15, 15, 15, 15, 20);
+                AxisAlignedMargins ptvAsymmMarginSub = new AxisAlignedMargins(StructureMarginGeometry.Outer, 3, 3, 3, 3, 3, 20);
+                healthyTissue.SegmentVolume = ptv.AsymmetricMargin(ptvAsymmMargin).Sub(ptv.AsymmetricMargin(ptvAsymmMarginSub)).And(body.Margin(-3));
+            }
+            else
+            {
+                healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
+            }
 
             message.Report("Removing small contours from HT_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT}", HEALTHY_TISSUE);
@@ -138,7 +150,17 @@ namespace TMIAutomation
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT2_AUTO...");
             Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
-            healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
+
+            if (isBaseDose)
+            {
+                AxisAlignedMargins ptvAsymmMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 30, 30, 30, 30, 30, 35);
+                AxisAlignedMargins ptvAsymmMarginSub = new AxisAlignedMargins(StructureMarginGeometry.Outer, 17, 17, 17, 17, 17, 35);
+                healthyTissue2.SegmentVolume = ptv.AsymmetricMargin(ptvAsymmMargin).Sub(ptv.AsymmetricMargin(ptvAsymmMarginSub)).And(body.Margin(-3));
+            }
+            else
+            {
+                healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
+            }
 
             message.Report("Removing small contours from HT2_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT2}", HEALTHY_TISSUE2);

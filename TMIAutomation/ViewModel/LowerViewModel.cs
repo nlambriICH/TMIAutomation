@@ -261,11 +261,21 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isControlChecked)
                 {
+#if ESAPI16
                     await this.modelBase.GenerateLowerControlAsync(this.selectedCourseId,
                                                                    this.selectedLowerPlanId,
                                                                    this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
                                                                    progress,
-                                                                   message);
+                                                                   message,
+                                                                   isBaseDose: true);
+#else
+                    await this.modelBase.GenerateLowerControlAsync(this.selectedCourseId,
+                                                                   this.selectedLowerPlanId,
+                                                                   this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
+                                                                   progress,
+                                                                   message,
+                                                                   generateBaseDosePlanOnly);
+#endif
                 }
 
                 if (this.isOptimizationChecked)

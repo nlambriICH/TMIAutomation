@@ -173,9 +173,11 @@ namespace TMIAutomation
                                               string lowerPlanId,
                                               string lowerPTVId,
                                               IProgress<double> progress,
-                                              IProgress<string> message)
+                                              IProgress<string> message,
+                                              bool isBaseDose = false
+                                              )
         {
-            LowerControl lowerControl = new LowerControl(this.esapiWorker, courseId, lowerPlanId, lowerPTVId);
+            LowerControl lowerControl = new LowerControl(this.esapiWorker, courseId, lowerPlanId, lowerPTVId, isBaseDose);
             return lowerControl.CreateAsync(progress, message);
         }
 
