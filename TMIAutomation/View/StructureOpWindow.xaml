@@ -6,7 +6,7 @@
         xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
         mc:Ignorable="d"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        d:DataContext="{d:DesignInstance Type=viewmodel:RenameStructureViewModel}"
+        d:DataContext="{d:DesignInstance Type=viewmodel:StructureOpViewModel}"
         Title="Lower-extremities: Add Structure" 
         SizeToContent="Height"
         Width="500"
@@ -30,7 +30,7 @@
         <TextBox Grid.Row="1"
                  Name="StructureIdTextBox"
                  Text="{Binding StructureId, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
-                 Margin="50,10,0,10"
+                 Margin="50,0,0,30"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Bottom"
                  Width="200"
@@ -49,7 +49,7 @@
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsValidId}" Value="False">
                             <Setter Property="Background" Value="DarkOrange"/>
-                            <Setter Property="ToolTip" Value="{Binding TooltipMessage}"/>
+                            <Setter Property="ToolTip" Value="{Binding TooltipStructId}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -60,12 +60,25 @@
                 Height="25"
                 VerticalAlignment="Top"
                 HorizontalAlignment="Right"
-                Margin="0,10,65,10"
+                Margin="0,50,65,10"
                 FontSize="16"
                 VerticalContentAlignment="Center"
                 IsEnabled="{Binding IsValidId}"
-                Content="Confirm"
-                x:Name="ConfirmStructureIdButton"
-                Click="Button_Click"/>
+                Content="Rename"
+                x:Name="RenameStructureIdButton"
+                Click="Button_Click_Rename"
+                ToolTip="{Binding TooltipRename}"/>
+        <Button Grid.Row="1"
+                Width="130"
+                Height="25"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                Margin="0,10,65,10"
+                FontSize="16"
+                VerticalContentAlignment="Center"
+                Content="Remove"
+                x:Name="RemoveStructureIdButton"
+                Click="Button_Click_Remove"
+                ToolTip="{Binding TooltipRemove}"/>
     </Grid>
 </Window>

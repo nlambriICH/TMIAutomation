@@ -142,13 +142,13 @@
     <Compile Include="Model\StructureCreation\Junction\LowerJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
-    <Compile Include="ViewModel\RenameStructureViewModel.cs" />
+    <Compile Include="ViewModel\StructureOpViewModel.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProgressBarViewModel.cs" />
     <Compile Include="ViewModel\UpperViewModel.cs" />
-    <Compile Include="View\RenameStructureWindow.xaml.cs">
-      <DependentUpon>RenameStructureWindow.xaml</DependentUpon>
+    <Compile Include="View\StructureOpWindow.xaml.cs">
+      <DependentUpon>StructureOpWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\LowerPlanOptSelection.xaml.cs">
       <DependentUpon>LowerPlanOptSelection.xaml</DependentUpon>
@@ -187,7 +187,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\RenameStructureWindow.xaml">
+    <Page Include="View\StructureOpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -269,20 +269,32 @@ namespace TMIAutomation
                 logger.Information("Found existing Sructure {Id} with Dicom type {dicomType} in current StructureSet {ssId}", id, dicomType, ss.Id);
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
                 logger.Information("Asking the user to rename the Structure {Id}", id);
-                RenameStructureViewModel renameStructureViewModel = new RenameStructureViewModel(oldStructure, id, e.Message);
-                RenameStructureWindow renameStructureWindow = new RenameStructureWindow(renameStructureViewModel);
+                StructureOpViewModel structureOpViewModel = new StructureOpViewModel(oldStructure, id, e.Message);
+                RenameStructureWindow renameStructureWindow = new RenameStructureWindow(structureOpViewModel);
                 renameStructureWindow.ShowDialog();
-#if ESAPI15
-                /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
-                * ESAPI15 won't throw any error, although the structure Id doesn't change
-                */
-                if (oldStructure.Id == id)
+                logger.Information("Structure operation {op}", structureOpViewModel.Operation);
+
+                if (structureOpViewModel.Operation == Operation.Rename)
                 {
-                    throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
-                        $"Please set its status to UnApproved in all StructureSets.");
-                }
+                    oldStructure.Id = structureOpViewModel.StructureId;
+#if ESAPI15
+                    /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                    * ESAPI15 won't throw any error, although the structure Id doesn't change
+                    */
+                    if (oldStructure.Id == id)
+                    {
+                        throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
+                            $"Please set its status to UnApproved in all StructureSets.");
+                    }
 #endif
-                logger.Information("Structure {Id} renamed to {oldId}", id, oldStructure.Id);
+                    logger.Information("Structure {Id} renamed to {oldId}", id, oldStructure.Id);
+                }
+                else
+                {
+                    // It is allowed to remove a structure that is approved in another structure set
+                    ss.RemoveStructure(oldStructure);
+                    logger.Information("Remove Structure {Id}", id);
+                }
             }
 
             logger.Information("Add new Structure {Id}", id);
