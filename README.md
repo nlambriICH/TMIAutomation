@@ -15,8 +15,8 @@ If you liked/used this project, don't forget to give it a star! :star:
 
 ### Documentation
 
-The script Reference Guide is located in the `Docs` folder of this repository.
-Alternatively, it can be found in the `Docs` folder contained in the release files.
+The script _Reference Guide_ is located in the `Docs` folder of this repository.
+Alternatively, it can be found in the `Docs` folder contained in the release [assets](https://github.com/nlambriICH/TMIAutomation/releases).
 
 ### Demo
 
@@ -33,7 +33,7 @@ Go to the latest release [page](https://github.com/nlambriICH/TMIAutomation/rele
 * for Eclipse v15: download the zip file `ESAPI15_TMIAutomation-vx.x.x.x.zip`
 * for Eclipse v16: download the zip file `ESAPI16_TMIAutomation-vx.x.x.x.zip`
 
-If you are on a research workstation (TBox), you can immediately run the script - TMIAutomation.esapi.dll -
+If you are on a research workstation (_TBox_), you can immediately run the script `TMIAutomation.esapi.dll`
 by setting the database in research mode from the RT Administration module of Eclipse.
 Otherwise, the plug-in script `TMIAutomation.esapi.dll` needs to be **approved** in the Eclipse application.
 
