@@ -1,0 +1,71 @@
+﻿<Window x:Class="TMIAutomation.View.RenameStructureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        d:DataContext="{d:DesignInstance Type=viewmodel:RenameStructureViewModel}"
+        Title="Lower-extremities: Add Structure" 
+        SizeToContent="Height"
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        Topmost="True"
+        Loaded="Window_Loaded">
+    <Grid Background="#b6b5bd">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="120"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Width="450"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,0"
+                   TextWrapping="Wrap"
+                   FontSize="14"
+                   Text="{Binding TextMessage}"/>
+        <TextBox Grid.Row="1"
+                 Name="StructureIdTextBox"
+                 Text="{Binding StructureId, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                 Margin="50,10,0,10"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Bottom"
+                 Width="200"
+                 Height="25"
+                 VerticalContentAlignment="Center"
+                 FontSize="14"
+                 KeyDown="StructureIdTextBox_KeyDown">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SourceUpdated">
+                    <i:InvokeCommandAction Command="{Binding AssignStructureIdCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <TextBox.Resources>
+                <Style TargetType="TextBox">
+                    <Setter Property="Background" Value="White"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsValidId}" Value="False">
+                            <Setter Property="Background" Value="DarkOrange"/>
+                            <Setter Property="ToolTip" Value="{Binding TooltipMessage}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Resources>
+        </TextBox>
+        <Button Grid.Row="1"
+                Width="130"
+                Height="25"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Right"
+                Margin="0,10,65,10"
+                FontSize="16"
+                VerticalContentAlignment="Center"
+                IsEnabled="{Binding IsValidId}"
+                Content="Confirm"
+                x:Name="ConfirmStructureIdButton"
+                Click="Button_Click"/>
+    </Grid>
+</Window>
