@@ -241,6 +241,10 @@ IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI1
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Release-16.1 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Release-15.6 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>
 </Project>
