@@ -13,6 +13,11 @@ If you liked/used this project, don't forget to give it a star! :star:
 
 ## Usage
 
+### Documentation
+
+The script Reference Guide is located in the `Docs` folder of this repository.
+Alternatively, it can be found in the `Docs` folder contained in the release files.
+
 ### Demo
 
 Example on Eclipse v15:
@@ -28,7 +33,9 @@ Go to the latest release [page](https://github.com/nlambriICH/TMIAutomation/rele
 * for Eclipse v15: download the zip file `ESAPI15_TMIAutomation-vx.x.x.x.zip`
 * for Eclipse v16: download the zip file `ESAPI16_TMIAutomation-vx.x.x.x.zip`
 
-The plug-in script `TMIAutomation.esapi.dll` needs to be **approved** in the Eclipse application.
+If you are on a research workstation (TBox), you can immediately run the script - TMIAutomation.esapi.dll -
+by setting the database in research mode from the RT Administration module of Eclipse.
+Otherwise, the plug-in script `TMIAutomation.esapi.dll` needs to be **approved** in the Eclipse application.
 
 The `Configuration` folder contains config files with objectives and parameters to optimize the lower-extremities plan.
 Example values are provided in order for the script to execute properly.
@@ -59,7 +66,7 @@ Project structure:
 
 ## Licence
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE.md` for more information.
 
 ## Contact
 
