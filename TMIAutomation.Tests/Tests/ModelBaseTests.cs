@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMIAutomation.Tests.Attributes;
@@ -22,11 +22,23 @@ namespace TMIAutomation.Tests
                 : this;
         }
 
+        [Fact]
+        private void GetCourses()
+        {
+#if ESAPI16
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CLowerAutoAddOpt", "TEst", "CBaseDoseAddOpt", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+#else
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+#endif
+            List<string> courses = modelBase.GetCourses(scriptContext);
+            Assert.Equal(expectedCourses, courses);
+        }
+
         [Theory]
         [MemberData(nameof(GetPlans_Data))]
         private void GetPlans(ModelBase.PlanType planType, int index, string expectedPlanId)
         {
-            List<string> plans = modelBase.GetPlans(scriptContext, planType);
+            List<string> plans = modelBase.GetPlans(scriptContext, scriptContext.Course.Id, planType);
             try
             {
                 Assert.Equal(expectedPlanId, plans[index]);
@@ -50,7 +62,7 @@ namespace TMIAutomation.Tests
         [MemberData(nameof(GetPTVsFromPlan_Data))]
         private void GetPTVsFromPlan(string planId, int index, string expectedPlanId)
         {
-            List<string> ptvs = modelBase.GetPTVsFromPlan(scriptContext, planId);
+            List<string> ptvs = modelBase.GetPTVsFromPlan(scriptContext, scriptContext.Course.Id, planId);
             try
             {
                 Assert.Equal(expectedPlanId, ptvs[index]);
@@ -121,7 +133,7 @@ namespace TMIAutomation.Tests
         [MemberData(nameof(IsPlanDoseValid_Data))]
         private void IsPlanDoseValid(string planId, bool expected)
         {
-            bool isDoseValid = modelBase.IsPlanDoseValid(scriptContext, planId);
+            bool isDoseValid = modelBase.IsPlanDoseValid(scriptContext, scriptContext.Course.Id, planId);
             try
             {
                 Assert.Equal(expected, isDoseValid);
@@ -143,7 +155,7 @@ namespace TMIAutomation.Tests
         [MemberData(nameof(GetMachineName_Data))]
         private void GetMachineName(string planId, string expectedMachineName)
         {
-            string machineName = modelBase.GetMachineName(scriptContext, planId);
+            string machineName = modelBase.GetMachineName(scriptContext, scriptContext.Course.Id, planId);
             try
             {
                 Assert.Equal(expectedMachineName, machineName);

@@ -1,5 +1,5 @@
-﻿using Serilog;
-using System;
+﻿using System;
+using Serilog;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 

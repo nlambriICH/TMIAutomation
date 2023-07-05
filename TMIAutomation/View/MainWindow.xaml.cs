@@ -1,5 +1,5 @@
-﻿using Serilog;
-using System.Windows;
+﻿using System.Windows;
+using Serilog;
 using TMIAutomation.ViewModel;
 
 namespace TMIAutomation.View

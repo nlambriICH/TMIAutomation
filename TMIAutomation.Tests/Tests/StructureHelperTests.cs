@@ -20,23 +20,38 @@ namespace TMIAutomation.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TryAddStructure_Data))]
-        private void TryAddStructure(string dicomType, string id, string expectedId)
+        [MemberData(nameof(TryAddStructureRename_Data))]
+        private void TryAddStructureRename(string dicomType, string id, string expectedId)
         {
             Structure newStructure = structureSet.TryAddStructure(dicomType, id, this.logger);
             Assert.Equal(expectedId, newStructure.Id);
         }
 
-        public static IEnumerable<object[]> TryAddStructure_Data()
+        public static IEnumerable<object[]> TryAddStructureRename_Data()
         {
-            yield return new object[] { "CONTROL", "TestStructure", "TestStructure"};
-            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%"};
-            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%"};
+            yield return new object[] { "CONTROL", "TestStructure", "TestStructure" };
+            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%" };
+            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%" };
+        }
+
+        [Theory]
+        [MemberData(nameof(TryAddStructureRemove_Data))]
+        private void TryAddStructureRemove(string dicomType, string id, string expectedId)
+        {
+            Structure newStructure = structureSet.TryAddStructure(dicomType, id, this.logger);
+            Assert.Equal(expectedId, newStructure.Id);
+        }
+
+        public static IEnumerable<object[]> TryAddStructureRemove_Data()
+        {
+            yield return new object[] { "CONTROL", "Dose_25%", "Dose_25%" };
+            yield return new object[] { "CONTROL", "Dose_50%", "Dose_50%" };
+            yield return new object[] { "CONTROL", "Dose_75%", "Dose_75%" };
         }
 
 #if ESAPI15
         [Fact]
-        private void TryAddStructure_Approved_Exception()
+        private void TryAddStructureRename_Approved_Exception()
         {
             InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => structureSet.TryAddStructure("CONTROL", "Dose_75%", this.logger));
             Assert.Equal("Could not change Id of the existing Structure Dose_75%. Please set its status to UnApproved in all StructureSets.",

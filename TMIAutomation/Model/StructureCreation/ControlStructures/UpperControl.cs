@@ -1,8 +1,8 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 
@@ -12,12 +12,14 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<UpperControl>();
         private readonly EsapiWorker esapiWorker;
+        private readonly string courseId;
         private readonly string upperPlanId;
         private readonly string upperPTVId;
 
-        public UpperControl(EsapiWorker esapiWorker, string upperPlanId, string upperPTVId)
+        public UpperControl(EsapiWorker esapiWorker, string courseId, string upperPlanId, string upperPTVId)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.upperPTVId = upperPTVId;
         }
@@ -26,12 +28,12 @@ namespace TMIAutomation
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("UpperControl context: {@context}", new List<string> { this.upperPlanId, this.upperPTVId });
+                logger.Information("UpperControl context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.upperPTVId });
 
                 /*
                 * Create Healthy Tissue (HT), Healthy Tissue 2 (HT2), and Body Free (Body_free)
                 */
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 StructureSet upperSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId).StructureSet;
                 Structure upperPTV = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
                 int bottomSlicePTVWithJunction = upperSS.GetStructureSlices(upperPTV).FirstOrDefault();

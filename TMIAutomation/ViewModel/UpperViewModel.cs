@@ -1,16 +1,41 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel
 {
     public class UpperViewModel : ViewModelBase
     {
+        private List<string> courses;
+        public List<string> Courses
+        {
+            get => courses;
+            set
+            {
+                Set(ref courses, value);
+                SelectedCourseId = this.courses.Count != 0 ? this.courses[0] : string.Empty;
+            }
+        }
+
+        private string selectedCourseId;
+        public string SelectedCourseId
+        {
+            get => selectedCourseId;
+            set
+            {
+                if (selectedCourseId != value)
+                {
+                    Set(ref selectedCourseId, value);
+                    RetrieveUpperPlans(selectedCourseId);
+                }
+            }
+        }
+
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
@@ -85,17 +110,27 @@ namespace TMIAutomation.ViewModel
             IsJunctionChecked = true;
             IsControlChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
-            RetrieveUpperPlans();
+            RetrieveCourses();
         }
 
-        private async void RetrieveUpperPlans()
+        /*
+         * Async void methods used only to set properties:
+         * they cannot return a Task and need to be async to run on the ESAPI thread
+         * Warning: there is no guarantee that these methods will be awaited
+        */
+        private async void RetrieveCourses()
         {
-            UpperPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Up);
+            Courses = await this.modelBase.GetCoursesAsync();
+        }
+
+        private async void RetrieveUpperPlans(string courseId)
+        {
+            UpperPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Up);
         }
 
         private async void RetrieveUpperPTVs(string planId)
         {
-            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(planId);
+            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, planId);
         }
 
         private async void StartExecution()
@@ -115,13 +150,13 @@ namespace TMIAutomation.ViewModel
             {
                 if (this.isJunctionChecked)
                 {
-                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
-                    RetrieveUpperPTVs(this.selectedPlanId);
+                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
+                    UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, this.selectedPlanId);
                 }
 
                 if (this.isControlChecked)
                 {
-                    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                    await this.modelBase.GenerateUpperControlAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
                 }
             }
             catch (Exception e)
