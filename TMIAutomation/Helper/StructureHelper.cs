@@ -270,8 +270,8 @@ namespace TMIAutomation
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
                 logger.Information("Asking the user to rename the Structure {Id}", id);
                 StructureOpViewModel structureOpViewModel = new StructureOpViewModel(oldStructure, id, e.Message);
-                RenameStructureWindow renameStructureWindow = new RenameStructureWindow(structureOpViewModel);
-                renameStructureWindow.ShowDialog();
+                StructureOpWindow structureOpWindow = new StructureOpWindow(structureOpViewModel);
+                structureOpWindow.ShowDialog();
                 logger.Information("Structure operation {op}", structureOpViewModel.Operation);
 
                 if (structureOpViewModel.Operation == Operation.Rename)

@@ -7,11 +7,11 @@ using TMIAutomation.ViewModel;
 namespace TMIAutomation.View
 {
     /// <summary>
-    /// Interaction logic for AddStructureWindow.xaml
+    /// Interaction logic for StructureOpWindow.xaml
     /// </summary>
-    public partial class RenameStructureWindow : Window
+    public partial class StructureOpWindow : Window
     {
-        public RenameStructureWindow(StructureOpViewModel structureOpViewModel)
+        public StructureOpWindow(StructureOpViewModel structureOpViewModel)
         {
             InitializeComponent();
             this.DataContext = structureOpViewModel;
