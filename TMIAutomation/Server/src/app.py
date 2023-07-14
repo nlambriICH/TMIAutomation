@@ -1,18 +1,19 @@
+"""Module implementing the local server of the models."""
 import socket
 import logging
-from flask import Flask, request, jsonify, abort
+from flask import Flask, Response, request, jsonify, abort
 import onnxruntime
 import yaml
-from pipeline import Pipeline
+from pipeline import Pipeline, RequestInfo
 
 
 logging.basicConfig(
-    filename="app.log",
+    filename="logs/app.log",
     level=logging.INFO,
     format="%(asctime)s:%(name)s:%(levelname)s:%(message)s",
 )
 
-with open("config.yml", "r") as stream:
+with open("config.yml", "r", encoding="utf-8") as stream:
     try:
         config = yaml.safe_load(stream)
         logging.getLogger().setLevel(config["loglevel"])
@@ -25,11 +26,16 @@ app = Flask(__name__)
 try:
     ort_session = onnxruntime.InferenceSession(r"models\body_cnn.onnx")
     input_name = ort_session.get_inputs()[0].name
-except Exception:
-    logging.exception("Could not load model")
+except Exception:  # pylint: disable=broad-exception-caught
+    logging.exception("Could not load model.")
 
 
-def find_available_port():
+def _get_available_port() -> int | None:
+    """Get the first available port between the range startport and endport specified in config.yml.
+
+    Returns:
+        int | None: The first available port between startport and endport. None if all ports are unavailable.
+    """
     start_port = config["startport"]
     end_port = config["endport"]
     for port in range(start_port, end_port):
@@ -45,9 +51,17 @@ def find_available_port():
         "Could not find any available port between %d-%d", start_port, end_port
     )
 
+    return None
+
 
 @app.route("/predict", methods=["POST"])
-def get_predictions():
+def predict() -> Response | None:
+    """Inference endpoint.
+
+    Returns:
+        Response: Response object with application/json mime type containing the
+        isocenters, jaw X apertures, and jaw Y apertures in patient coordinate system.
+    """
     if ort_session is None:
         abort(503)
 
@@ -61,8 +75,12 @@ def get_predictions():
             dicom_path = config["dicom_path"]
         ptv_name = request.json["ptv_name"]
         oars_name = request.json["oars_name"]
+
         pipeline = Pipeline(
-            ort_session, input_name, dicom_path, ptv_name, oars_name, save_io=True
+            ort_session,
+            input_name,
+            RequestInfo(dicom_path, ptv_name, oars_name),
+            save_io=True,
         )
         pipeline_out = pipeline.predict()
 
@@ -71,21 +89,32 @@ def get_predictions():
                 "Isocenters": pipeline_out[0].tolist(),
                 "Jaw_X": pipeline_out[1].tolist(),
                 "Jaw_Y": pipeline_out[2].tolist(),
-                "Dicom path": dicom_path,
             }
         )
 
+    return None
+
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def status_message() -> str:
+    """Main endpoint of the local server.
+
+    Returns:
+        str: A string reporting a server status message.
+    """
+    return (
+        "<p>ERROR: Could not load the model.</p>"
+        if ort_session is None
+        else "<p>The local server is running properly!</p>"
+    )
 
 
-def main():
-    port = find_available_port()
+def main() -> None:
+    """Script entry point."""
+    port = _get_available_port()
     if port:
         config["port"] = port
-        with open("config.yml", "w") as yml_file:
+        with open("config.yml", "w", encoding="utf-8") as yml_file:
             yml_file.write(yaml.dump(config, default_flow_style=False))
         logging.info("Starting server on port: %i", port)
         app.run(port=port, debug=True)

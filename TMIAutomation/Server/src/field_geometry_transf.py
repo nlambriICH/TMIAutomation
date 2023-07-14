@@ -1,3 +1,5 @@
+"""Module implementing the field geometry transformations
+between patient and pixel coordinate systems."""
 from typing import Literal
 import numpy as np
 from pydicom import Dataset
@@ -12,11 +14,11 @@ def get_zero_row_idx(arr: np.ndarray) -> np.ndarray:
     """
     Return the indices of rows in a 2D numpy array where all elements are zero.
 
-    Parameters:
-    arr (np.ndarray): A 2D numpy array.
+    Args:
+        arr (np.ndarray): A 2D numpy array.
 
     Returns:
-    A 1D numpy array of indices of rows where all elements are zero.
+        np.ndarray: A 1D numpy array of indices of rows where all elements are zero.
     """
     return np.where(np.all(arr == 0, axis=1))[0]
 
@@ -31,12 +33,12 @@ def get_jaw_kps_from_aperture(
     Args:
         isocenters (np.ndarray): Array of shape (n_fields, 3) containing the 3D coordinates of the isocenters for each field.
         jaw_X (np.ndarray): A 2D array of shape (n_fields, 2) containing the X aperture of the fields, where
-                            the 2nd dimension is for X1 and X2.
+        the 2nd dimension is for X1 and X2.
         jaw_Y (np.ndarray): A 2D array of shape (n_fields, 2) containing the Y aperture of the fields, where
-                            the 2nd dimension is for Y1 and Y2.
+        the 2nd dimension is for Y1 and Y2.
 
     Returns:
-        A tuple containing two 2D arrays of shape (n_fields, 2):
+        tuple[np.ndarray, np.ndarray]: Tuple containing two 2D arrays of shape (n_fields, 2):
         - The first array contains the coordinates of the X1 and X2 sides of the field's X aperture.
         - The second array contains the coordinates of the Y1 and Y2 sides of the field's Y aperture.
     """
@@ -60,12 +62,12 @@ def get_jaw_aperture_from_kps(
     Args:
         isocenters (np.ndarray): Array of shape (n_fields, 3) containing the 3D coordinates of the isocenters.
         jaw_X_kps (np.ndarray): A 2D array of shape (n_fields, 2) containing the X coordinates of the 4 middle points
-                                of the sides of the rectangle defined by each field's X aperture.
+        of the sides of the rectangle defined by each field's X aperture.
         jaw_Y_kps (np.ndarray): A 2D array of shape (n_fields, 2) containing the Y coordinates of the 4 middle points
-                                of the sides of the rectangle defined by each field's Y aperture.
+        of the sides of the rectangle defined by each field's Y aperture.
 
     Returns:
-        A tuple containing two 2D arrays of shape (n_fields, 2):
+        tuple[np.ndarray, np.ndarray]: Tuple containing two 2D arrays of shape (n_fields, 2):
         - The first array contains the X aperture of each field, where the 2nd dimension is for X1 and X2.
         - The second array contains the Y aperture of each field, where the 2nd dimension is for Y1 and Y2.
     """
@@ -91,17 +93,17 @@ def transform_field_geometry(
     Args:
         series_data (list[Dataset]): list of DICOM datasets corresponding to the CT series that the RTPLAN belongs to.
         iso_orig (np.ndarray): Array of shape (n_fields, 3) containing the 3D coordinates
-            of the isocenter for each field in the original coordinate system.
+        of the isocenter for each field in the original coordinate system.
         jaw_X_orig (np.ndarray): Array of shape (n_fields, 2) containing the X apertures
-            for each field in the original coordinate system.
+        for each field in the original coordinate system.
         jaw_Y_orig (np.ndarray): Array of shape (n_fields, 2) containing the Y apertures
-            for each field in the original coordinate system.
-        from_to (str): the orignal and target coordinate system. Allowed values: "pat_pix" and "pix_pat". Default is "pat_pix".
+        for each field in the original coordinate system.
+        from_to (str): the orignal and target coordinate system. Allowed values: "pat_pix" and "pix_pat". Defaults to "pat_pix".
 
     Returns:
-        tuple[np.ndarray, np.ndarray, np.ndarray]: A tuple containing the transformed isocenters,
-            jaw X apertures, and jaw Y apertures. Each of these arrays has the same shape as the
-            corresponding input arrays.
+        tuple[np.ndarray, np.ndarray, np.ndarray]: Tuple containing the transformed isocenters,
+        jaw X apertures, and jaw Y apertures. Each of these arrays has the same shape as the
+        corresponding input arrays.
     """
     if from_to == "pat_pix":
         transf_matrix = get_patient_to_pixel_transformation_matrix(series_data)

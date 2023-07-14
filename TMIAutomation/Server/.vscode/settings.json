@@ -1,8 +1,11 @@
 {
-    "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
-    "editor.formatOnSave": true,
+    "python.linting.flake8Enabled": true,
     "python.linting.flake8Args": [
         "--max-line-length=130",
     ],
+    "python.linting.pylintArgs": [
+        "--max-line-length=130"
+    ],
+    "editor.formatOnSave": true,
 }
