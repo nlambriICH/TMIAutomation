@@ -412,7 +412,9 @@ class Pipeline:
         self.postprocess(model_output)
 
         if local_optimization:
-            from local_optimization import LocalOptimization
+            from local_optimization import (  # pylint: disable=import-outside-toplevel
+                LocalOptimization,
+            )
 
             LocalOptimization(self.image, self.field_geometry).optimize()
 

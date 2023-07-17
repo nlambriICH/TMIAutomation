@@ -1,4 +1,6 @@
 """Module implementing the local server of the models."""
+import os
+import sys
 import socket
 import logging
 from flask import Flask, Response, request, jsonify, abort
@@ -6,6 +8,9 @@ import onnxruntime
 import yaml
 from pipeline import Pipeline, RequestInfo
 
+
+if not os.path.exists("logs"):
+    os.makedirs("logs")
 
 logging.basicConfig(
     filename="logs/app.log",
@@ -116,8 +121,16 @@ def main() -> None:
         config["port"] = port
         with open("config.yml", "w", encoding="utf-8") as yml_file:
             yml_file.write(yaml.dump(config, default_flow_style=False))
+
         logging.info("Starting server on port: %i", port)
-        app.run(port=port, debug=True)
+
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            # Running in PyInstaller bundle
+            from waitress import serve  # pylint: disable=import-outside-toplevel
+
+            serve(app, host="127.0.0.1", port=port)
+        else:
+            app.run(port=port)
 
 
 if __name__ == "__main__":
