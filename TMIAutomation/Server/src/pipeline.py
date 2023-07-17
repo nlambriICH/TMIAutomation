@@ -3,7 +3,7 @@ import os
 import glob
 import warnings
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 from rt_utils import RTStructBuilder
 from rt_utils.image_helper import get_spacing_between_slices
@@ -25,19 +25,32 @@ class RequestInfo:
 
 
 @dataclass
-class InputImage:
-    "Input image - shape (H, W, C) - and properties."
+class Image:
+    "Image - shape (H, W, C) - processed by the pipeline, and its properties."
+
     aspect_ratio: float
     num_slices: int
     width_resize: int
-    image: np.ndarray | None
+    pixels: np.ndarray | None = field(default=None)
+
+
+@dataclass
+class FieldGeometry:
+    "Field geometry (isocenter positions and jaw apertures) in pixel coordinate system."
+
+    isocenters_pix: np.ndarray = field(default_factory=lambda: np.zeros(shape=(12, 3)))
+    jaws_X_pix: np.ndarray = field(default_factory=lambda: np.zeros(shape=(12, 2)))
+    jaws_Y_pix: np.ndarray = field(default_factory=lambda: np.zeros(shape=(12, 2)))
 
 
 class Pipeline:
     """Pipeline class implementing:
-    - preprocessing steps (raw-interim)
-    - postprocessing steps (build_output-interim-local_opt-pix_to_pat)
+    1) Preprocessing steps (raw-interim)
+    2) Postprocessing steps (build_output-interim-local_opt-pix_to_pat)
     """
+
+    # TODO: implement usage of two different models: body and arms
+    # For the moment only the body model is used
 
     def __init__(
         self,
@@ -45,7 +58,7 @@ class Pipeline:
         input_name: str,
         request_info: RequestInfo,
         save_io: bool = False,
-    ):
+    ) -> None:
         self.ort_session = ort_session
         self.input_name = input_name
         self.request_info = request_info
@@ -63,8 +76,8 @@ class Pipeline:
         slice_thickness = get_spacing_between_slices(self.rtstruct.series_data)
         aspect_ratio = slice_thickness / pixel_spacing
         num_slices = len(self.rtstruct.series_data)
-        self.input_image = InputImage(aspect_ratio, num_slices, 512, None)
-        self.model_output = None
+        self.image = Image(aspect_ratio, num_slices, 512)
+        self.field_geometry = FieldGeometry()
 
     def _get_masked_image_3d(self, mask_3d: np.ndarray) -> np.ndarray:
         """Create a 3D-masked CT image given a 3D mask.
@@ -129,8 +142,8 @@ class Pipeline:
             [
                 iaa.Resize(
                     size={
-                        "height": self.input_image.width_resize,
-                        "width": self.input_image.width_resize,
+                        "height": self.image.width_resize,
+                        "width": self.image.width_resize,
                     },
                     interpolation="nearest",
                 ),
@@ -184,31 +197,44 @@ class Pipeline:
         oars_channel = np.sum(oars_channel, axis=-1)
 
         image = np.stack((ptv_img_2d, 0.3 * ptv_mask_2d, oars_channel), axis=-1)
-        self.input_image.image = self._transform(image)
+        self.image.pixels = self._transform(image)
 
         if self.save_io:
             plt.imsave(
                 "logs/input_img.png",
-                np.where(self.input_image.image == -1, 0, self.input_image.image),
+                np.where(self.image.pixels == -1, 0, self.image.pixels),
             )
 
-        return self.input_image.image
-
-    def _build_output(self) -> np.ndarray:
+    def _build_output(self, model_output: np.ndarray) -> np.ndarray:
         """Build the flat output of the regression.
+
+        Args:
+            model_output (np.ndarray): Output of regression model.
 
         Returns:
             np.ndarray: Flat array containing the regression results.
         """
         output = np.zeros(shape=84)
-        y_hat = self.model_output[0]
+        y_hat = model_output[0]
 
         # Isocenter indexes
         index_x = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27]
         index_y = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
+
+        try:
+            assert self.image.pixels.shape == (
+                self.image.width_resize,
+                self.image.width_resize,
+                3,
+            )
+        except AssertionError:
+            logging.exception(
+                "Expected square image. The reconstructed output might be incorrect."
+            )
+
         output[index_x] = (
-            ndimage.center_of_mass(self.input_image.image[0])[0]
-            / self.input_image.width_resize
+            ndimage.center_of_mass(self.image.pixels[..., 0])[1]
+            / self.image.width_resize
         )  # x coord repeated 8 times + 2 times for iso thorax
         output[
             index_y
@@ -242,7 +268,7 @@ class Pipeline:
             output[50] = y_hat[14]  # chest iso
 
             # Overlap fields
-            norm = self.input_image.aspect_ratio * self.input_image.num_slices / 512
+            norm = self.image.aspect_ratio * self.image.num_slices / 512
             output[41] = (output[8] - output[14] + 0.01) * norm + output[46]  # abdomen
             output[45] = (output[14] - output[20] + 0.03) * norm + output[50]  # third
             output[49] = (output[20] - output[26] + 0.02) * norm + output[54]  # chest
@@ -255,6 +281,7 @@ class Pipeline:
 
             # Begin jaw_Y
             for i in range(4):
+                output[76 + i] = y_hat[21 + i]  # apertures for the head
                 if i < 2:
                     # Same apertures opposite signs legs
                     output[60 + 2 * i] = y_hat[i + 18]
@@ -275,8 +302,6 @@ class Pipeline:
                     output[80 + 2 * i] = 0
                     output[81 + 2 * i] = 0
 
-                output[76 + i] = y_hat[21 + i]  # apertures for the head
-
         return output
 
     def _inverse_transform(
@@ -284,9 +309,9 @@ class Pipeline:
         isocenters_hat: np.ndarray,
         jaws_X_pix_hat: np.ndarray,
         jaws_Y_pix_hat: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Transform the model's predictions to the pixel space of the original image,
-        by applying scaling, rotation (90 degress CW), and resize to the original image shape.
+        by applying scaling, rotation (90 degrees CW), and resize to the original image shape.
 
         Args:
             isocenters_hat (np.ndarray): Isocenter positions in pixel space of the transformed image.
@@ -294,20 +319,20 @@ class Pipeline:
             jaws_Y_pix_hat (np.ndarray): Jaw Y apertures in pixel space of the transformed image.
 
         Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: Isocenters, jaw X apertures, and jaw Y apertures
-            in pixel space of the original image.
+            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: Original image, isocenters,
+            jaw X apertures, and jaw Y apertures in pixel space of the original image.
         """
-        isocenters_pix = isocenters_hat * self.input_image.width_resize
-        jaws_X_pix = jaws_X_pix_hat * self.input_image.width_resize
-        jaws_Y_pix = jaws_Y_pix_hat * self.input_image.width_resize
+        isocenters_pix = isocenters_hat * self.image.width_resize
+        jaws_X_pix = jaws_X_pix_hat * self.image.width_resize
+        jaws_Y_pix = jaws_Y_pix_hat * self.image.width_resize
 
         seq = iaa.Sequential(
             [
                 iaa.Rot90(k=1, keep_size=False),
                 iaa.Resize(
                     size={
-                        "height": self.input_image.width_resize,
-                        "width": self.input_image.num_slices,
+                        "height": self.image.width_resize,
+                        "width": self.image.num_slices,
                     },
                     interpolation="nearest",
                 ),
@@ -319,10 +344,10 @@ class Pipeline:
 
         iso_kps = KeypointsOnImage(
             [Keypoint(x=iso[2], y=iso[0]) for iso in isocenters_pix],
-            shape=self.input_image.image.shape,
+            shape=self.image.pixels.shape,
         )
 
-        _, iso_kps_transf = seq(image=self.input_image.image, keypoints=iso_kps)
+        image_original, iso_kps_transf = seq(image=self.image.pixels, keypoints=iso_kps)
 
         iso_kps_tmp = iso_kps_transf.to_xy_array()
         iso_kps_tmp[get_zero_row_idx(isocenters_pix)] = 0
@@ -331,20 +356,17 @@ class Pipeline:
         iso_3d_pix_transf[:, [2, 0]] = iso_3d_pix_transf[:, [0, 2]]
 
         # Only Y apertures need to be resized (X aperture along x/height)
-        jaw_Y_pix_transf = (
-            jaws_Y_pix * self.input_image.num_slices / self.input_image.width_resize
-        )
+        jaw_Y_pix_transf = jaws_Y_pix * self.image.num_slices / self.image.width_resize
 
-        return iso_3d_pix_transf, jaws_X_pix, jaw_Y_pix_transf
+        return image_original, iso_3d_pix_transf, jaws_X_pix, jaw_Y_pix_transf
 
-    def postprocess(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def postprocess(self, model_output: np.ndarray) -> None:
         """Postprocess the model's output.
 
-        Returns:
-            tuple[np.ndarray, np.ndarray, np.ndarray]: Isocenters, jaw X apertures, and jaw Y apertures
-            in pixel space of the original image.
+        Args:
+            model_output (np.ndarray): Output of regression model.
         """
-        output = self._build_output()
+        output = self._build_output(model_output)
 
         isocenters_hat = np.zeros((12, 3))
         jaws_X_hat = np.zeros((12, 2))
@@ -356,10 +378,21 @@ class Pipeline:
                     jaws_X_hat[i, j] = output[36 + 2 * i + j]
                     jaws_Y_hat[i, j] = output[60 + 2 * i + j]
 
-        return self._inverse_transform(isocenters_hat, jaws_X_hat, jaws_Y_hat)
+        (
+            self.image.pixels,
+            self.field_geometry.isocenters_pix,
+            self.field_geometry.jaws_X_pix,
+            self.field_geometry.jaws_Y_pix,
+        ) = self._inverse_transform(isocenters_hat, jaws_X_hat, jaws_Y_hat)
 
-    def predict(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def predict(
+        self, local_optimization: bool = True
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Execute the entire pipeline to produce predictions from raw data to patient coordinate system.
+
+        Args:
+            local_optimization (bool): Whether to perform the local optimization of the model's output
+            for the abdominal field geometry. Defaults to True.
 
         Returns:
             tuple[np.ndarray, np.ndarray, np.ndarray]: Isocenters, jaw X apertures, and jaw Y apertures
@@ -368,22 +401,25 @@ class Pipeline:
         self.preprocess()
 
         model_input = np.transpose(
-            self.input_image.image[np.newaxis],
+            self.image.pixels[np.newaxis],
             axes=(0, -1, 1, 2),  # swap (H, W, C) --> (C, H, W)
         ).astype(np.float32)
 
         ort_inputs = {self.input_name: model_input}
         ort_outs = self.ort_session.run(None, ort_inputs)  # list of numpy arrays
-        self.model_output = ort_outs[0]
+        model_output = ort_outs[0]
 
-        isocenters_pix, jaws_X_pix, jaws_Y_pix = self.postprocess()
+        self.postprocess(model_output)
 
-        # TODO: local optimization
+        if local_optimization:
+            from local_optimization import LocalOptimization
+
+            LocalOptimization(self.image, self.field_geometry).optimize()
 
         return transform_field_geometry(
             self.rtstruct.series_data,
-            isocenters_pix,
-            jaws_X_pix,
-            jaws_Y_pix,
+            self.field_geometry.isocenters_pix,
+            self.field_geometry.jaws_X_pix,
+            self.field_geometry.jaws_Y_pix,
             from_to="pix_pat",
         )
