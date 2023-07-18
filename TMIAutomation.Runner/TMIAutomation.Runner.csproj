@@ -179,6 +179,8 @@
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-15.6 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Server\dist $(TargetDir)dist /mir /ns /nfl
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -13,6 +13,7 @@ namespace TMIAutomation.Tests
     {
         private static Application EclipseApp { get; set; }
         private static readonly Dictionary<string, string> testData = InitializeTestData();
+        private static readonly IServiceProvider serviceProvider;
 
         [STAThread]
         public static void Main(string[] args)
@@ -36,7 +37,7 @@ namespace TMIAutomation.Tests
                 try
                 {
                     TestBuilder.Create()
-                            .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
+                            .Add<ModelBaseTests>(new ModelBase(esapiWorker, serviceProvider), scriptContext)
                             .Add<ObjectiveSetupTests>(scriptContext.PlanSetup.OptimizationSetup, scriptContext.PlanSetup)
                             .Add<CalculationTests>(scriptContext.PlanSetup, scriptContext)
                             .Add<IsocenterTests>(scriptContext.PlanSetup, scriptContext)
