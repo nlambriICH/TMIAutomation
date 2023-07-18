@@ -78,6 +78,14 @@
                   Style="{StaticResource CheckBoxTheme}"
                   IsChecked="{Binding Path=IsControlChecked, Mode=TwoWay}"/>
 
+        <CheckBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="550,245,0,0"
+                  Content="Optimization"
+                  Style="{StaticResource CheckBoxTheme}"
+                  x:Name="Optimization"
+                  IsChecked="{Binding Path=IsOptimizationChecked, Mode=TwoWay}"/>
+
         <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="325,300,0,0"

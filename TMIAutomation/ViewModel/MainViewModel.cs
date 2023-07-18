@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight;
+﻿using System;
+using GalaSoft.MvvmLight;
 using TMIAutomation.Async;
 
 namespace TMIAutomation.ViewModel
@@ -8,9 +9,9 @@ namespace TMIAutomation.ViewModel
         public UpperViewModel UpperVM { get; }
         public LowerViewModel LowerVM { get; }
 
-        public MainViewModel(EsapiWorker esapiWorker)
+        public MainViewModel(EsapiWorker esapiWorker, IServiceProvider serviceProvider)
         {
-            ModelBase modelBase = new ModelBase(esapiWorker);
+            ModelBase modelBase = new ModelBase(esapiWorker, serviceProvider);
             UpperVM = new UpperViewModel(modelBase);
             LowerVM = new LowerViewModel(modelBase);
         }

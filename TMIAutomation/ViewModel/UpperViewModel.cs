@@ -93,6 +93,13 @@ namespace TMIAutomation.ViewModel
             set => Set(ref isControlChecked, value);
         }
 
+        private bool isOptimizationChecked;
+        public bool IsOptimizationChecked
+        {
+            get => isOptimizationChecked;
+            set => Set(ref isOptimizationChecked, value);
+        }
+
         private readonly ModelBase modelBase;
 
         public ICommand StartExecutionCommand { get; }
@@ -109,6 +116,7 @@ namespace TMIAutomation.ViewModel
             this.modelBase = modelBase;
             IsJunctionChecked = true;
             IsControlChecked = true;
+            IsOptimizationChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
             RetrieveCourses();
         }
@@ -148,6 +156,19 @@ namespace TMIAutomation.ViewModel
 
             try
             {
+                List<string> oarIds = new List<string> { };
+                if (this.isOptimizationChecked)
+                {
+                    List<string> structureNames = await this.modelBase.GetStructureNamesAsync(this.selectedCourseId, this.selectedPlanId);
+                    OARSelectionViewModel oarSelectionViewModel = new OARSelectionViewModel(structureNames);
+                    OARSelection oarSelectionWindow = new OARSelection(oarSelectionViewModel);
+                    oarSelectionWindow.ShowDialog();
+
+                    oarIds = oarSelectionViewModel.StructureSelection.Where(s => s.IsChecked)
+                        .Select(s => s.StructureName)
+                        .ToList();
+                }
+
                 if (this.isJunctionChecked)
                 {
                     await this.modelBase.GenerateUpperJunctionAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
@@ -157,6 +178,11 @@ namespace TMIAutomation.ViewModel
                 if (this.isControlChecked)
                 {
                     await this.modelBase.GenerateUpperControlAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
+                }
+
+                if (this.isOptimizationChecked)
+                {
+                    await this.modelBase.OptimizeAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
                 }
             }
             catch (Exception e)

@@ -9,9 +9,9 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    public class Optimization
+    public class LowerOptimization
     {
-        private readonly ILogger logger = Log.ForContext<Optimization>();
+        private readonly ILogger logger = Log.ForContext<LowerOptimization>();
         private readonly EsapiWorker esapiWorker;
         private readonly string courseId;
         private readonly string upperPlanId;
@@ -22,7 +22,7 @@ namespace TMIAutomation
 #endif
 
 #if ESAPI16
-        public Optimization(EsapiWorker esapiWorker,
+        public LowerOptimization(EsapiWorker esapiWorker,
                             string courseId,
                             string upperPlanId,
                             string registrationId,
@@ -35,7 +35,7 @@ namespace TMIAutomation
             this.lowerPlanId = lowerPlanId;
         }
 #else
-        public Optimization(EsapiWorker esapiWorker,
+        public LowerOptimization(EsapiWorker esapiWorker,
                             string courseId,
                             string upperPlanId,
                             string registrationId,
@@ -56,9 +56,9 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
 #if ESAPI16
-                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
+                logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
 #else
-                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
+                logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
 #endif
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
