@@ -131,6 +131,7 @@
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
     <Compile Include="Client\Client.cs" />
+    <Compile Include="Helper\Configuration.cs" />
     <Compile Include="Model\Optimization\OptimizationCycleTarget.cs" />
     <Compile Include="Model\Optimization\Calculation\Calculation.cs" />
     <Compile Include="Model\Optimization\Calculation\PostCalculation.cs" />

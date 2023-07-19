@@ -24,45 +24,53 @@ namespace TMIAutomation
             List<List<double>> jawX = fieldGeometry["Jaw_X"];
             List<List<double>> jawY = fieldGeometry["Jaw_Y"];
 
-            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters("TrueBeamSN1015",
+            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(Configuration.TreatmentMachine,
                                                                                                    "6X",
                                                                                                    600,
                                                                                                    "ARC",
                                                                                                    "");
 
-            for (int i = 0; i < isocenters.Count() - 2; ++i) // -2 because of body model
+            for (int i = isocenters.Count() - 3; i >= 0; i = i - 2) // -3 because of body model
             {
-                VVector isocenter = new VVector(isocenters[i][0], isoCoordY, isocenters[i][2]);
-                VRect<double> jawPositions = new VRect<double>(jawX[i][0], jawY[i][0], jawX[i][1], jawY[i][1]);
+                int firstIsoInGroup = i - 1;
+                VVector isocenter = new VVector(isocenters[firstIsoInGroup][0], isoCoordY, isocenters[firstIsoInGroup][2]);
+                VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
 
-                logger.Information("Adding field {num}. Isocenter coordinates [mm]: {@isocenter}; Jaw position [mm]: {@jawPosition}", i, isocenter, jawPositions);
+                logger.Information("Adding field {num}. Isocenter coordinates [mm]: {@isocenter}; Jaw position [mm]: {@jawPosition}",
+                                   isocenters.Count() - 2 - i,
+                                   isocenter,
+                                   jawPositions);
 
-                if (i % 2 == 0)
-                {
-                    targetPlan.AddArcBeam(
-                        sourcePlanBeamParams,
-                        jawPositions,
-                        90,
-                        180.1,
-                        179.9,
-                        GantryDirection.Clockwise,
-                        0,
-                        isocenter
-                    );
-                }
-                else
-                {
-                    targetPlan.AddArcBeam(
-                        sourcePlanBeamParams,
-                        jawPositions,
-                        90,
-                        179.9,
-                        180.1,
-                        GantryDirection.CounterClockwise,
-                        0,
-                        isocenter
-                    );
-                }
+                targetPlan.AddArcBeam(
+                    sourcePlanBeamParams,
+                    jawPositions,
+                    90,
+                    179.9,
+                    180.1,
+                    GantryDirection.CounterClockwise,
+                    0,
+                    isocenter
+                );
+
+                int secondIsoInGroup = i;
+                isocenter = new VVector(isocenters[secondIsoInGroup][0], isoCoordY, isocenters[secondIsoInGroup][2]);
+                jawPositions = new VRect<double>(jawX[secondIsoInGroup][0], jawY[secondIsoInGroup][0], jawX[secondIsoInGroup][1], jawY[secondIsoInGroup][1]);
+
+                logger.Information("Adding field {num}. Isocenter coordinates [mm]: {@isocenter}; Jaw position [mm]: {@jawPosition}",
+                                   isocenters.Count() - 1 - i,
+                                   isocenter,
+                                   jawPositions);
+
+                targetPlan.AddArcBeam(
+                    sourcePlanBeamParams,
+                    jawPositions,
+                    90,
+                    180.1,
+                    179.9,
+                    GantryDirection.Clockwise,
+                    0,
+                    isocenter
+                );
             }
         }
 
