@@ -223,7 +223,7 @@ namespace TMIAutomation
         {
             progress.Report(0.05);
             message.Report("Setup isocenters and objectives...");
-            lowerPlan.SetIsocenters(upperPlan);
+            lowerPlan.SetIsocentersLower(upperPlan);
             lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
 
             OptimizationSetup optSetup = lowerPlan.OptimizationSetup;

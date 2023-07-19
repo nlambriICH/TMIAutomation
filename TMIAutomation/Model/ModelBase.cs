@@ -5,25 +5,21 @@ using System.Threading.Tasks;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 
 namespace TMIAutomation
 {
     public class ModelBase
     {
         private readonly EsapiWorker esapiWorker;
-        private readonly IServiceProvider serviceProvider;
         public enum PlanType
         {
             Up,
             Down
         }
 
-        public ModelBase(EsapiWorker esapiWorker, IServiceProvider serviceProvider)
+        public ModelBase(EsapiWorker esapiWorker)
         {
             this.esapiWorker = esapiWorker;
-            this.serviceProvider = serviceProvider;
         }
 
         public Task<List<string>> GetCoursesAsync()
@@ -218,13 +214,11 @@ namespace TMIAutomation
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Client httpClient = new Client(this.serviceProvider.GetService<IHttpClientFactory>());
             UpperOptimization optimization = new UpperOptimization(this.esapiWorker,
                                                                    courseId,
                                                                    upperPlanId,
                                                                    upperPTVId,
-                                                                   oarIds,
-                                                                   httpClient);
+                                                                   oarIds);
             return optimization.ComputeAsync(progress, message);
         }
 

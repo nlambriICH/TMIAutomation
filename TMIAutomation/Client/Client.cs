@@ -13,11 +13,9 @@ namespace TMIAutomation
     public class Client
     {
         private readonly ILogger logger = Log.ForContext<Client>();
-        private readonly IHttpClientFactory httpClientFactory;
 
-        public Client(IHttpClientFactory httpClientFactory)
+        public Client()
         {
-            this.httpClientFactory = httpClientFactory;
         }
 
         public Dictionary<string, List<List<double>>> GetFieldGeometry(string patientId, string upperPTVId, List<string> oarIds)
@@ -25,7 +23,7 @@ namespace TMIAutomation
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>> { };
             try
             {
-                using (HttpClient client = httpClientFactory.CreateClient())
+                using (HttpClient client = new HttpClient())
                 {
                     string dicomPath = GetDicomPath(patientId);
                     ClientRequest request = new ClientRequest
@@ -57,7 +55,7 @@ namespace TMIAutomation
         private string GetDicomPath(string patientId)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string dicomPath = Path.Combine(assemblyDir, "dist", "dicoms", patientId);
+            string dicomPath = Path.Combine(assemblyDir, "Dicoms", patientId);
 
             return Directory.Exists(dicomPath) ? dicomPath : throw new InvalidOperationException($"Could not find DICOM path {dicomPath}.");
         }

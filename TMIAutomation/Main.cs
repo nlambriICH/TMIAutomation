@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using TMIAutomation;
 using TMIAutomation.Async;
@@ -19,11 +18,9 @@ namespace VMS.TPS
     {
         private readonly ILogger logger;
         private readonly string logPath;
-        private readonly IServiceProvider serviceProvider;
 
         public Script()
         {
-            this.serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
             string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
             this.logPath = directory.FullName;
@@ -68,7 +65,7 @@ namespace VMS.TPS
             {
                 try
                 {
-                    MainViewModel viewModel = new MainViewModel(esapiWorker, this.serviceProvider);
+                    MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
                     mainWindow.ShowDialog();
                 }

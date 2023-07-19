@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 using TMIAutomation.Async;
+using VMS.TPS.Common.Model.API;
 
 namespace TMIAutomation
 {
@@ -20,15 +22,14 @@ namespace TMIAutomation
                                  string courseId,
                                  string upperPlanId,
                                  string upperPTVId,
-                                 List<string> oarIds,
-                                 Client httpClient)
+                                 List<string> oarIds)
         {
             this.esapiWorker = esapiWorker;
             this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.upperPTVId = upperPTVId;
             this.oarIds = oarIds;
-            this.httpClient = httpClient;
+            this.httpClient = new Client();
         }
 
         public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
@@ -38,8 +39,10 @@ namespace TMIAutomation
                 logger.Information("UpperOptimization context: {@context}",
                                    new List<string> { this.courseId, this.upperPlanId, this.upperPTVId, string.Join(",", this.oarIds) });
 
-                var fieldGeometry = this.httpClient.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
-                // create VMAT arcs...
+                Dictionary<string, List<List<double>>> fieldGeometry = this.httpClient.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
+                ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
+                upperPlan.SetIsocentersUpper(fieldGeometry);
             });
         }
 

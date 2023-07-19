@@ -8,17 +8,65 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    public static class Isocenter
+    public static class Isocenters
     {
-        private static readonly ILogger logger = Log.ForContext(typeof(Isocenter));
+        private static readonly ILogger logger = Log.ForContext(typeof(Isocenters));
 
-        public static void SetIsocenters(this ExternalPlanSetup targetPlan, ExternalPlanSetup sourcePlan)
+        public static void SetIsocentersUpper(this ExternalPlanSetup targetPlan, Dictionary<string, List<List<double>>> fieldGeometry)
         {
-            foreach (Beam beam in targetPlan.Beams)
+            targetPlan.ClearBeams();
+
+            StructureSet upperSS = targetPlan.StructureSet;
+            Structure upperPTVNoJ = upperSS.Structures.FirstOrDefault(s => s.Id == "PTV_totFIN_Crop");// StructureHelper.UPPER_PTV_NO_JUNCTION);
+            double isoCoordY = upperPTVNoJ.CenterPoint.y;
+
+            List<List<double>> isocenters = fieldGeometry["Isocenters"];
+            List<List<double>> jawX = fieldGeometry["Jaw_X"];
+            List<List<double>> jawY = fieldGeometry["Jaw_Y"];
+
+            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters("TrueBeamSN1015",
+                                                                                                   "6X",
+                                                                                                   600,
+                                                                                                   "ARC",
+                                                                                                   "");
+
+            for (int i = 0; i < isocenters.Count() - 2; ++i) // -2 because of body model
             {
-                logger.Information("Removing existing beam: {beamID}", beam.Id);
-                targetPlan.RemoveBeam(beam);
+                VVector isocenter = new VVector(isocenters[i][0], isoCoordY, isocenters[i][2]);
+                VRect<double> jawPositions = new VRect<double>(jawX[i][0], jawY[i][0], jawX[i][1], jawY[i][1]);
+
+                if (i % 2 == 0)
+                {
+                    targetPlan.AddArcBeam(
+                        sourcePlanBeamParams,
+                        jawPositions,
+                        90,
+                        180.1,
+                        179.9,
+                        GantryDirection.Clockwise,
+                        0,
+                        isocenter
+                    );
+                }
+                else
+                {
+                    targetPlan.AddArcBeam(
+                        sourcePlanBeamParams,
+                        jawPositions,
+                        90,
+                        179.9,
+                        180.1,
+                        GantryDirection.CounterClockwise,
+                        0,
+                        isocenter
+                    );
+                }
             }
+        }
+
+        public static void SetIsocentersLower(this ExternalPlanSetup targetPlan, ExternalPlanSetup sourcePlan)
+        {
+            targetPlan.ClearBeams();
 
             StructureSet lowerSS = targetPlan.StructureSet;
             Structure lowerPTVTotal = lowerSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.PTV_TOTAL);
@@ -63,6 +111,15 @@ namespace TMIAutomation
                     0,
                     isoPositions[i]
                 );
+            }
+        }
+
+        private static void ClearBeams(this ExternalPlanSetup targetPlan)
+        {
+            foreach (Beam beam in targetPlan.Beams.ToList()) // avoid Collection modified exception
+            {
+                logger.Information("Removing existing beam: {beamID}", beam.Id);
+                targetPlan.RemoveBeam(beam);
             }
         }
 

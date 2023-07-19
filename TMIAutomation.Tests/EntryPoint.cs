@@ -37,7 +37,7 @@ namespace TMIAutomation.Tests
                 try
                 {
                     TestBuilder.Create()
-                            .Add<ModelBaseTests>(new ModelBase(esapiWorker, serviceProvider), scriptContext)
+                            .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
                             .Add<ObjectiveSetupTests>(scriptContext.PlanSetup.OptimizationSetup, scriptContext.PlanSetup)
                             .Add<CalculationTests>(scriptContext.PlanSetup, scriptContext)
                             .Add<IsocenterTests>(scriptContext.PlanSetup, scriptContext)
