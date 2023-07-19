@@ -26,6 +26,8 @@ namespace TMIAutomation
                 using (HttpClient client = new HttpClient())
                 {
                     string dicomPath = GetDicomPath(patientId);
+                    if (!Directory.Exists(dicomPath)) throw new InvalidOperationException($"Could not find DICOM path {dicomPath}.");
+
                     ClientRequest request = new ClientRequest
                     {
                         DicomPath = dicomPath,
@@ -36,6 +38,7 @@ namespace TMIAutomation
                     int port = this.GetServerPort() ?? throw new InvalidOperationException("Could not retrieve the server port.");
                     StringContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
 
+                    logger.Information("Sending request {@request}", request);
                     HttpResponseMessage response = client.PostAsync($"http://localhost:{port}/predict", content).Result;
                     if (response != null)
                     {
@@ -57,7 +60,7 @@ namespace TMIAutomation
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string dicomPath = Path.Combine(assemblyDir, "Dicoms", patientId);
 
-            return Directory.Exists(dicomPath) ? dicomPath : throw new InvalidOperationException($"Could not find DICOM path {dicomPath}.");
+            return dicomPath;
         }
 
         private int? GetServerPort()
@@ -71,7 +74,7 @@ namespace TMIAutomation
                 if (line.StartsWith("port:"))
                 {
                     port = int.Parse(line.Split(':').Last());
-                    logger.Information("Retrieved port number {port}", port);
+                    logger.Verbose("Retrieved port number {port}", port);
                     break;
                 }
             }

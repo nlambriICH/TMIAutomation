@@ -17,7 +17,7 @@ namespace TMIAutomation
             targetPlan.ClearBeams();
 
             StructureSet upperSS = targetPlan.StructureSet;
-            Structure upperPTVNoJ = upperSS.Structures.FirstOrDefault(s => s.Id == "PTV_totFIN_Crop");// StructureHelper.UPPER_PTV_NO_JUNCTION);
+            Structure upperPTVNoJ = upperSS.Structures.FirstOrDefault(s => s.Id == StructureHelper.UPPER_PTV_NO_JUNCTION);
             double isoCoordY = upperPTVNoJ.CenterPoint.y;
 
             List<List<double>> isocenters = fieldGeometry["Isocenters"];
@@ -34,6 +34,8 @@ namespace TMIAutomation
             {
                 VVector isocenter = new VVector(isocenters[i][0], isoCoordY, isocenters[i][2]);
                 VRect<double> jawPositions = new VRect<double>(jawX[i][0], jawY[i][0], jawX[i][1], jawY[i][1]);
+
+                logger.Information("Adding field {num}. Isocenter coordinates [mm]: {@isocenter}; Jaw position [mm]: {@jawPosition}", i, isocenter, jawPositions);
 
                 if (i % 2 == 0)
                 {

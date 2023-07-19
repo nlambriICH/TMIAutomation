@@ -156,6 +156,19 @@ namespace TMIAutomation
             });
         }
 
+        public Task GenerateUpperPlanAsync(string courseId)
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
+                StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.HeadFirstSupine);
+
+                ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIupperAuto"));
+                newPlan.Id = numOfAutoPlans == 0 ? "TMLIupperAuto" : string.Concat("TMLIupperAuto", numOfAutoPlans);
+            });
+        }
+
         public Task<bool> IsPlanDoseValidAsync(string courseId, string planId)
         {
             return this.esapiWorker.RunAsync(scriptContext => IsPlanDoseValid(scriptContext, courseId, planId), isWriteable: false);

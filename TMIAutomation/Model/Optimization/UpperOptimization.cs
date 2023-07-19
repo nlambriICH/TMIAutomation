@@ -39,9 +39,15 @@ namespace TMIAutomation
                 logger.Information("UpperOptimization context: {@context}",
                                    new List<string> { this.courseId, this.upperPlanId, this.upperPTVId, string.Join(",", this.oarIds) });
 
+                progress.Report(0.50);
+                message.Report("Get model predictions...");
                 Dictionary<string, List<List<double>>> fieldGeometry = this.httpClient.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
+                
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
+
+                progress.Report(0.40);
+                message.Report("Set isocenters...");
                 upperPlan.SetIsocentersUpper(fieldGeometry);
             });
         }

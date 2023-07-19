@@ -149,7 +149,7 @@ namespace TMIAutomation.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked };
+            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.IsOptimizationChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
             bool success = true; // show "Complete" message box
@@ -168,6 +168,9 @@ namespace TMIAutomation.ViewModel
                         .Select(s => s.StructureName)
                         .ToList();
                 }
+
+                await this.modelBase.GenerateUpperPlanAsync(this.selectedCourseId);
+                UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
 
                 if (this.isJunctionChecked)
                 {
