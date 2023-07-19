@@ -1,4 +1,3 @@
-dicom_path: ..\dicoms\Test
 endport: 6000
 loglevel: INFO
 port: 5004

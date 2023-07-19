@@ -71,13 +71,7 @@ def predict() -> Response | None:
         abort(503)
 
     if request.method == "POST":
-        try:
-            dicom_path = request.json["dicom_path"]
-        except KeyError:
-            logging.warning(
-                "Dicom path not found in request. Using value from config.yml."
-            )
-            dicom_path = config["dicom_path"]
+        dicom_path = request.json["dicom_path"]
         ptv_name = request.json["ptv_name"]
         oars_name = request.json["oars_name"]
 
