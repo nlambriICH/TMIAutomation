@@ -189,7 +189,7 @@ class Pipeline:
                 oar_mask_2d = np.zeros_like(ptv_img_2d)
 
             if "intestine" not in oar_name:
-                logging.info("Scaling %s mask.", oar_name)
+                logging.info("Scaling mask %s.", oar_name)
                 oar_mask_2d = 0.5 * oar_mask_2d
 
             oars_channel[..., i] = oar_mask_2d
@@ -233,7 +233,9 @@ class Pipeline:
             )
 
         output[index_x] = (
-            ndimage.center_of_mass(self.image.pixels[..., 0])[1]
+            ndimage.center_of_mass(
+                np.where(self.image.pixels[..., 0] == -1, 0, self.image.pixels[..., 0])
+            )[1]
             / self.image.width_resize
         )  # x coord repeated 8 times + 2 times for iso thorax
         output[
