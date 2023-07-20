@@ -8,6 +8,8 @@ import onnxruntime
 import yaml
 from pipeline import Pipeline, RequestInfo
 
+# True if running in PyInstaller bundle
+BUNDLED = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 if not os.path.exists("logs"):
     os.makedirs("logs")
@@ -79,7 +81,7 @@ def predict() -> Response | None:
             ort_session,
             input_name,
             RequestInfo(dicom_path, ptv_name, oars_name),
-            save_io=True,
+            save_io=not BUNDLED,
         )
         pipeline_out = pipeline.predict()
 
@@ -118,7 +120,7 @@ def main() -> None:
 
         logging.info("Starting server on port: %i", port)
 
-        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        if BUNDLED:
             # Running in PyInstaller bundle
             from waitress import serve  # pylint: disable=import-outside-toplevel
 

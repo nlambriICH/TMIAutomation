@@ -9,11 +9,12 @@ namespace TMIAutomation
     public static class Configuration
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Configuration));
-        private readonly static Dictionary<string, string> settings = InitializeSettings();
+        private static readonly string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private static readonly Dictionary<string, string> optSettings = InitOptSettings();
+        private static readonly List<string> oarNames = InitOARNames();
 
-        private static Dictionary<string, string> InitializeSettings()
+        private static Dictionary<string, string> InitOptSettings()
         {
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string optOptionsPath = Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
             logger.Verbose("Reading optimization options from {optOptionsPath}", optOptionsPath);
             Dictionary<string, string> dict = new Dictionary<string, string>();
@@ -29,11 +30,27 @@ namespace TMIAutomation
             return dict;
         }
 
-        public static string OptimizationAlgorithm => settings["OptimizationAlgorithm"];
-        public static string DoseAlgorithm => settings["DoseAlgorithm"];
-        public static string MLCID => settings["MLCID"];
-        public static string DosePerFraction => settings["DosePerFraction"];
-        public static string NumberOfFractions => settings["NumberOfFractions"];
-        public static string TreatmentMachine => settings["TreatmentMachine"];
+        private static List<string> InitOARNames()
+        {
+            string oarNamesPath = Path.Combine(assemblyDir, "Configuration", "OARNames.txt");
+            logger.Verbose("Reading OAR names from {oarNamesPath}", oarNamesPath);
+            List<string> list = new List<string>();
+            foreach (string line in File.ReadLines(oarNamesPath))
+            {
+                if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
+                logger.Verbose("Read name: {line}", line);
+                list.Add(line);
+            }
+
+            return list;
+        }
+
+        public static string OptimizationAlgorithm => optSettings["OptimizationAlgorithm"];
+        public static string DoseAlgorithm => optSettings["DoseAlgorithm"];
+        public static string MLCID => optSettings["MLCID"];
+        public static string DosePerFraction => optSettings["DosePerFraction"];
+        public static string NumberOfFractions => optSettings["NumberOfFractions"];
+        public static string TreatmentMachine => optSettings["TreatmentMachine"];
+        public static List<string> OarNames => oarNames;
     }
 }

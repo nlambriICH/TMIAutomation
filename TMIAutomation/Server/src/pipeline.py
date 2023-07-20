@@ -5,6 +5,7 @@ import warnings
 import logging
 from dataclasses import dataclass, field
 import numpy as np
+from thefuzz import fuzz
 from rt_utils import RTStructBuilder
 from rt_utils.image_helper import get_spacing_between_slices
 import imgaug.augmenters as iaa
@@ -176,6 +177,11 @@ class Pipeline:
             np.nan_to_num(ptv_img_2d), ptv_mask_2d, background=-1
         )
 
+        # Words and similarity threshold for intestine mask scaling
+        target_words, threshold = [
+            "intestino",
+            "bowel",
+        ], 80
         oars_shape = list(ptv_img_2d.shape)
         oars_shape.append(len(self.request_info.oars_name))
         oars_channel = np.zeros(oars_shape)
@@ -188,7 +194,10 @@ class Pipeline:
                 )
                 oar_mask_2d = np.zeros_like(ptv_img_2d)
 
-            if "intestine" not in oar_name:
+            similarities = [
+                fuzz.ratio(oar_name.lower(), target) for target in target_words
+            ]
+            if not any(similarity >= threshold for similarity in similarities):
                 logging.info("Scaling mask %s.", oar_name)
                 oar_mask_2d = 0.5 * oar_mask_2d
 

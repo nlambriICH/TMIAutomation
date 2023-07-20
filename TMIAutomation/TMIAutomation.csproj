@@ -55,6 +55,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FuzzySharp, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FuzzySharp.2.0.2\lib\net461\FuzzySharp.dll</HintPath>
+    </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
     </Reference>
@@ -247,6 +250,9 @@
   <ItemGroup>
     <Resource Include="Configuration\ESAPI15\PointOptimizationObjectives.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\OARNames.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
@@ -257,9 +263,9 @@ IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI1
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
-IF $(ConfigurationName) == Release-16.1 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration OARNames.txt
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
-IF $(ConfigurationName) == Release-15.6 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(ProjectDir)Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
