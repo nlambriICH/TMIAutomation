@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -19,11 +20,13 @@ namespace VMS.TPS
     {
         private readonly ILogger logger;
         private readonly string logPath;
+        private readonly string executingPath;
+        private Process serverProcess;
 
         public Script()
         {
-            string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
+            this.executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(this.executingPath, "LOG"));
             this.logPath = directory.FullName;
 
             Log.Logger = new LoggerConfiguration()
@@ -67,9 +70,10 @@ namespace VMS.TPS
             {
                 try
                 {
+                    this.StartLocalServer();
+
                     MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
-
                     if (feetFirstSupine)
                     {
                         mainWindow.LowerTabItem.IsSelected = true;
@@ -87,7 +91,30 @@ namespace VMS.TPS
                     MessageBox.Show(new Form { TopMost = true }, msgBoxMessage, "TMIAutomation - Error");
                     logger.Fatal(exc, "The following fatal error occured during the script execution");
                 }
+                finally
+                {
+                    this.serverProcess?.CloseMainWindow();
+                }
             });
+        }
+
+        private void StartLocalServer()
+        {
+            try
+            {
+                string serverDirectory = Path.Combine(this.executingPath, "dist", "app");
+                string serverPath = Path.Combine(serverDirectory, "app.exe");
+                ProcessStartInfo startInfo = new ProcessStartInfo(serverPath)
+                {
+                    WorkingDirectory = serverDirectory,
+                    WindowStyle = ProcessWindowStyle.Minimized
+                };
+                this.serverProcess = Process.Start(startInfo);
+            }
+            catch (Exception e)
+            {
+                logger.Error("Could not start the local server", e);
+            }
         }
     }
 }
