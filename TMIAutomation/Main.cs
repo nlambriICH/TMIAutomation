@@ -9,6 +9,7 @@ using TMIAutomation.Async;
 using TMIAutomation.View;
 using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.API;
+using VMS.TPS.Common.Model.Types;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
@@ -58,6 +59,7 @@ namespace VMS.TPS
                                context.Patient.FirstName,
                                context.Patient.Id
                                );
+            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine;
             context.Patient.BeginModifications();
 
             // Create and show the main window on a separate thread
@@ -67,6 +69,15 @@ namespace VMS.TPS
                 {
                     MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
+
+                    if (feetFirstSupine)
+                    {
+                        mainWindow.LowerTabItem.IsSelected = true;
+                    }
+                    else
+                    {
+                        mainWindow.UpperTabItem.IsSelected = true;
+                    }
                     mainWindow.ShowDialog();
                 }
                 catch (Exception exc)
