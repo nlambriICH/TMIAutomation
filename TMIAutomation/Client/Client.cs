@@ -10,15 +10,11 @@ using Serilog;
 
 namespace TMIAutomation
 {
-    public class Client
+    public static class Client
     {
-        private readonly ILogger logger = Log.ForContext<Client>();
+        private static readonly ILogger logger = Log.ForContext(typeof(Client));
 
-        public Client()
-        {
-        }
-
-        public Dictionary<string, List<List<double>>> GetFieldGeometry(string patientId, string upperPTVId, List<string> oarIds)
+        public static Dictionary<string, List<List<double>>> GetFieldGeometry(string patientId, string upperPTVId, List<string> oarIds)
         {
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>> { };
             try
@@ -35,7 +31,7 @@ namespace TMIAutomation
                         IdOARs = oarIds
                     };
 
-                    int port = this.GetServerPort() ?? throw new InvalidOperationException("Could not retrieve the server port.");
+                    int port = GetServerPort() ?? throw new InvalidOperationException("Could not retrieve the server port.");
                     StringContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
 
                     logger.Information("Sending request {@request}", request);
@@ -55,7 +51,7 @@ namespace TMIAutomation
             return fieldGeometry;
         }
 
-        private string GetDicomPath(string patientId)
+        private static string GetDicomPath(string patientId)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string dicomPath = Path.Combine(assemblyDir, "Dicoms", patientId);
@@ -63,7 +59,7 @@ namespace TMIAutomation
             return dicomPath;
         }
 
-        private int? GetServerPort()
+        private static int? GetServerPort()
         {
             int? port = null;
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

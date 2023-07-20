@@ -16,7 +16,6 @@ namespace TMIAutomation
         private readonly string upperPlanId;
         private readonly string upperPTVId;
         private readonly List<string> oarIds;
-        private readonly Client httpClient;
 
         public UpperOptimization(EsapiWorker esapiWorker,
                                  string courseId,
@@ -29,7 +28,6 @@ namespace TMIAutomation
             this.upperPlanId = upperPlanId;
             this.upperPTVId = upperPTVId;
             this.oarIds = oarIds;
-            this.httpClient = new Client();
         }
 
         public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
@@ -41,7 +39,7 @@ namespace TMIAutomation
 
                 progress.Report(0.50);
                 message.Report("Get model predictions...");
-                Dictionary<string, List<List<double>>> fieldGeometry = this.httpClient.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
+                Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
                 
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
