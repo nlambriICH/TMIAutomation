@@ -159,7 +159,7 @@ namespace TMIAutomation.ViewModel
                 List<string> oarIds = new List<string> { };
                 if (this.isOptimizationChecked)
                 {
-                    List<string> structureNames = await this.modelBase.GetStructureNamesAsync(this.selectedCourseId, this.selectedPlanId);
+                    List<string> structureNames = await this.modelBase.GetOARNamesAsync(this.selectedCourseId, this.selectedPlanId);
                     OARSelectionViewModel oarSelectionViewModel = new OARSelectionViewModel(structureNames);
                     OARSelection oarSelectionWindow = new OARSelection(oarSelectionViewModel);
                     oarSelectionWindow.ShowDialog();

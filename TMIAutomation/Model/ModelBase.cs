@@ -83,16 +83,19 @@ namespace TMIAutomation
                                                   .ToList();
         }
 
-        public Task<List<string>> GetStructureNamesAsync(string courseId, string planId)
+        public Task<List<string>> GetOARNamesAsync(string courseId, string planId)
         {
-            return this.esapiWorker.RunAsync(scriptContext => GetStructureNames(scriptContext, courseId, planId), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => GetOARNames(scriptContext, courseId, planId), isWriteable: false);
         }
 
-        public List<string> GetStructureNames(PluginScriptContext scriptContext, string courseId, string planId)
+        public List<string> GetOARNames(PluginScriptContext scriptContext, string courseId, string planId)
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-            return selectedPlan.StructureSet.Structures.OrderBy(s => s.Id).Select(s => s.Id).ToList();
+            return selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "ORGAN")
+                .OrderBy(s => s.Id)
+                .Select(s => s.Id)
+                .ToList();
         }
 
         public Task<List<string>> GetPTVsFromImgOrientationAsync(PatientOrientation patientOrientation)
