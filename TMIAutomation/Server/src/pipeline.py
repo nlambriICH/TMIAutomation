@@ -174,7 +174,7 @@ class Pipeline:
 
         ptv_mask_2d = ptv_mask_3d.any(axis=0)  # coronal projection
         ptv_img_2d = self._scale_hu_img(
-            np.nan_to_num(ptv_img_2d), ptv_mask_2d, background=-1
+            np.nan_to_num(ptv_img_2d), ptv_mask_2d, background=0
         )
 
         # Words and similarity threshold for intestine mask scaling
@@ -203,7 +203,7 @@ class Pipeline:
 
             oars_channel[..., i] = oar_mask_2d
 
-        oars_channel = np.sum(oars_channel, axis=-1)
+        oars_channel = oars_channel.max(axis=-1)
 
         image = np.stack((ptv_img_2d, 0.3 * ptv_mask_2d, oars_channel), axis=-1)
         self.image.pixels = self._transform(image)
@@ -211,7 +211,7 @@ class Pipeline:
         if self.save_io:
             plt.imsave(
                 "logs/input_img.png",
-                np.where(self.image.pixels == -1, 0, self.image.pixels),
+                self.image.pixels,
             )
 
     def _build_output(self, model_output: np.ndarray) -> np.ndarray:
@@ -242,9 +242,7 @@ class Pipeline:
             )
 
         output[index_x] = (
-            ndimage.center_of_mass(
-                np.where(self.image.pixels[..., 0] == -1, 0, self.image.pixels[..., 0])
-            )[1]
+            ndimage.center_of_mass(self.image.pixels[..., 0])[1]
             / self.image.width_resize
         )  # x coord repeated 8 times + 2 times for iso thorax
         output[

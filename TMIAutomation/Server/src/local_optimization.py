@@ -230,11 +230,7 @@ class LocalOptimization:
         opt.search(_loss, n_iter=search_space["x_0"].shape[0], verbosity=False)
         best_x_pixel_spine = opt.best_value[0]
 
-        x_com = round(
-            ndimage.center_of_mass(
-                np.where(self.image.pixels[..., 0] == -1, 0, self.image.pixels[..., 0])
-            )[0]
-        )
+        x_com = round(ndimage.center_of_mass(self.image.pixels[..., 0])[0])
         y_pixels = np.concatenate(
             (
                 np.arange(x_com - 115, x_com - 50),
