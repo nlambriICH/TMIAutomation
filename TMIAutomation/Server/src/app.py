@@ -5,11 +5,17 @@ import socket
 import logging
 from flask import Flask, Response, request, jsonify, abort
 import onnxruntime
+from onnxruntime import InferenceSession
 import yaml
 from pipeline import Pipeline, RequestInfo
 
 # True if running in PyInstaller bundle
-BUNDLED = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+BUNDLED: bool = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
+
+MODEL_NAME_BODY: str = "body_cnn"
+ORT_SESSION_BODY: InferenceSession | None = None
+MODEL_NAME_ARMS: str = "arms_cnn"
+ORT_SESSION_ARMS: InferenceSession | None = None
 
 if not os.path.exists("logs"):
     os.makedirs("logs")
@@ -29,12 +35,19 @@ with open("config.yml", "r", encoding="utf-8") as stream:
 
 app = Flask(__name__)
 
+try:
+    model_path = os.path.join("models", f"{MODEL_NAME_BODY}.onnx")
+    ORT_SESSION_BODY = onnxruntime.InferenceSession(model_path)
+    logging.info("Loaded model %s from %s.", MODEL_NAME_BODY, model_path)
+except Exception:  # pylint: disable=broad-exception-caught
+    logging.exception("Could not load model %s from %s.", MODEL_NAME_BODY, model_path)
 
 try:
-    ort_session = onnxruntime.InferenceSession(r"models\body_cnn.onnx")
-    input_name = ort_session.get_inputs()[0].name
+    model_path = os.path.join("models", f"{MODEL_NAME_ARMS}.onnx")
+    ORT_SESSION_ARMS = onnxruntime.InferenceSession(model_path)
+    logging.info("Loaded model %s from %s.", MODEL_NAME_ARMS, model_path)
 except Exception:  # pylint: disable=broad-exception-caught
-    logging.exception("Could not load model.")
+    logging.exception("Could not load model %s from %s.", MODEL_NAME_ARMS, model_path)
 
 
 def _get_available_port() -> int | None:
@@ -69,18 +82,25 @@ def predict() -> Response | None:
         Response: Response object with application/json mime type containing the
         isocenters, jaw X apertures, and jaw Y apertures in patient coordinate system.
     """
-    if ort_session is None:
+    if ORT_SESSION_BODY is None and ORT_SESSION_ARMS is None:
         abort(503)
 
     if request.method == "POST":
+        model_name = request.json["model_name"]
+        if model_name == MODEL_NAME_BODY and ORT_SESSION_BODY is not None:
+            ort_session = ORT_SESSION_BODY
+        elif model_name == MODEL_NAME_ARMS and ORT_SESSION_ARMS is not None:
+            ort_session = ORT_SESSION_ARMS
+        else:
+            abort(503)
+
         dicom_path = request.json["dicom_path"]
         ptv_name = request.json["ptv_name"]
         oars_name = request.json["oars_name"]
 
         pipeline = Pipeline(
             ort_session,
-            input_name,
-            RequestInfo(dicom_path, ptv_name, oars_name),
+            RequestInfo(model_name, dicom_path, ptv_name, oars_name),
             save_io=not BUNDLED,
         )
         pipeline_out = pipeline.predict()
@@ -103,11 +123,14 @@ def status_message() -> str:
     Returns:
         str: A string reporting a server status message.
     """
-    return (
-        "<p>ERROR: Could not load the model.</p>"
-        if ort_session is None
-        else "<p>The local server is running properly!</p>"
-    )
+    if ORT_SESSION_BODY is None and ORT_SESSION_ARMS is None:
+        return "<p style='color:Red;'>ERROR: Could not load the models.</p>"
+    if ORT_SESSION_BODY is None:
+        return f"<p style='color:Orange;'>WARNING: Could not load {MODEL_NAME_BODY} model.</p>"
+    if ORT_SESSION_ARMS is None:
+        return f"<p style='color:Orange;'>WARNING: Could not load {MODEL_NAME_ARMS} model.</p>"
+
+    return "<p style='color:Limegreen;'>The local server is running properly!</p>"
 
 
 def main() -> None:

@@ -29,6 +29,8 @@ class RequestInfo:
 class Image:
     "Image - shape (H, W, C) - processed by the pipeline, and its properties."
 
+    pixel_spacing: float
+    slice_thickness: float
     aspect_ratio: float
     num_slices: int
     width_resize: int
@@ -56,12 +58,10 @@ class Pipeline:
     def __init__(
         self,
         ort_session: InferenceSession,
-        input_name: str,
         request_info: RequestInfo,
         save_io: bool = False,
     ) -> None:
         self.ort_session = ort_session
-        self.input_name = input_name
         self.request_info = request_info
         self.save_io = save_io
 
@@ -77,7 +77,9 @@ class Pipeline:
         slice_thickness = get_spacing_between_slices(self.rtstruct.series_data)
         aspect_ratio = slice_thickness / pixel_spacing
         num_slices = len(self.rtstruct.series_data)
-        self.image = Image(aspect_ratio, num_slices, 512)
+        self.image = Image(
+            pixel_spacing, slice_thickness, aspect_ratio, num_slices, width_resize=512
+        )
         self.field_geometry = FieldGeometry()
 
     def _get_masked_image_3d(self, mask_3d: np.ndarray) -> np.ndarray:
@@ -229,6 +231,7 @@ class Pipeline:
         # Isocenter indexes
         index_x = [0, 3, 6, 9, 12, 15, 18, 21, 24, 27]
         index_y = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
+        norm = self.image.aspect_ratio * self.image.num_slices / self.image.width_resize
 
         try:
             assert self.image.pixels.shape == (
@@ -250,68 +253,159 @@ class Pipeline:
         ] = 0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
 
         if y_hat.shape[0] == 25:
-            output[30] = 0  # x coord right arm
-            output[33] = 0  # x coord left arm
+            self._build_body_cnn_output(output, y_hat, norm)
 
-            for z in range(2):  # z coords
-                output[z * 3 * 2 + 2] = y_hat[z]
-                output[z * 3 * 2 + 5] = y_hat[z]
-                output[(z + 3) * 3 * 2 + 2] = y_hat[z + 2]
-                output[(z + 3) * 3 * 2 + 5] = y_hat[z + 2]
-            output[14] = (output[11] + output[20]) / 2
-            output[17] = (output[11] + output[20]) / 2
-            output[32] = 0  # z coord right arm
-            output[35] = 0  # z coord left arm
-
-            # Begin jaw_X
-            for i in range(5):
-                output[36 + i] = y_hat[4 + i]  # 4 legs + down field 4th iso
-            for i in range(3):
-                output[42 + i] = y_hat[9 + i]  # 2 4th iso + down field 3rd iso
-                output[52 + i] = y_hat[15 + i]  # head fields
-                output[56 + i] = 0  # arms fields
-
-            # chest
-            output[46] = y_hat[12]  # third iso
-            output[48] = y_hat[13]  # chest iso down field
-            output[50] = y_hat[14]  # chest iso
-
-            # Overlap fields
-            norm = self.image.aspect_ratio * self.image.num_slices / 512
-            output[41] = (output[8] - output[14] + 0.01) * norm + output[46]  # abdomen
-            output[45] = (output[14] - output[20] + 0.03) * norm + output[50]  # third
-            output[49] = (output[20] - output[26] + 0.02) * norm + output[54]  # chest
-
-            # Symmetric apertures
-            output[47] = -output[44]  # third iso
-            output[51] = -output[48]  # chest
-            output[55] = -output[52]  # head
-            output[59] = 0  # arms
-
-            # Begin jaw_Y
-            for i in range(4):
-                output[76 + i] = y_hat[21 + i]  # apertures for the head
-                if i < 2:
-                    # Same apertures opposite signs legs
-                    output[60 + 2 * i] = y_hat[i + 18]
-                    output[61 + 2 * i] = -y_hat[i + 18]
-
-                    # 4 fields with equal (and opposite) apertures
-                    # Pelvis
-                    output[64 + 2 * i] = y_hat[20]
-                    output[65 + 2 * i] = -y_hat[20]
-                    # Third iso
-                    output[68 + 2 * i] = y_hat[20]
-                    output[69 + 2 * i] = -y_hat[20]
-                    # Chest
-                    output[72 + 2 * i] = y_hat[20]
-                    output[73 + 2 * i] = -y_hat[20]
-
-                    # Arms apertures with opposite sign
-                    output[80 + 2 * i] = 0
-                    output[81 + 2 * i] = 0
+        elif y_hat.shape[0] == 30:
+            self._build_arms_cnn_output(output, y_hat, norm)
 
         return output
+
+    def _build_arms_cnn_output(
+        self, output: np.ndarray, y_hat: np.ndarray, norm: float
+    ) -> None:
+        """Build the output of the arms_cnn model.
+
+        Args:
+            output (np.ndarray): Array of shape=(84,) containing the (x, y) coordinates of the isocenters.
+            y_hat (np.ndarray): Model predictions.
+            norm (float): Normalization factor used to scale the field coordinates to compute the
+            overlap of fields along X.
+        """
+        output[30] = y_hat[0]  # z coord right arm
+        output[33] = y_hat[1]  # z coord left arm
+
+        for z in range(2):  # first two z coords
+            output[z * 3 * 2 + 2] = y_hat[z + 2]
+            output[z * 3 * 2 + 5] = y_hat[z + 2]
+        output[20] = 0  # we skip the third iso
+        output[23] = 0  # we skip the third iso
+        for z in range(3):  # last three z coords we skip the third iso
+            output[(z + 3) * 3 * 2 + 2] = y_hat[z + 4]
+            output[(z + 3) * 3 * 2 + 5] = y_hat[z + 4]
+
+            # Begin jaw_X
+            # 4 legs + 3 pelvis
+        for i in range(5):
+            output[36 + i] = y_hat[7 + i]  # retrieve apertures of first 11 fields
+        output[42] = y_hat[12]
+        output[43] = y_hat[13]
+        # 3 for third iso = null + one symmetric (thus 0)
+        for i in range(3):
+            output[44 + i] = 0
+            # 3 for chest iso = null + one symmetric (again 0)
+        output[48] = y_hat[14]
+        output[50] = y_hat[15]  # add in groups of three avoiding repetitions
+
+        for i in range(3):
+            output[52 + i] = y_hat[16 + i]  # head
+            output[56 + i] = y_hat[19 + i]  # arms
+
+            # Symmetric apertures
+        output[47] = -output[44]
+        output[51] = -output[48]
+        output[55] = -output[52]
+
+        output[59] = y_hat[22]
+        # Overlap fields
+
+        output[41] = (y_hat[3] - y_hat[4] + 0.01) * norm + output[50]  # abdomen
+        output[49] = (y_hat[4] - y_hat[5] + 0.03) * norm + output[54]  # chest
+
+        # Begin jaw_Y
+        for i in range(4):
+            output[76 + i] = y_hat[26 + i].item()  # apertures for the head
+            if i < 2:
+                # Same apertures opposite signs #LEGS
+                output[60 + 2 * i] = y_hat[i + 23].item()
+                output[61 + 2 * i] = -y_hat[i + 23].item()
+
+                # 4 fields with equal (and opposite) apertures
+                output[64 + 2 * i] = y_hat[24].item()
+                output[65 + 2 * i] = -y_hat[24].item()
+                output[68 + 2 * i] = 0  # index 35 == thorax iso
+                output[69 + 2 * i] = 0
+
+                # 2 fields with equal (and opposite) apertures
+                output[72 + 2 * i] = y_hat[24].item()
+                output[73 + 2 * i] = -y_hat[24].item()
+
+                # Arms apertures with opposite sign
+                scaling_factor_mm_norm = (
+                    self.image.slice_thickness * self.image.num_slices
+                )  # distance [mm] / scaling_factor to compute normalized aperture in pixel space
+                output[80 + 2 * i] = -200 / scaling_factor_mm_norm
+                output[81 + 2 * i] = 200 / scaling_factor_mm_norm
+
+    def _build_body_cnn_output(
+        self, output: np.ndarray, y_hat: np.ndarray, norm: float
+    ) -> None:
+        """Build the output of the body_cnn model.
+
+        Args:
+            output (np.ndarray): Array of shape=(84,) containing the (x, y) coordinates of the isocenters.
+            y_hat (np.ndarray): Model predictions.
+            norm (float): Normalization factor used to scale the field coordinates to compute the
+            overlap of fields along X.
+        """
+        output[30] = 0  # x coord right arm
+        output[33] = 0  # x coord left arm
+
+        for z in range(2):  # z coords
+            output[z * 3 * 2 + 2] = y_hat[z]
+            output[z * 3 * 2 + 5] = y_hat[z]
+            output[(z + 3) * 3 * 2 + 2] = y_hat[z + 2]
+            output[(z + 3) * 3 * 2 + 5] = y_hat[z + 2]
+        output[14] = (output[11] + output[20]) / 2
+        output[17] = (output[11] + output[20]) / 2
+        output[32] = 0  # z coord right arm
+        output[35] = 0  # z coord left arm
+
+        # Begin jaw_X
+        for i in range(5):
+            output[36 + i] = y_hat[4 + i]  # 4 legs + down field 4th iso
+        for i in range(3):
+            output[42 + i] = y_hat[9 + i]  # 2 4th iso + down field 3rd iso
+            output[52 + i] = y_hat[15 + i]  # head fields
+            output[56 + i] = 0  # arms fields
+
+        # chest
+        output[46] = y_hat[12]  # third iso
+        output[48] = y_hat[13]  # chest iso down field
+        output[50] = y_hat[14]  # chest iso
+
+        # Overlap fields
+        output[41] = (output[8] - output[14] + 0.01) * norm + output[46]  # abdomen
+        output[45] = (output[14] - output[20] + 0.03) * norm + output[50]  # third
+        output[49] = (output[20] - output[26] + 0.02) * norm + output[54]  # chest
+
+        # Symmetric apertures
+        output[47] = -output[44]  # third iso
+        output[51] = -output[48]  # chest
+        output[55] = -output[52]  # head
+        output[59] = 0  # arms
+
+        # Begin jaw_Y
+        for i in range(4):
+            output[76 + i] = y_hat[21 + i]  # apertures for the head
+            if i < 2:
+                # Same apertures opposite signs legs
+                output[60 + 2 * i] = y_hat[i + 18]
+                output[61 + 2 * i] = -y_hat[i + 18]
+
+                # 4 fields with equal (and opposite) apertures
+                # Pelvis
+                output[64 + 2 * i] = y_hat[20]
+                output[65 + 2 * i] = -y_hat[20]
+                # Third iso
+                output[68 + 2 * i] = y_hat[20]
+                output[69 + 2 * i] = -y_hat[20]
+                # Chest
+                output[72 + 2 * i] = y_hat[20]
+                output[73 + 2 * i] = -y_hat[20]
+
+                # Arms apertures with opposite sign
+                output[80 + 2 * i] = 0
+                output[81 + 2 * i] = 0
 
     def _inverse_transform(
         self,
@@ -414,7 +508,8 @@ class Pipeline:
             axes=(0, -1, 1, 2),  # swap (H, W, C) --> (C, H, W)
         ).astype(np.float32)
 
-        ort_inputs = {self.input_name: model_input}
+        input_name = self.ort_session.get_inputs()[0].name
+        ort_inputs = {input_name: model_input}
         ort_outs = self.ort_session.run(None, ort_inputs)  # list of numpy arrays
         model_output = ort_outs[0]
 
