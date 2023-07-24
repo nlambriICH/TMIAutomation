@@ -1,21 +1,12 @@
 """Module implementing the local server of the models."""
 import os
-import sys
 import socket
 import logging
 from flask import Flask, Response, request, jsonify, abort
 import onnxruntime
-from onnxruntime import InferenceSession
 import yaml
+import config
 from pipeline import Pipeline, RequestInfo
-
-# True if running in PyInstaller bundle
-BUNDLED: bool = getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
-
-MODEL_NAME_BODY: str = "body_cnn"
-ORT_SESSION_BODY: InferenceSession | None = None
-MODEL_NAME_ARMS: str = "arms_cnn"
-ORT_SESSION_ARMS: InferenceSession | None = None
 
 if not os.path.exists("logs"):
     os.makedirs("logs")
@@ -28,26 +19,30 @@ logging.basicConfig(
 
 with open("config.yml", "r", encoding="utf-8") as stream:
     try:
-        config = yaml.safe_load(stream)
-        logging.getLogger().setLevel(config["loglevel"])
+        yml_config = yaml.safe_load(stream)
+        logging.getLogger().setLevel(yml_config["loglevel"])
     except yaml.YAMLError as exc:
         logging.error(exc)
 
 app = Flask(__name__)
 
 try:
-    model_path = os.path.join("models", f"{MODEL_NAME_BODY}.onnx")
-    ORT_SESSION_BODY = onnxruntime.InferenceSession(model_path)
-    logging.info("Loaded model %s from %s.", MODEL_NAME_BODY, model_path)
+    model_path = os.path.join("models", f"{config.MODEL_NAME_BODY}.onnx")
+    config.ORT_SESSION_BODY = onnxruntime.InferenceSession(model_path)
+    logging.info("Loaded model %s from %s.", config.MODEL_NAME_BODY, model_path)
 except Exception:  # pylint: disable=broad-exception-caught
-    logging.exception("Could not load model %s from %s.", MODEL_NAME_BODY, model_path)
+    logging.exception(
+        "Could not load model %s from %s.", config.MODEL_NAME_BODY, model_path
+    )
 
 try:
-    model_path = os.path.join("models", f"{MODEL_NAME_ARMS}.onnx")
-    ORT_SESSION_ARMS = onnxruntime.InferenceSession(model_path)
-    logging.info("Loaded model %s from %s.", MODEL_NAME_ARMS, model_path)
+    model_path = os.path.join("models", f"{config.MODEL_NAME_ARMS}.onnx")
+    config.ORT_SESSION_ARMS = onnxruntime.InferenceSession(model_path)
+    logging.info("Loaded model %s from %s.", config.MODEL_NAME_ARMS, model_path)
 except Exception:  # pylint: disable=broad-exception-caught
-    logging.exception("Could not load model %s from %s.", MODEL_NAME_ARMS, model_path)
+    logging.exception(
+        "Could not load model %s from %s.", config.MODEL_NAME_ARMS, model_path
+    )
 
 
 def _get_available_port() -> int | None:
@@ -56,8 +51,8 @@ def _get_available_port() -> int | None:
     Returns:
         int | None: The first available port between startport and endport. None if all ports are unavailable.
     """
-    start_port = config["startport"]
-    end_port = config["endport"]
+    start_port = yml_config["startport"]
+    end_port = yml_config["endport"]
     for port in range(start_port, end_port):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -82,15 +77,17 @@ def predict() -> Response | None:
         Response: Response object with application/json mime type containing the
         isocenters, jaw X apertures, and jaw Y apertures in patient coordinate system.
     """
-    if ORT_SESSION_BODY is None and ORT_SESSION_ARMS is None:
+    if config.ORT_SESSION_BODY is None and config.ORT_SESSION_ARMS is None:
         abort(503)
 
     if request.method == "POST":
         model_name = request.json["model_name"]
-        if model_name == MODEL_NAME_BODY and ORT_SESSION_BODY is not None:
-            ort_session = ORT_SESSION_BODY
-        elif model_name == MODEL_NAME_ARMS and ORT_SESSION_ARMS is not None:
-            ort_session = ORT_SESSION_ARMS
+        if model_name == config.MODEL_NAME_BODY and config.ORT_SESSION_BODY is not None:
+            ort_session = config.ORT_SESSION_BODY
+        elif (
+            model_name == config.MODEL_NAME_ARMS and config.ORT_SESSION_ARMS is not None
+        ):
+            ort_session = config.ORT_SESSION_ARMS
         else:
             abort(503)
 
@@ -101,7 +98,6 @@ def predict() -> Response | None:
         pipeline = Pipeline(
             ort_session,
             RequestInfo(model_name, dicom_path, ptv_name, oars_name),
-            save_io=not BUNDLED,
         )
         pipeline_out = pipeline.predict()
 
@@ -123,12 +119,12 @@ def status_message() -> str:
     Returns:
         str: A string reporting a server status message.
     """
-    if ORT_SESSION_BODY is None and ORT_SESSION_ARMS is None:
+    if config.ORT_SESSION_BODY is None and config.ORT_SESSION_ARMS is None:
         return "<p style='color:Red;'>ERROR: Could not load the models.</p>"
-    if ORT_SESSION_BODY is None:
-        return f"<p style='color:Orange;'>WARNING: Could not load {MODEL_NAME_BODY} model.</p>"
-    if ORT_SESSION_ARMS is None:
-        return f"<p style='color:Orange;'>WARNING: Could not load {MODEL_NAME_ARMS} model.</p>"
+    if config.ORT_SESSION_BODY is None:
+        return f"<p style='color:Orange;'>WARNING: Could not load {config.MODEL_NAME_BODY} model.</p>"
+    if config.ORT_SESSION_ARMS is None:
+        return f"<p style='color:Orange;'>WARNING: Could not load {config.MODEL_NAME_ARMS} model.</p>"
 
     return "<p style='color:Limegreen;'>The local server is running properly!</p>"
 
@@ -137,13 +133,13 @@ def main() -> None:
     """Script entry point."""
     port = _get_available_port()
     if port:
-        config["port"] = port
+        yml_config["port"] = port
         with open("config.yml", "w", encoding="utf-8") as yml_file:
-            yml_file.write(yaml.dump(config, default_flow_style=False))
+            yml_file.write(yaml.dump(yml_config, default_flow_style=False))
 
         logging.info("Starting server on port: %i", port)
 
-        if BUNDLED:
+        if config.BUNDLED:
             # Running in PyInstaller bundle
             from waitress import serve  # pylint: disable=import-outside-toplevel
 

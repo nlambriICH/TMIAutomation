@@ -13,6 +13,7 @@ from imgaug.augmentables import Keypoint, KeypointsOnImage
 import matplotlib.pyplot as plt
 from scipy import ndimage
 from onnxruntime import InferenceSession
+import config
 from field_geometry_transf import transform_field_geometry, get_zero_row_idx
 
 
@@ -20,6 +21,7 @@ from field_geometry_transf import transform_field_geometry, get_zero_row_idx
 class RequestInfo:
     """HTTP request information."""
 
+    model_name: str
     dicom_path: str
     ptv_name: str
     oars_name: list[str]
@@ -59,11 +61,10 @@ class Pipeline:
         self,
         ort_session: InferenceSession,
         request_info: RequestInfo,
-        save_io: bool = False,
     ) -> None:
         self.ort_session = ort_session
         self.request_info = request_info
-        self.save_io = save_io
+        self.save_io = not config.BUNDLED
 
         rt_struct_path = glob.glob(
             os.path.join(self.request_info.dicom_path, "RTSTRUCT*")
