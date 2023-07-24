@@ -6,6 +6,7 @@ from typing import Literal
 import numpy as np
 from scipy import ndimage
 from gradient_free_optimizers import GridSearchOptimizer
+import config
 from pipeline import Image, FieldGeometry
 
 
@@ -29,9 +30,10 @@ class LocalOptimization:
     and ribs positions.
     """
 
-    # TODO: implement usage of two different models: body and arms
-    # For the moment only the body model is used
-    def __init__(self, image: Image, field_geometry: FieldGeometry) -> None:
+    def __init__(
+        self, model_name: str, image: Image, field_geometry: FieldGeometry
+    ) -> None:
+        self.model_name = model_name
         self.image = image
         self.field_geometry = field_geometry
         self.optimization_result = OptimizationResult()
@@ -56,14 +58,33 @@ class LocalOptimization:
         x_left = self.optimization_result.min_pos_x_left
         x_right = self.optimization_result.min_pos_x_right
 
-        if (
+        if self.model_name == config.MODEL_NAME_BODY and (
             x_left - (x_right - x_left) / 2
             < self.field_geometry.isocenters_pix[2, 2]
             < x_left + (x_right - x_left) / 2
         ):
-            # Shifting the isocenter when it is in the neighborhood above, the jaws are fixed after.
+            # Shifting the isocenter when it is in the neighborhood above, the jaws are fixed after
             self.field_geometry.isocenters_pix[2, 2] = x_left - 10
             self.field_geometry.isocenters_pix[3, 2] = x_left - 10
+        elif self.model_name == config.MODEL_NAME_ARMS and (
+            x_right
+            < self.field_geometry.isocenters_pix[2, 2]
+            < x_right + (x_right - x_left) / 2
+            or x_left > self.field_geometry.isocenters_pix[2, 2]
+        ):
+            # Setting the isocenters for arms model at 3/4 space
+            self.field_geometry.isocenters_pix[2, 2] = (
+                x_left + (x_right - x_left) * 3 / 4
+            )
+            self.field_geometry.isocenters_pix[3, 2] = (
+                x_left + (x_right - x_left) * 3 / 4
+            )
+            # Fixing the fields with minimum overlap, after the isocenter shift
+            self.field_geometry.jaws_X_pix[2, 1] = (
+                self.field_geometry.isocenters_pix[6, 2]
+                - self.field_geometry.isocenters_pix[2, 2]
+                + 1
+            ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[3, 0]
 
         # For both models, if the isocenter is on the spine
         if x_left < self.field_geometry.isocenters_pix[2, 2] < x_right:
@@ -84,8 +105,8 @@ class LocalOptimization:
         ):
             self._set_spinal_fields()
 
-        # Set distance between the last two iso only for body model to have symmetric fields
-        if self.field_geometry.isocenters_pix[2, 2] < x_left:
+        # Set distance between pelvis-abdomen isos to have symmetric fields
+        if config.MODEL_NAME_BODY and self.field_geometry.isocenters_pix[2, 2] < x_left:
             translation = 0.5 * (
                 (
                     self.field_geometry.isocenters_pix[2, 2]
@@ -134,6 +155,18 @@ class LocalOptimization:
                 < self.optimization_result.min_pos_x_left
             ):
                 self._set_spinal_fields()
+
+        # Move back fields for arms model
+        if (
+            self.model_name == config.MODEL_NAME_ARMS
+            and self.field_geometry.isocenters_pix[2, 2] > x_right
+        ):
+            self.field_geometry.jaws_X_pix[0, 1] = (
+                x_right - self.field_geometry.isocenters_pix[0, 2] - 1
+            ) * self.image.aspect_ratio
+            self.field_geometry.jaws_X_pix[3, 0] = (
+                (x_left - self.field_geometry.isocenters_pix[2, 2]) + 1
+            ) * self.image.aspect_ratio
 
     def _get_pixel_location(
         self,
@@ -237,7 +270,9 @@ class LocalOptimization:
         a = (
             self.field_geometry.isocenters_pix[0, 2]
             + self.field_geometry.isocenters_pix[2, 2]
-        ) / 2 + 10
+        ) / 2
+        if self.model_name == config.MODEL_NAME_BODY:
+            a += 10
         b = (
             self.field_geometry.isocenters_pix[2, 2]
             + self.field_geometry.isocenters_pix[6, 2]

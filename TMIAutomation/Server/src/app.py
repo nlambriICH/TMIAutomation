@@ -82,21 +82,11 @@ def predict() -> Response | None:
 
     if request.method == "POST":
         model_name = request.json["model_name"]
-        if model_name == config.MODEL_NAME_BODY and config.ORT_SESSION_BODY is not None:
-            ort_session = config.ORT_SESSION_BODY
-        elif (
-            model_name == config.MODEL_NAME_ARMS and config.ORT_SESSION_ARMS is not None
-        ):
-            ort_session = config.ORT_SESSION_ARMS
-        else:
-            abort(503)
-
         dicom_path = request.json["dicom_path"]
         ptv_name = request.json["ptv_name"]
         oars_name = request.json["oars_name"]
 
         pipeline = Pipeline(
-            ort_session,
             RequestInfo(model_name, dicom_path, ptv_name, oars_name),
         )
         pipeline_out = pipeline.predict()

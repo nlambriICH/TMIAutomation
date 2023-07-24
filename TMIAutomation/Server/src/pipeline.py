@@ -12,7 +12,7 @@ import imgaug.augmenters as iaa
 from imgaug.augmentables import Keypoint, KeypointsOnImage
 import matplotlib.pyplot as plt
 from scipy import ndimage
-from onnxruntime import InferenceSession
+from flask import abort
 import config
 from field_geometry_transf import transform_field_geometry, get_zero_row_idx
 
@@ -54,15 +54,10 @@ class Pipeline:
     2) Postprocessing steps (build_output-interim-local_opt-pix_to_pat)
     """
 
-    # TODO: implement usage of two different models: body and arms
-    # For the moment only the body model is used
-
     def __init__(
         self,
-        ort_session: InferenceSession,
         request_info: RequestInfo,
     ) -> None:
-        self.ort_session = ort_session
         self.request_info = request_info
         self.save_io = not config.BUNDLED
 
@@ -509,9 +504,22 @@ class Pipeline:
             axes=(0, -1, 1, 2),  # swap (H, W, C) --> (C, H, W)
         ).astype(np.float32)
 
-        input_name = self.ort_session.get_inputs()[0].name
+        if (
+            self.request_info.model_name == config.MODEL_NAME_BODY
+            and config.ORT_SESSION_BODY is not None
+        ):
+            ort_session = config.ORT_SESSION_BODY
+        elif (
+            self.request_info.model_name == config.MODEL_NAME_ARMS
+            and config.ORT_SESSION_ARMS is not None
+        ):
+            ort_session = config.ORT_SESSION_ARMS
+        else:
+            abort(503)
+
+        input_name = ort_session.get_inputs()[0].name
         ort_inputs = {input_name: model_input}
-        ort_outs = self.ort_session.run(None, ort_inputs)  # list of numpy arrays
+        ort_outs = ort_session.run(None, ort_inputs)  # list of numpy arrays
         model_output = ort_outs[0]
 
         self.postprocess(model_output)
@@ -521,12 +529,33 @@ class Pipeline:
                 LocalOptimization,
             )
 
-            LocalOptimization(self.image, self.field_geometry).optimize()
+            LocalOptimization(
+                self.request_info.model_name, self.image, self.field_geometry
+            ).optimize()
 
-        return transform_field_geometry(
+        (
+            isocenters_pat_coord,
+            jaws_X_pat_coord,
+            jaws_Y_pat_coord,
+        ) = transform_field_geometry(
             self.rtstruct.series_data,
             self.field_geometry.isocenters_pix,
             self.field_geometry.jaws_X_pix,
             self.field_geometry.jaws_Y_pix,
             from_to="pix_pat",
+        )
+
+        # Ensure that jaw apertures are <= 200 mm
+        return (
+            isocenters_pat_coord,
+            np.where(
+                np.absolute(jaws_X_pat_coord) > 200,
+                np.sign(jaws_X_pat_coord) * 200,
+                jaws_X_pat_coord,
+            ),
+            np.where(
+                np.absolute(jaws_Y_pat_coord) > 200,
+                np.sign(jaws_Y_pat_coord) * 200,
+                jaws_Y_pat_coord,
+            ),
         )
