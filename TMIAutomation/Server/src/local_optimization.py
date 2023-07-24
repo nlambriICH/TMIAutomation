@@ -209,6 +209,29 @@ class LocalOptimization:
                 "Expected original shape image. The local optimization might give incorrect results."
             )
 
+        # Maximum distance between head-pelvis isocenters: 840 mm
+        maximum_extension_pix = 840 / self.image.slice_thickness
+        head_pelvis_iso_pix_diff = (
+            self.field_geometry.isocenters_pix[8, 2]  # head iso-z
+            - self.field_geometry.isocenters_pix[0, 2]  # pelvis iso-z
+        )
+        head_pelvis_iso_dist_pix = abs(head_pelvis_iso_pix_diff)
+
+        if head_pelvis_iso_dist_pix > maximum_extension_pix:
+            shift_pixels = np.sign(head_pelvis_iso_pix_diff) * (
+                head_pelvis_iso_dist_pix - maximum_extension_pix
+            )
+            logging.info(
+                "Distance between head-pelvis isocenters was %d pixels. Maximum allowed distance is %d (= 84 cm)."
+                " Shifting pelvis isocenters by %d pixels.",
+                head_pelvis_iso_dist_pix,
+                maximum_extension_pix,
+                shift_pixels,
+            )
+            self.field_geometry.isocenters_pix[[0, 1], 2] = (
+                self.field_geometry.isocenters_pix[0, 2] + shift_pixels
+            )
+
         ptv_mask = self.image.pixels[..., 1]
 
         a = (
