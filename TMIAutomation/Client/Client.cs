@@ -13,8 +13,10 @@ namespace TMIAutomation
     public static class Client
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Client));
+        public static readonly string MODEL_NAME_BODY = "body_cnn";
+        public static readonly string MODEL_NAME_ARMS = "arms_cnn";
 
-        public static Dictionary<string, List<List<double>>> GetFieldGeometry(string patientId, string upperPTVId, List<string> oarIds)
+        public static Dictionary<string, List<List<double>>> GetFieldGeometry(string modelName, string patientId, string upperPTVId, List<string> oarIds)
         {
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>> { };
             try
@@ -26,6 +28,7 @@ namespace TMIAutomation
 
                     ClientRequest request = new ClientRequest
                     {
+                        ModelName = modelName == MODEL_NAME_BODY ? MODEL_NAME_BODY : MODEL_NAME_ARMS,
                         DicomPath = dicomPath,
                         IdPTV = upperPTVId,
                         IdOARs = oarIds
@@ -80,6 +83,8 @@ namespace TMIAutomation
 
         private class ClientRequest
         {
+            [JsonProperty("model_name")]
+            public string ModelName { get; set; }
             [JsonProperty("dicom_path")]
             public string DicomPath { get; set; }
             [JsonProperty("ptv_name")]

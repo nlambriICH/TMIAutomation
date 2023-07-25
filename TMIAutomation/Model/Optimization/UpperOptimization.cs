@@ -37,16 +37,20 @@ namespace TMIAutomation
                 logger.Information("UpperOptimization context: {@context}",
                                    new List<string> { this.courseId, this.upperPlanId, this.upperPTVId, string.Join(",", this.oarIds) });
 
-                progress.Report(0.50);
-                message.Report("Get model predictions...");
-                Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
-                
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
+                Structure upperPTV = upperPlan.StructureSet.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
+
+                string modelName = upperPTV.MeshGeometry.Bounds.SizeX > 450 ? Client.MODEL_NAME_ARMS : Client.MODEL_NAME_BODY;
+                logger.Information("Calling model {modelName}", modelName);
+
+                progress.Report(0.50);
+                message.Report("Get model predictions...");
+                Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(modelName, scriptContext.Patient.Id, this.upperPTVId, this.oarIds);
 
                 progress.Report(0.40);
                 message.Report("Set isocenters...");
-                upperPlan.SetIsocentersUpper(fieldGeometry);
+                upperPlan.SetIsocentersUpper(modelName, upperPTV, fieldGeometry);
             });
         }
 
