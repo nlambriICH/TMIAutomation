@@ -35,7 +35,8 @@ namespace TMIAutomation.Tests
                             .Add<ObjectiveSetupTests>(scriptContextLower.PlanSetup.OptimizationSetup, scriptContextLower.PlanSetup)
                             .Add<CalculationTests>(scriptContextLower.PlanSetup, scriptContextLower)
                             .Add<IsocenterTests>(scriptContextLower.PlanSetup, planSetupUpper, scriptContextLower)
-                            .Add<StructureHelperTests>(scriptContextLower.StructureSet);
+                            .Add<StructureHelperTests>(scriptContextLower.StructureSet)
+                            .AddStatic<ClientTests>(patientID);
                     TestBase.RunTests();
                 }
                 catch (Exception e)
