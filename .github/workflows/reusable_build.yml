@@ -24,8 +24,8 @@ jobs:
             pip install -r requirements.txt
       - name: Build server app
         run: |
+            cd TMIAutomation\Server
             pyinstaller --clean --noconfirm --add-data "models;models" --add-data "config.yml;." --collect-submodules=pydicom src/app.py
-            cd ..\..
       - name: Add nuget to PATH
         uses: nuget/setup-nuget@v1
       - name: Add msbuild to PATH
