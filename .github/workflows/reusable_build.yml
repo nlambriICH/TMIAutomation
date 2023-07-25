@@ -13,6 +13,19 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.11'
+      - name: Setup venv
+        run: |
+            cd TMIAutomation\Server
+            python -m venv venv
+            pip install requirements.txt
+      - name: Build server app
+        run: |
+            pyinstaller --clean --noconfirm --add-data "models;models" --add-data "config.yml;." --collect-submodules=pydicom src/app.py
+            cd ..\..
       - name: Add nuget to PATH
         uses: nuget/setup-nuget@v1
       - name: Add msbuild to PATH
