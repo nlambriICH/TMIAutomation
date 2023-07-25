@@ -4,6 +4,9 @@ using System.Linq;
 using Serilog;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
+#if ESAPI16
+using System.Text;
+#endif
 
 namespace TMIAutomation
 {
