@@ -70,7 +70,7 @@ namespace TMIAutomation.Tests
         }
 
         [Fact]
-        private void SetIsocentersUpper()
+        private void SetIsocentersUpperBodyCNN()
         {
             List<List<double>> isocenters = new List<List<double>>
             {
@@ -87,7 +87,6 @@ namespace TMIAutomation.Tests
                 new List<double> { -300, 118.0, 163.4 }, // arms
                 new List<double> { -300, 118.0, 163.4 },
             };
-
             List<List<double>> jawX = new List<List<double>>
             {
                 new List<double> { -19.1, 168.2 }, // pelvis
@@ -103,7 +102,6 @@ namespace TMIAutomation.Tests
                 new List<double> { -300, -300 }, // arms
                 new List<double> { -300, -300 },
             };
-
             List<List<double>> jawY = new List<List<double>>
             {
                 new List<double> { -195.5, 195.5 }, // pelvis
@@ -119,15 +117,14 @@ namespace TMIAutomation.Tests
                 new List<double> { -163.4, -163.4 }, // arms
                 new List<double> { -163.4, -163.4 },
             };
-
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>>
             {
                 { "Isocenters", isocenters },
                 { "Jaw_X", jawX },
                 { "Jaw_Y", jawY },
             };
-
-            upperPlan.SetIsocentersUpper(fieldGeometry);
+            Structure upperPTV = this.upperPlan.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.UPPER_PTV_NO_JUNCTION);
+            upperPlan.SetIsocentersUpper(Client.MODEL_NAME_BODY, upperPTV, fieldGeometry);
 
             try
             {
@@ -141,6 +138,108 @@ namespace TMIAutomation.Tests
                     }
                     else
                     {
+                        Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                        Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
+                        Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                    }
+                }
+            }
+            catch (EqualException e)
+            {
+                throw new Exception("Unexpected upper field configuration", e);
+            }
+            finally
+            {
+                // Teardown
+                upperPlan.Beams.ToList().ForEach(beam => planInContext.RemoveBeam(beam));
+            }
+        }
+
+        [Fact]
+        private void SetIsocentersUpperArmsCNN()
+        {
+            List<List<double>> isocenters = new List<List<double>>
+            {
+                new List<double> { 26.0, 118.0, -811.5 }, // pelvis
+                new List<double> { 26.0, 118.0, -811.5 },
+                new List<double> { 26.0, 118.0, -531.6 }, // abdomen
+                new List<double> { 26.0, 118.0, -531.6 },
+                new List<double> { 26.0, 118.0, 163.4 }, // thorax
+                new List<double> { 26.0, 118.0, 163.4 },
+                new List<double> { 26.0, 118.0, -260.6 }, // shoulders
+                new List<double> { 26.0, 118.0, -260.6 },
+                new List<double> { 26.0, 118.0, -16.7 },  // head
+                new List<double> { 26.0, 118.0, -16.7 },
+                new List<double> { -185.5, 118.0, -510.2 }, // arms
+                new List<double> { 201.9, 118.0, -510.2 },
+            };
+            List<List<double>> jawX = new List<List<double>>
+            {
+                new List<double> { -28.7, 153.7 }, // pelvis
+                new List<double> { -160.3, 13.1 },
+                new List<double> { -5.0, 133.6 }, // abdomen
+                new List<double> { -142.3, 0.0 },
+                new List<double> { 26.0, 26.0 }, // thorax
+                new List<double> { 26.0, 26.0 },
+                new List<double> { -10.2, 161.9 }, // shoulders
+                new List<double> { -143.7, 10.2 },
+                new List<double> { -10.9, 119.6 }, // head
+                new List<double> { -120.8, 10.9 },
+                new List<double> { -80.1, 64.3 }, // arms
+                new List<double> { -75.1, 78.4 },
+            };
+            List<List<double>> jawY = new List<List<double>>
+            {
+                new List<double> { -200, 200 }, // pelvis
+                new List<double> { -197.2, 197.2 },
+                new List<double> { -197.2, 197.2 }, // abdomen
+                new List<double> { -197.2, 197.2 },
+                new List<double> { -163.4, -163.4 }, // thorax
+                new List<double> { -163.4, -163.4 },
+                new List<double> { -197.2, 197.2 }, // shoulders
+                new List<double> { -197.2, 197.2 },
+                new List<double> { -124.0, 119.8 }, // head
+                new List<double> { -133.8, 133.2 },
+                new List<double> { -200.0, 200.0 }, // arms
+                new List<double> { -200.0, 200.0 },
+            };
+            Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>>
+            {
+                { "Isocenters", isocenters },
+                { "Jaw_X", jawX },
+                { "Jaw_Y", jawY },
+            };
+            Structure upperPTV = this.upperPlan.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.UPPER_PTV_NO_JUNCTION);
+            upperPlan.SetIsocentersUpper(Client.MODEL_NAME_ARMS, upperPTV, fieldGeometry);
+
+            try
+            {
+                foreach (Beam beam in upperPlan.Beams)
+                {
+                    if (beam.BeamNumber == 7) // right arm iso
+                    {
+                        Assert.Equal(355.0, beam.ControlPoints.First().CollimatorAngle);
+                        Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                        Assert.Equal(355.0, beam.ControlPoints.Last().GantryAngle);
+                        Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+                    }
+                    else if (beam.BeamNumber == 8) // left arm iso
+                    {
+                        Assert.Equal(5, beam.ControlPoints.First().CollimatorAngle);
+                        Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                        Assert.Equal(5, beam.ControlPoints.Last().GantryAngle);
+                        Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                    }
+                    else if (beam.BeamNumber % 2 != 0)
+                    {
+                        Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
+                        Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                        Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
+                        Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+                    }
+                    else
+                    {
+                        Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
                         Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
                         Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
                         Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
