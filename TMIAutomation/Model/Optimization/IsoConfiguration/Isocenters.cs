@@ -18,10 +18,19 @@ namespace TMIAutomation
                                               Dictionary<string, List<List<double>>> fieldGeometry)
         {
             targetPlan.ClearBeams();
-
             List<List<double>> isocenters = fieldGeometry["Isocenters"];
             List<List<double>> jawX = fieldGeometry["Jaw_X"];
             List<List<double>> jawY = fieldGeometry["Jaw_Y"];
+
+            // Round isocenter's z-coord with respect to UserOrigin
+            List<VVector> isoRounded = new List<VVector>();
+            foreach (List<double> iso in isocenters)
+            {
+                VVector isoUserCoord = targetPlan.StructureSet.Image.DicomToUser(new VVector(iso[0], iso[1], iso[2]), targetPlan);
+                isoUserCoord.z = Math.Round(isoUserCoord.z, 0);
+                VVector isoDicom = targetPlan.StructureSet.Image.UserToDicom(isoUserCoord, targetPlan);
+                isoRounded.Add(isoDicom);
+            }
 
             ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(Configuration.TreatmentMachine,
                                                                                                    "6X",
@@ -35,7 +44,7 @@ namespace TMIAutomation
                 for (int i = isocenters.Count() - 3; i >= 0; i -= 2) // -3 because of body model (skip last 2 iso for arms)
                 {
                     int firstIsoInGroup = i - 1;
-                    VVector isocenter = new VVector(isocenters[firstIsoInGroup][0], isoCoordY, isocenters[firstIsoInGroup][2]);
+                    VVector isocenter = isoRounded[firstIsoInGroup];
                     VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -50,7 +59,7 @@ namespace TMIAutomation
                     );
 
                     int secondIsoInGroup = i;
-                    isocenter = new VVector(isocenters[secondIsoInGroup][0], isoCoordY, isocenters[secondIsoInGroup][2]);
+                    isocenter = isoRounded[secondIsoInGroup];
                     jawPositions = new VRect<double>(jawX[secondIsoInGroup][0], jawY[secondIsoInGroup][0], jawX[secondIsoInGroup][1], jawY[secondIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -71,7 +80,7 @@ namespace TMIAutomation
                 {
                     if (i == 5) continue; // skip thorax isocenter not present with iso on arms
                     int firstIsoInGroup = i - 1;
-                    VVector isocenter = new VVector(isocenters[firstIsoInGroup][0], isoCoordY, isocenters[firstIsoInGroup][2]);
+                    VVector isocenter = isoRounded[firstIsoInGroup];
                     VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -86,7 +95,7 @@ namespace TMIAutomation
                     );
 
                     int secondIsoInGroup = i;
-                    isocenter = new VVector(isocenters[secondIsoInGroup][0], isoCoordY, isocenters[secondIsoInGroup][2]);
+                    isocenter = isoRounded[secondIsoInGroup];
                     jawPositions = new VRect<double>(jawX[secondIsoInGroup][0], jawY[secondIsoInGroup][0], jawX[secondIsoInGroup][1], jawY[secondIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -103,7 +112,7 @@ namespace TMIAutomation
 
                 // Isocenter right arm
                 int indexIsoRightArm = isocenters.Count - 1;
-                VVector isocenterRightArm = new VVector(isocenters[indexIsoRightArm][0], isoCoordY, isocenters[indexIsoRightArm][2]);
+                VVector isocenterRightArm = isoRounded[indexIsoRightArm];
                 VRect<double> jawPositionsRightArm = new VRect<double>(jawX[indexIsoRightArm][0], jawY[indexIsoRightArm][0], jawX[indexIsoRightArm][1], jawY[indexIsoRightArm][1]);
                 LogNewBeamInfo(targetPlan, isocenterRightArm, jawPositionsRightArm);
                 targetPlan.AddArcBeam(
@@ -119,7 +128,7 @@ namespace TMIAutomation
 
                 // Isocenter left arm
                 int indexIsoLeftArm = isocenters.Count - 2;
-                VVector isocenterLeftArm = new VVector(isocenters[indexIsoLeftArm][0], isoCoordY, isocenters[indexIsoLeftArm][2]);
+                VVector isocenterLeftArm = isoRounded[indexIsoLeftArm];
                 VRect<double> jawPositionsLeftArm = new VRect<double>(jawX[indexIsoLeftArm][0], jawY[indexIsoLeftArm][0], jawX[indexIsoLeftArm][1], jawY[indexIsoLeftArm][1]);
                 LogNewBeamInfo(targetPlan, isocenterLeftArm, jawPositionsLeftArm);
                 targetPlan.AddArcBeam(
@@ -134,8 +143,8 @@ namespace TMIAutomation
                 );
 
                 // Isocenters pelvis
-                VVector isocenterPelivs = new VVector(isocenters[1][0], isoCoordY, isocenters[1][2]);
-                VRect<double> jawPositionsPelvis = new VRect<double>(jawX[1][0], jawY[1][0], jawX[1][1], jawY[1][1]);
+                VVector isocenterPelivs = isoRounded[0];
+                VRect<double> jawPositionsPelvis = new VRect<double>(jawX[0][0], jawY[0][0], jawX[0][1], jawY[0][1]);
                 LogNewBeamInfo(targetPlan, isocenterPelivs, jawPositionsPelvis);
                 targetPlan.AddArcBeam(
                     sourcePlanBeamParams,
@@ -148,8 +157,8 @@ namespace TMIAutomation
                     isocenterPelivs
                 );
 
-                isocenterPelivs = new VVector(isocenters[0][0], isoCoordY, isocenters[0][2]);
-                jawPositionsPelvis = new VRect<double>(jawX[0][0], jawY[0][0], jawX[0][1], jawY[0][1]);
+                isocenterPelivs = isoRounded[1];
+                jawPositionsPelvis = new VRect<double>(jawX[1][0], jawY[1][0], jawX[1][1], jawY[1][1]);
                 LogNewBeamInfo(targetPlan, isocenterPelivs, jawPositionsPelvis);
                 targetPlan.AddArcBeam(
                     sourcePlanBeamParams,
