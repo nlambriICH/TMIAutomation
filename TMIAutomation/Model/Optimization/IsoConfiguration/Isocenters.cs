@@ -22,13 +22,15 @@ namespace TMIAutomation
             List<List<double>> jawX = fieldGeometry["Jaw_X"];
             List<List<double>> jawY = fieldGeometry["Jaw_Y"];
 
-            // Round isocenter's z-coord with respect to UserOrigin
+            // Round isocenter's z-coord with respect to UserOrigin and assign PTV center point for y-coord
+            double isoCoordY = upperPTV.CenterPoint.y;
             List<VVector> isoRounded = new List<VVector>();
             foreach (List<double> iso in isocenters)
             {
                 VVector isoUserCoord = targetPlan.StructureSet.Image.DicomToUser(new VVector(iso[0], iso[1], iso[2]), targetPlan);
                 isoUserCoord.z = Math.Round(isoUserCoord.z, 0);
                 VVector isoDicom = targetPlan.StructureSet.Image.UserToDicom(isoUserCoord, targetPlan);
+                isoDicom.y = isoCoordY;
                 isoRounded.Add(isoDicom);
             }
 
@@ -37,8 +39,6 @@ namespace TMIAutomation
                                                                                                    600,
                                                                                                    "ARC",
                                                                                                    "");
-
-            double isoCoordY = upperPTV.CenterPoint.y;
             if (modelName == Client.MODEL_NAME_BODY)
             {
                 for (int i = isocenters.Count() - 3; i >= 0; i -= 2) // -3 because of body model (skip last 2 iso for arms)
@@ -113,6 +113,7 @@ namespace TMIAutomation
                 // Isocenter right arm
                 int indexIsoRightArm = isocenters.Count - 1;
                 VVector isocenterRightArm = isoRounded[indexIsoRightArm];
+                isocenterRightArm.y += 40; // shift y-coord toward the arm (posterior)
                 VRect<double> jawPositionsRightArm = new VRect<double>(jawX[indexIsoRightArm][0], jawY[indexIsoRightArm][0], jawX[indexIsoRightArm][1], jawY[indexIsoRightArm][1]);
                 LogNewBeamInfo(targetPlan, isocenterRightArm, jawPositionsRightArm);
                 targetPlan.AddArcBeam(
@@ -129,6 +130,7 @@ namespace TMIAutomation
                 // Isocenter left arm
                 int indexIsoLeftArm = isocenters.Count - 2;
                 VVector isocenterLeftArm = isoRounded[indexIsoLeftArm];
+                isocenterLeftArm.y += 40; // shift y-coord toward the arm (posterior)
                 VRect<double> jawPositionsLeftArm = new VRect<double>(jawX[indexIsoLeftArm][0], jawY[indexIsoLeftArm][0], jawX[indexIsoLeftArm][1], jawY[indexIsoLeftArm][1]);
                 LogNewBeamInfo(targetPlan, isocenterLeftArm, jawPositionsLeftArm);
                 targetPlan.AddArcBeam(
