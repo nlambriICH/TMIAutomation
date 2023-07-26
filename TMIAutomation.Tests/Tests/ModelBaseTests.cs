@@ -54,8 +54,8 @@ namespace TMIAutomation.Tests
             yield return new object[] { ModelBase.PlanType.Up, 0, "RA_TMLIup5" };
             yield return new object[] { ModelBase.PlanType.Up, 1, "RA_TMLIup4" };
             yield return new object[] { ModelBase.PlanType.Up, 2, "RA_TMLIup3" };
-            yield return new object[] { ModelBase.PlanType.Down, 0, "TMLIdownAuto1" };
-            yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto" };
+            yield return new object[] { ModelBase.PlanType.Down, 0, "TMLIdownAuto" };
+            yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto1" };
         }
 
         [Theory]

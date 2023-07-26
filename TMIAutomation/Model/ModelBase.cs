@@ -48,23 +48,29 @@ namespace TMIAutomation
         public List<string> GetPlans(PluginScriptContext scriptContext, string courseId, PlanType planType)
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
-            List<string> orderedPlans = new List<string>();
+            PlanSetup planInScope = scriptContext.PlanSetup;
+
+            List<PlanSetup> orderedPlans = new List<PlanSetup>();
             switch (planType)
             {
                 case PlanType.Up:
                     orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
                                         .OrderByDescending(p => p.CreationDateTime)
-                                        .Select(s => s.Id)
                                         .ToList();
                     break;
                 case PlanType.Down:
                     orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine)
                                         .OrderByDescending(p => p.CreationDateTime)
-                                        .Select(s => s.Id)
                                         .ToList();
                     break;
             }
-            return orderedPlans;
+
+            if (orderedPlans.Remove(planInScope))
+            {
+                orderedPlans.Insert(0, planInScope);
+            }
+
+            return orderedPlans.Select(ps => ps.Id).ToList();
         }
 
         public Task<List<string>> GetPTVsFromPlanAsync(string courseId, string planId)
