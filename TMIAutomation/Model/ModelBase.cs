@@ -77,7 +77,7 @@ namespace TMIAutomation
         {
             return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromPlan(scriptContext, courseId, planId), isWriteable: false);
         }
-        
+
         public List<string> GetPTVsFromPlan(PluginScriptContext scriptContext, string courseId, string planId)
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
@@ -162,6 +162,8 @@ namespace TMIAutomation
                 ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
                 int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIdownAuto"));
                 newPlan.Id = numOfAutoPlans == 0 ? "TMLIdownAuto" : string.Concat("TMLIdownAuto", numOfAutoPlans);
+
+                scriptContext.PlanSetup = newPlan; // set the new plan in context
             });
         }
 
@@ -175,6 +177,8 @@ namespace TMIAutomation
                 ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
                 int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIupperAuto"));
                 newPlan.Id = numOfAutoPlans == 0 ? "TMLIupperAuto" : string.Concat("TMLIupperAuto", numOfAutoPlans);
+
+                scriptContext.PlanSetup = newPlan;  // set the new plan in context
             });
         }
 
