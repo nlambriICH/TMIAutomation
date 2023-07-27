@@ -14,7 +14,11 @@ import matplotlib.pyplot as plt
 from scipy import ndimage
 from flask import abort
 import config
-from field_geometry_transf import transform_field_geometry, get_zero_row_idx
+from field_geometry_transf import (
+    transform_field_geometry,
+    get_zero_row_idx,
+    restrict_to_max_aperture,
+)
 
 
 @dataclass
@@ -545,17 +549,8 @@ class Pipeline:
             from_to="pix_pat",
         )
 
-        # Ensure that jaw apertures are <= 200 mm
         return (
             isocenters_pat_coord,
-            np.where(
-                np.absolute(jaws_X_pat_coord) > 200,
-                np.sign(jaws_X_pat_coord) * 200,
-                jaws_X_pat_coord,
-            ),
-            np.where(
-                np.absolute(jaws_Y_pat_coord) > 200,
-                np.sign(jaws_Y_pat_coord) * 200,
-                jaws_Y_pat_coord,
-            ),
+            restrict_to_max_aperture(jaws_X_pat_coord),
+            restrict_to_max_aperture(jaws_Y_pat_coord),
         )

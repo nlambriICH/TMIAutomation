@@ -23,6 +23,22 @@ def get_zero_row_idx(arr: np.ndarray) -> np.ndarray:
     return np.where(np.all(arr == 0, axis=1))[0]
 
 
+def restrict_to_max_aperture(jaw_apertures: np.ndarray) -> np.ndarray:
+    """Ensure that jaw apertures are <= 200 mm.
+
+    Args:
+        jaw_aperture (np.ndarray): Array containing the jaw apertures in the patient coordinate system.
+
+    Returns:
+        np.ndarray: Array of jaw apertures with restricted maximum apertures.
+    """
+    return np.where(
+        np.absolute(jaw_apertures) > 200,
+        np.sign(jaw_apertures) * 200,
+        jaw_apertures,
+    )
+
+
 def get_jaw_kps_from_aperture(
     isocenters: np.ndarray,
     jaw_X: np.ndarray,
