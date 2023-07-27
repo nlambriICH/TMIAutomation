@@ -6,6 +6,7 @@ from typing import Literal
 import numpy as np
 from scipy import ndimage
 from gradient_free_optimizers import GridSearchOptimizer
+import matplotlib.pyplot as plt
 import config
 from pipeline import Image, FieldGeometry
 
@@ -204,13 +205,18 @@ class LocalOptimization:
             for i in range(40):
                 if not ptv_mask[j, x_pixel_spine + sign * i]:  # pixel is background
                     pixel_shift += 1
-                    if (
+                    if (  # next pixel is in mask
                         ptv_mask[j, x_pixel_spine + sign * i]
                         != ptv_mask[j, x_pixel_spine + sign * (i + 1)]
                     ):
+                        for k in range(1, 10):
+                            if not ptv_mask[j, x_pixel_spine + sign * (i + 1 + k)]:
+                                # pixel_shift == np.inf if background is found after a few pixels (i.e., spine)
+                                pixel_shift = np.inf
                         break
                 else:  # pixel in mask
-                    pixel_shift = np.inf  # count == np.inf if first pixel is in mask
+                    # pixel_shift == np.inf if first pixel is in mask
+                    pixel_shift = np.inf
                     break
 
             # Assumption: at least one pixel along j is background
@@ -226,6 +232,35 @@ class LocalOptimization:
             )
 
         return min_pos_x
+
+    def _search_x_pixel_spine(self) -> int:
+        """Search the optimal 'x' pixel location of the spine with GridSearch.
+
+        Returns:
+            int: The optimal 'x' pixel location of the spine.
+        """
+        ptv_mask = self.image.pixels[..., 1]
+
+        a = (
+            self.field_geometry.isocenters_pix[0, 2]
+            + self.field_geometry.isocenters_pix[2, 2]
+        ) / 2
+        if self.model_name == config.MODEL_NAME_BODY:
+            a += 10
+        b = (
+            self.field_geometry.isocenters_pix[2, 2]
+            + self.field_geometry.isocenters_pix[6, 2]
+        ) / 2
+        search_space = {"x_0": np.arange(a, b, 1, dtype=int)}
+
+        def _loss(pos_new):
+            x = pos_new["x_0"]
+            score = np.sum(ptv_mask[:, x])
+            return -score
+
+        opt = GridSearchOptimizer(search_space)
+        opt.search(_loss, n_iter=search_space["x_0"].shape[0], verbosity=False)
+        return opt.best_value[0]
 
     def optimize(self) -> None:
         """Search the 'x' pixel coordinates of the maximum extension
@@ -265,36 +300,29 @@ class LocalOptimization:
                 self.field_geometry.isocenters_pix[0, 2] + shift_pixels
             )
 
-        ptv_mask = self.image.pixels[..., 1]
-
-        a = (
-            self.field_geometry.isocenters_pix[0, 2]
-            + self.field_geometry.isocenters_pix[2, 2]
-        ) / 2
-        if self.model_name == config.MODEL_NAME_BODY:
-            a += 10
-        b = (
-            self.field_geometry.isocenters_pix[2, 2]
-            + self.field_geometry.isocenters_pix[6, 2]
-        ) / 2
-        search_space = {"x_0": np.arange(a, b, 1, dtype=int)}
-
-        def _loss(pos_new):
-            x = pos_new["x_0"]
-            score = np.sum(ptv_mask[:, x])
-            return -score
-
-        opt = GridSearchOptimizer(search_space)
-        opt.search(_loss, n_iter=search_space["x_0"].shape[0], verbosity=False)
-        best_x_pixel_spine = opt.best_value[0]
-
+        best_x_pixel_spine = self._search_x_pixel_spine()
         x_com = round(ndimage.center_of_mass(self.image.pixels[..., 0])[0])
+        y_pixel_right = np.arange(x_com - 115, x_com - 50)
+        y_pixel_left = np.arange(x_com + 50, x_com + 115)
         y_pixels = np.concatenate(
             (
-                np.arange(x_com - 115, x_com - 50),
-                np.arange(x_com + 50, x_com + 115),
+                y_pixel_right,
+                y_pixel_left,
             )
         )
+
+        if not config.BUNDLED:
+            plt.imshow(self.image.pixels, aspect=1 / self.image.aspect_ratio)
+            plt.vlines(best_x_pixel_spine, y_pixels[0], y_pixels[-1], linewidths=0.5)
+            for y in (y_pixel_right, y_pixel_left):
+                plt.hlines(
+                    y[[0, -1]],
+                    best_x_pixel_spine - 40,
+                    best_x_pixel_spine + 40,
+                    linewidths=0.5,
+                )
+            plt.savefig("logs/local_opt.png")
+            plt.close()
 
         self.optimization_result.min_pos_x_left = self._get_pixel_location(
             best_x_pixel_spine, y_pixels, location="iliac"
