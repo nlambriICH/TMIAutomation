@@ -40,7 +40,9 @@ class LocalOptimization:
         self.optimization_result = OptimizationResult()
 
     def _set_spinal_fields(self):
-        # TODO: docstring
+        """Adjust the X_jaws apertures between the abdomen and thorax isocenters to guarantee an overlap between the two
+        fields according to the maximum extension between iliac crests and ribs
+        """
         self.field_geometry.jaws_X_pix[2, 1] = (
             self.optimization_result.min_pos_x_right
             - self.field_geometry.isocenters_pix[2, 2]
@@ -101,7 +103,8 @@ class LocalOptimization:
             )
 
         if (
-            self.field_geometry.isocenters_pix[2, 2]
+            self.model_name == config.MODEL_NAME_BODY
+            and self.field_geometry.isocenters_pix[2, 2]
             < self.optimization_result.min_pos_x_left
         ):
             self._set_spinal_fields()
