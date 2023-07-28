@@ -8,22 +8,6 @@ import yaml
 import config
 from pipeline import Pipeline, RequestInfo
 
-if not os.path.exists("logs"):
-    os.makedirs("logs")
-
-logging.basicConfig(
-    filename="logs/app.log",
-    level=logging.INFO,
-    format="%(asctime)s:%(name)s:%(levelname)s:%(message)s",
-)
-
-with open("config.yml", "r", encoding="utf-8") as stream:
-    try:
-        yml_config = yaml.safe_load(stream)
-        logging.getLogger().setLevel(yml_config["loglevel"])
-    except yaml.YAMLError as exc:
-        logging.error(exc)
-
 app = Flask(__name__)
 
 try:
@@ -46,13 +30,13 @@ except Exception:  # pylint: disable=broad-exception-caught
 
 
 def _get_available_port() -> int | None:
-    """Get the first available port between the range startport and endport specified in config.yml.
+    """Get the first available port between the range start_port and end_port specified in config.yml.
 
     Returns:
-        int | None: The first available port between startport and endport. None if all ports are unavailable.
+        int | None: The first available port between start_port and end_port. None if all ports are unavailable.
     """
-    start_port = yml_config["startport"]
-    end_port = yml_config["endport"]
+    start_port = config.YML["start_port"]
+    end_port = config.YML["end_port"]
     for port in range(start_port, end_port):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -123,9 +107,9 @@ def main() -> None:
     """Script entry point."""
     port = _get_available_port()
     if port:
-        yml_config["port"] = port
+        config.YML["port"] = port
         with open("config.yml", "w", encoding="utf-8") as yml_file:
-            yml_file.write(yaml.dump(yml_config, default_flow_style=False))
+            yml_file.write(yaml.dump(config.YML, default_flow_style=False))
 
         logging.info("Starting server on port: %i", port)
 
