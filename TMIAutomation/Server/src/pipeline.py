@@ -501,13 +501,6 @@ class Pipeline:
             tuple[np.ndarray, np.ndarray, np.ndarray]: Isocenters, jaw X apertures, and jaw Y apertures
             in patient coordinate system.
         """
-        self.preprocess()
-
-        model_input = np.transpose(
-            self.image.pixels[np.newaxis],
-            axes=(0, -1, 1, 2),  # swap (H, W, C) --> (C, H, W)
-        ).astype(np.float32)
-
         if (
             self.request_info.model_name == config.MODEL_NAME_BODY
             and config.ORT_SESSION_BODY is not None
@@ -520,6 +513,13 @@ class Pipeline:
             ort_session = config.ORT_SESSION_ARMS
         else:
             abort(503)
+
+        self.preprocess()
+
+        model_input = np.transpose(
+            self.image.pixels[np.newaxis],
+            axes=(0, -1, 1, 2),  # swap (H, W, C) --> (C, H, W)
+        ).astype(np.float32)
 
         input_name = ort_session.get_inputs()[0].name
         ort_inputs = {input_name: model_input}
