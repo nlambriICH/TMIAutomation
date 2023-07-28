@@ -6,7 +6,6 @@ from typing import Literal
 import numpy as np
 from scipy import ndimage
 from gradient_free_optimizers import GridSearchOptimizer
-import matplotlib.pyplot as plt
 import config
 from pipeline import Image, FieldGeometry
 
@@ -17,8 +16,8 @@ class OptimizationResult:
     'x' pixels of the maximum extension of the ribs and iliac crests.
     """
 
-    min_pos_x_right: int = field(default=0)
-    min_pos_x_left: int = field(default=0)
+    x_pixel_ribs: int = field(default=0)
+    x_pixel_iliac: int = field(default=0)
 
 
 class LocalOptimization:
@@ -38,79 +37,94 @@ class LocalOptimization:
         self.image = image
         self.field_geometry = field_geometry
         self.optimization_result = OptimizationResult()
+        self.field_overlap_pixels = config.YML["field_overlap_pixels"]
 
     def _set_spinal_fields(self):
         """Adjust the X_jaws apertures between the abdomen and thorax isocenters to guarantee an overlap between the two
         fields according to the maximum extension between iliac crests and ribs
         """
         self.field_geometry.jaws_X_pix[2, 1] = (
-            self.optimization_result.min_pos_x_right
+            self.optimization_result.x_pixel_ribs
             - self.field_geometry.isocenters_pix[2, 2]
-            - 1
+            - 1  # shift one pixel from ribs boundary
         ) * self.image.aspect_ratio
 
         self.field_geometry.jaws_X_pix[5, 0] = (
-            self.optimization_result.min_pos_x_left
+            self.optimization_result.x_pixel_iliac
             - self.field_geometry.isocenters_pix[4, 2]
-            + 1
+            + 1  # shift one pixel from iliac crests boundary
         ) * self.image.aspect_ratio
 
     def _adjust_abdominal_fields_geometry(self) -> None:
         """Adjust the abdominal fields geometry according to the maximum extension
         of iliac crests and ribs."""
-        x_left = self.optimization_result.min_pos_x_left
-        x_right = self.optimization_result.min_pos_x_right
+
+        x_iliac = (
+            self.optimization_result.x_pixel_iliac
+        )  # iliac crests 'x' pixel location
+        x_ribs = self.optimization_result.x_pixel_ribs  # ribs pixel 'x' location
 
         if self.model_name == config.MODEL_NAME_BODY and (
-            x_left - (x_right - x_left) / 2
+            x_iliac - (x_ribs - x_iliac) / 2
             < self.field_geometry.isocenters_pix[2, 2]
-            < x_left + (x_right - x_left) / 2
+            < x_iliac + (x_ribs - x_iliac) / 2
         ):
             # Shifting the isocenter when it is in the neighborhood above, the jaws are fixed after
-            self.field_geometry.isocenters_pix[2, 2] = x_left - 10
-            self.field_geometry.isocenters_pix[3, 2] = x_left - 10
+            self.field_geometry.isocenters_pix[2, 2] = x_iliac - 10
+            self.field_geometry.isocenters_pix[3, 2] = x_iliac - 10
         elif self.model_name == config.MODEL_NAME_ARMS and (
-            x_right
+            x_ribs
             < self.field_geometry.isocenters_pix[2, 2]
-            < x_right + (x_right - x_left) / 2
-            or x_left > self.field_geometry.isocenters_pix[2, 2]
+            < x_ribs + (x_ribs - x_iliac) / 2
+            or self.field_geometry.isocenters_pix[2, 2] < x_iliac
         ):
             # Setting the isocenters for arms model at 3/4 space
             self.field_geometry.isocenters_pix[2, 2] = (
-                x_left + (x_right - x_left) * 3 / 4
+                x_iliac + (x_ribs - x_iliac) * 3 / 4
             )
             self.field_geometry.isocenters_pix[3, 2] = (
-                x_left + (x_right - x_left) * 3 / 4
+                x_iliac + (x_ribs - x_iliac) * 3 / 4
             )
-            # Fixing the fields with minimum overlap, after the isocenter shift
+            # Adjust the fields (abdomen/pelvis) after the isocenter shift, with an overlap specified in config.yml
             self.field_geometry.jaws_X_pix[2, 1] = (
                 self.field_geometry.isocenters_pix[6, 2]
                 - self.field_geometry.isocenters_pix[2, 2]
-                + 1
+                + self.field_overlap_pixels
+            ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[7, 0]
+            self.field_geometry.jaws_X_pix[0, 1] = (
+                self.field_geometry.isocenters_pix[2, 2]
+                - self.field_geometry.isocenters_pix[0, 2]
+                + self.field_overlap_pixels
             ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[3, 0]
 
         # For both models, if the isocenter is on the spine
-        if x_left < self.field_geometry.isocenters_pix[2, 2] < x_right:
+        if x_iliac < self.field_geometry.isocenters_pix[2, 2] < x_ribs:
             self.field_geometry.jaws_X_pix[2, 0] = (
-                (x_left - self.field_geometry.isocenters_pix[2, 2] + 1)
+                (x_iliac - self.field_geometry.isocenters_pix[2, 2])
                 * self.image.aspect_ratio
                 / 2
             )
             self.field_geometry.jaws_X_pix[3, 1] = (
-                (x_right - self.field_geometry.isocenters_pix[2, 2] - 1)
+                (x_ribs - self.field_geometry.isocenters_pix[2, 2])
                 * self.image.aspect_ratio
                 / 2
             )
 
+            # Increase aperture of abdominal field (upper)
+            if self.model_name == config.MODEL_NAME_BODY:
+                self.field_geometry.jaws_X_pix[2, 1] = (
+                    self.field_geometry.isocenters_pix[4, 2]
+                    - self.field_geometry.isocenters_pix[2, 2]
+                    + self.field_overlap_pixels
+                ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[5, 0]
+
+        # Set distance between pelvis-abdomen isocenters to have symmetric fields
         if (
             self.model_name == config.MODEL_NAME_BODY
-            and self.field_geometry.isocenters_pix[2, 2]
-            < self.optimization_result.min_pos_x_left
+            and self.field_geometry.isocenters_pix[2, 2] < x_iliac
         ):
             self._set_spinal_fields()
 
-        # Set distance between pelvis-abdomen isos to have symmetric fields
-        if config.MODEL_NAME_BODY and self.field_geometry.isocenters_pix[2, 2] < x_left:
             translation = 0.5 * (
                 (
                     self.field_geometry.isocenters_pix[2, 2]
@@ -130,7 +144,7 @@ class LocalOptimization:
                 )
             )
 
-            # Pelvis isocenters
+            # Pelvic isocenters
             self.field_geometry.isocenters_pix[2, 2] = (
                 self.field_geometry.isocenters_pix[0, 2]
                 + self.field_geometry.jaws_X_pix[1, 1] / self.image.aspect_ratio
@@ -154,22 +168,23 @@ class LocalOptimization:
                 + self.field_geometry.isocenters_pix[6, 2]
             ) / 2
 
-            if (
-                self.field_geometry.isocenters_pix[2, 2]
-                < self.optimization_result.min_pos_x_left
-            ):
+            if self.field_geometry.isocenters_pix[2, 2] < x_iliac:
                 self._set_spinal_fields()
 
-        # Move back fields for arms model
+        # Adjust the fields (abdomen/pelvis) according to iliac crests and ribs location
         if (
             self.model_name == config.MODEL_NAME_ARMS
-            and self.field_geometry.isocenters_pix[2, 2] > x_right
+            and self.field_geometry.isocenters_pix[2, 2] > x_ribs
         ):
             self.field_geometry.jaws_X_pix[0, 1] = (
-                x_right - self.field_geometry.isocenters_pix[0, 2] - 1
+                x_ribs
+                - self.field_geometry.isocenters_pix[0, 2]
+                - 1  # shift one pixel from ribs boundary
             ) * self.image.aspect_ratio
             self.field_geometry.jaws_X_pix[3, 0] = (
-                (x_left - self.field_geometry.isocenters_pix[2, 2]) + 1
+                x_iliac
+                - self.field_geometry.isocenters_pix[2, 2]
+                + 1  # shift one pixel from iliac crests boundary
             ) * self.image.aspect_ratio
 
     def _get_pixel_location(
@@ -305,32 +320,19 @@ class LocalOptimization:
 
         best_x_pixel_spine = self._search_x_pixel_spine()
         x_com = round(ndimage.center_of_mass(self.image.pixels[..., 0])[0])
-        y_pixel_right = np.arange(x_com - 115, x_com - 50)
-        y_pixel_left = np.arange(x_com + 50, x_com + 115)
+        y_pixels_right = np.arange(x_com - 115, x_com - 50)
+        y_pixels_left = np.arange(x_com + 50, x_com + 115)
         y_pixels = np.concatenate(
             (
-                y_pixel_right,
-                y_pixel_left,
+                y_pixels_right,
+                y_pixels_left,
             )
         )
 
-        if not config.BUNDLED:
-            plt.imshow(self.image.pixels, aspect=1 / self.image.aspect_ratio)
-            plt.vlines(best_x_pixel_spine, y_pixels[0], y_pixels[-1], linewidths=0.5)
-            for y in (y_pixel_right, y_pixel_left):
-                plt.hlines(
-                    y[[0, -1]],
-                    best_x_pixel_spine - 40,
-                    best_x_pixel_spine + 40,
-                    linewidths=0.5,
-                )
-            plt.savefig("logs/local_opt.png")
-            plt.close()
-
-        self.optimization_result.min_pos_x_left = self._get_pixel_location(
+        self.optimization_result.x_pixel_iliac = self._get_pixel_location(
             best_x_pixel_spine, y_pixels, location="iliac"
         )
-        self.optimization_result.min_pos_x_right = self._get_pixel_location(
+        self.optimization_result.x_pixel_ribs = self._get_pixel_location(
             best_x_pixel_spine, y_pixels, location="ribs"
         )
 
@@ -339,3 +341,17 @@ class LocalOptimization:
         logging.info("Predicted field geometry: %s", self.field_geometry)
         self._adjust_abdominal_fields_geometry()
         logging.info("Adjusted field geometry: %s", self.field_geometry)
+
+        if not config.BUNDLED:
+            from visualize import (  # pylint: disable=import-outside-toplevel
+                save_local_opt,
+            )
+
+            save_local_opt(
+                self.image,
+                best_x_pixel_spine,
+                y_pixels_right,
+                y_pixels_left,
+                self.optimization_result.x_pixel_ribs,
+                self.optimization_result.x_pixel_iliac,
+            )

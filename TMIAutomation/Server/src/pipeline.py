@@ -537,6 +537,15 @@ class Pipeline:
                 self.request_info.model_name, self.image, self.field_geometry
             ).optimize()
 
+        if not config.BUNDLED:
+            from visualize import (  # pylint: disable=import-outside-toplevel
+                save_field_geometry,
+            )
+
+            save_field_geometry(
+                self.request_info.model_name, self.image, self.field_geometry
+            )
+
         (
             isocenters_pat_coord,
             jaws_X_pat_coord,

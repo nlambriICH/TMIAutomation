@@ -1,4 +1,5 @@
-endport: 6000
-loglevel: INFO
+end_port: 6000
+field_overlap_pixels: 10
+log_level: INFO
 port: 5004
-startport: 5000
+start_port: 5000
