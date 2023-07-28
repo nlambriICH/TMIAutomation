@@ -98,7 +98,7 @@ namespace TMIAutomation
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-            return selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "ORGAN")
+            return selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "ORGAN" || s.DicomType == "AVOIDANCE")
                 .OrderBy(s => s.Id)
                 .Select(s => s.Id)
                 .ToList();
