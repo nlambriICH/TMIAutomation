@@ -1,60 +1,84 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from pipeline import Image, FieldGeometry
+from local_optimization import LocalOptimization
 import config
 
 
+def save_input_img(patient_id: str, image: Image) -> None:
+    """Save the input image for the model.
+
+    Args:
+        patient_id (str): The patient ID used to name the saved image.
+        image (Image): The original image with shape (H, W, C).
+    """
+    plt.imsave(
+        f"logs/input_img_{patient_id}.png",
+        image.pixels,
+    )
+
+
 def save_local_opt(
-    image: Image,
-    best_x_pixel_spine: float,
-    y_pixels_right: np.ndarray,
-    y_pixels_left: np.ndarray,
-    x_pixel_ribs: int,
-    x_pixel_iliac: int,
-    x_search_range: int = 40,
+    patient_id: str, image: Image, local_optimization: LocalOptimization
 ) -> None:
-    """Save the image used to search for the optimal 'x' pixel locations of iliac crests and ribs.
-    A vertical line is drawn to show the starting points of the 'x' search. Four horizontal lines
-    define the two 'y' regions where the search is limited. Two vertical red lines show the 'x' pixel
+    """Save the image and the local optimization results for the optimal 'x' pixel locations of iliac crests and ribs.
+    Four horizontal lines define the two 'y' regions where the search is limited. Two vertical red lines show the 'x' pixel
     location found by the local optimization for the iliac crests and ribs.
 
     Args:
+        patient_id (str): The patient ID used to name the saved image.
         image (Image): The original image with shape (H, W, C).
-        best_x_pixel_spine (float): Optimal 'x' pixel location of the spine.
-        y_pixels_right (np.ndarray): 'y' pixel values limiting the search space on the right of the patient.
-        y_pixels_left (np.ndarray): 'y' pixel values limiting the search space on the left of the patient.
-        x_pixel_ribs (int): 'x' pixel location of the ribs found by the local optimization.
-        x_pixel_iliac (int): 'x' pixel value of the iliac crests found by the local optimization.
-        x_search_range (int, optional):'x' pixels range of the search space. Defaults to 40.
+        local_optimization (LocalOptimization): The local optimization instance containing the
+        optimization search space and optimization results.
     """
     plt.imshow(image.pixels[..., 1], cmap="gray", aspect=1 / image.aspect_ratio)
-    plt.vlines(best_x_pixel_spine, y_pixels_right[0], y_pixels_left[-1], linewidths=0.5)
     plt.vlines(
-        [x_pixel_ribs, x_pixel_iliac],
-        y_pixels_right[0],
-        y_pixels_left[-1],
+        [
+            local_optimization.optimization_search_space.x_pixel_left,
+            local_optimization.optimization_search_space.x_pixel_right,
+        ],
+        local_optimization.optimization_search_space.y_pixels_right[0],
+        local_optimization.optimization_search_space.y_pixels_left[-1],
+        linewidths=0.5,
+    )
+    plt.vlines(
+        [
+            local_optimization.optimization_result.x_pixel_ribs,
+            local_optimization.optimization_result.x_pixel_iliac,
+        ],
+        local_optimization.optimization_search_space.y_pixels_right[0],
+        local_optimization.optimization_search_space.y_pixels_left[-1],
         linewidths=0.5,
         colors="r",
         linestyles="--",
     )
-    for y in (y_pixels_right, y_pixels_left):
+    for y in (
+        local_optimization.optimization_search_space.y_pixels_right,
+        local_optimization.optimization_search_space.y_pixels_left,
+    ):
         plt.hlines(
             y[[0, -1]],
-            best_x_pixel_spine - x_search_range,
-            best_x_pixel_spine + x_search_range,
+            local_optimization.optimization_search_space.x_pixel_left,
+            local_optimization.optimization_search_space.x_pixel_right,
             linewidths=0.5,
         )
-    plt.savefig("logs/local_opt.png")
+
+    if not os.path.exists("logs/local_opt/"):
+        os.makedirs("logs/local_opt/")
+
+    plt.savefig(f"logs/local_opt/local_opt_{patient_id}.png")
     plt.close()
 
 
 def save_field_geometry(
-    model_name: str, image: Image, field_geometry: FieldGeometry
+    patient_id: str, model_name: str, image: Image, field_geometry: FieldGeometry
 ) -> None:
     """Save the image and field geometry.
 
     Args:
+        patient_id (str): The patient ID used to name the saved image.
         model_name (str): The model name.
         image (Image): The original image with shape (H, W, C).
         field_geometry (FieldGeometry): The field geometry in pixel space.
@@ -120,5 +144,8 @@ def save_field_geometry(
             )
         )
 
-    plt.savefig("logs/field_geometry.png")
+    if not os.path.exists("logs/field_geometry/"):
+        os.makedirs("logs/field_geometry/")
+
+    plt.savefig(f"logs/field_geometry/field_geometry_{patient_id}.png")
     plt.close()

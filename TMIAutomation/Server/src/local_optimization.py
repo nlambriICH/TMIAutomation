@@ -2,10 +2,9 @@
 for the abdomen isocenter and related fields."""
 import logging
 from dataclasses import dataclass, field
-from typing import Literal
 import numpy as np
 from scipy import ndimage
-from gradient_free_optimizers import GridSearchOptimizer
+from gradient_free_optimizers import ParallelTemperingOptimizer
 import config
 from pipeline import Image, FieldGeometry
 
@@ -20,6 +19,22 @@ class OptimizationResult:
     x_pixel_iliac: int = field(default=0)
 
 
+@dataclass
+class OptimizationSearchSpace:
+    """Search space of the local optimization for iliac crests and ribs
+    'x' pixel location.
+    """
+
+    x_pixel_left: int = field(default=0)
+    x_pixel_right: int = field(default=0)
+    y_pixels_right: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=65, dtype=int)
+    )
+    y_pixels_left: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=65, dtype=int)
+    )
+
+
 class LocalOptimization:
     """Local optimization of the abdomen isocenter and related fields.
     The algorithm performs roughly the following steps:
@@ -31,12 +46,16 @@ class LocalOptimization:
     """
 
     def __init__(
-        self, model_name: str, image: Image, field_geometry: FieldGeometry
+        self,
+        model_name: str,
+        image: Image,
+        field_geometry: FieldGeometry,
     ) -> None:
         self.model_name = model_name
         self.image = image
         self.field_geometry = field_geometry
         self.optimization_result = OptimizationResult()
+        self.optimization_search_space = OptimizationSearchSpace()
         self.field_overlap_pixels = config.YML["field_overlap_pixels"]
 
     def _set_spinal_fields(self):
@@ -187,98 +206,111 @@ class LocalOptimization:
                 + 1  # shift one pixel from iliac crests boundary
             ) * self.image.aspect_ratio
 
-    def _get_pixel_location(
-        self,
-        x_pixel_spine: int,
-        y_pixels: np.ndarray,
-        location: Literal["ribs", "iliac"] = "ribs",
-    ) -> int:
-        """Search the 'x' pixel location of the maximum extension of the iliac crests or ribs.
-
-        Args:
-            x_pixel_spine (int): 'x' pixel location of the spine between the maximum extension of iliac crests and ribs.
-            y_pixels (np.ndarray): 'y' pixels search space.
-            location (Literal["ribs", "iliac"], optional): Which 'x' pixel location to search for,
-            either ribs or iliac crests. Defaults to "ribs".
-
-        Returns:
-            int: The 'x' pixel location of the maximum extension of the iliac crests or ribs.
-        """
-        ptv_mask = self.image.pixels[..., 1]
-        min_pos_x = x_pixel_spine
-        min_pixel_shift = ptv_mask.shape[1]
-        if location == "ribs":
-            sign = 1
-        elif location == "iliac":
-            sign = -1
-        else:
-            logging.warning(
-                "Expected location to be 'ribs' or 'iliac' but was '%s'. Defaulting to 'ribs'.",
-                location,
+    def _define_search_space(self):
+        """Define the optimization search space: 'x' pixel boundary and 'y' pixels range."""
+        self.optimization_search_space.x_pixel_left = round(
+            (
+                self.field_geometry.isocenters_pix[0, 2]
+                + self.field_geometry.isocenters_pix[2, 2]
             )
-            sign = 1
-
-        for j in y_pixels:
-            pixel_shift = 0
-            for i in range(40):
-                if not ptv_mask[j, x_pixel_spine + sign * i]:  # pixel is background
-                    pixel_shift += 1
-                    if (  # next pixel is in mask
-                        ptv_mask[j, x_pixel_spine + sign * i]
-                        != ptv_mask[j, x_pixel_spine + sign * (i + 1)]
-                    ):
-                        for k in range(1, 10):
-                            if not ptv_mask[j, x_pixel_spine + sign * (i + 1 + k)]:
-                                # pixel_shift == np.inf if background is found after a few pixels (i.e., spine)
-                                pixel_shift = np.inf
-                        break
-                else:  # pixel in mask
-                    # pixel_shift == np.inf if first pixel is in mask
-                    pixel_shift = np.inf
-                    break
-
-            # Assumption: at least one pixel along j is background
-            if min_pixel_shift > pixel_shift:
-                min_pixel_shift = pixel_shift
-                min_pos_x = x_pixel_spine + sign * pixel_shift
-
-        try:
-            assert min_pos_x != x_pixel_spine
-        except AssertionError:
-            logging.exception(
-                "Spine position corresponds to ribs/iliac crests position. The local optimization might be incorrect."
-            )
-
-        return min_pos_x
-
-    def _search_x_pixel_spine(self) -> int:
-        """Search the optimal 'x' pixel location of the spine with GridSearch.
-
-        Returns:
-            int: The optimal 'x' pixel location of the spine.
-        """
-        ptv_mask = self.image.pixels[..., 1]
-
-        a = (
-            self.field_geometry.isocenters_pix[0, 2]
-            + self.field_geometry.isocenters_pix[2, 2]
-        ) / 2
+            / 2
+        )
         if self.model_name == config.MODEL_NAME_BODY:
-            a += 10
-        b = (
-            self.field_geometry.isocenters_pix[2, 2]
-            + self.field_geometry.isocenters_pix[6, 2]
-        ) / 2
-        search_space = {"x_0": np.arange(a, b, 1, dtype=int)}
+            self.optimization_search_space.x_pixel_left += 10
+        else:
+            self.optimization_search_space.x_pixel_left -= 10
 
-        def _loss(pos_new):
-            x = pos_new["x_0"]
-            score = np.sum(ptv_mask[:, x])
-            return -score
+        self.optimization_search_space.x_pixel_right = round(
+            (
+                self.field_geometry.isocenters_pix[2, 2]
+                + self.field_geometry.isocenters_pix[6, 2]
+            )
+            / 2
+        )
 
-        opt = GridSearchOptimizer(search_space)
-        opt.search(_loss, n_iter=search_space["x_0"].shape[0], verbosity=False)
-        return opt.best_value[0]
+        x_com = round(ndimage.center_of_mass(self.image.pixels[..., 0])[0])
+        self.optimization_search_space.y_pixels_right = np.arange(
+            x_com - 115, x_com - 50
+        )
+        self.optimization_search_space.y_pixels_left = np.arange(
+            x_com + 50, x_com + 115
+        )
+
+    def _search_iliac_and_ribs(self):
+        """Search the optimal 'x' pixel location of the iliac crests and ribs."""
+        ptv_mask = self.image.pixels[..., 1]
+
+        self._define_search_space()
+
+        search_space = {
+            "x_iliac": np.arange(
+                self.optimization_search_space.x_pixel_left,
+                self.optimization_search_space.x_pixel_right,
+                1,
+                dtype=int,
+            ),
+            "x_ribs": np.arange(
+                self.optimization_search_space.x_pixel_left,
+                self.optimization_search_space.x_pixel_right,
+                1,
+                dtype=int,
+            ),
+        }
+
+        best_value_ribs = self.image.num_slices
+        best_value_iliac = 0
+        for y_pixels in (
+            self.optimization_search_space.y_pixels_right,
+            self.optimization_search_space.y_pixels_left,
+        ):
+
+            def _loss(pos_new):
+                # Loss:
+                # 1) maximize background pixels while minimizing pixels in mask
+                # (do not use == 1 to count pixels in mask because the mask is rescaled)
+                # 2) maximize the count of background pixels along the 'y' pixels for a
+                # given candidate 'x' pixel location
+
+                x_iliac = pos_new["x_iliac"]
+                x_ribs = pos_new["x_ribs"]
+
+                # pylint: disable=cell-var-from-loop
+                score = 2 * (
+                    np.count_nonzero(ptv_mask[y_pixels, x_iliac:x_ribs] == 0)
+                    - np.count_nonzero(ptv_mask[y_pixels, x_iliac:x_ribs] != 0)
+                ) + 60 * (
+                    np.count_nonzero(ptv_mask[y_pixels, x_ribs] == 0)
+                    + np.count_nonzero(ptv_mask[y_pixels, x_iliac] == 0)
+                )
+                # pylint: enable=cell-var-from-loop
+
+                return score
+
+            def _constraint_x_pixel(pos_new):
+                return pos_new["x_iliac"] <= pos_new["x_ribs"]
+
+            opt = ParallelTemperingOptimizer(
+                search_space, constraints=[_constraint_x_pixel], population=20
+            )
+            opt.search(
+                _loss,
+                n_iter=1000,
+                verbosity=False,
+            )
+
+            if opt.best_value[1] < best_value_ribs:
+                best_value_ribs = opt.best_value[1]
+
+            if best_value_iliac < opt.best_value[0]:
+                best_value_iliac = opt.best_value[0]
+
+        if best_value_ribs < best_value_iliac:
+            logging.warning(
+                "Pixel location of ribs < iliac crests. Local optimization might be incorrect."
+            )
+
+        self.optimization_result.x_pixel_iliac = best_value_iliac
+        self.optimization_result.x_pixel_ribs = best_value_ribs
 
     def optimize(self) -> None:
         """Search the 'x' pixel coordinates of the maximum extension
@@ -318,40 +350,10 @@ class LocalOptimization:
                 self.field_geometry.isocenters_pix[0, 2] + shift_pixels
             )
 
-        best_x_pixel_spine = self._search_x_pixel_spine()
-        x_com = round(ndimage.center_of_mass(self.image.pixels[..., 0])[0])
-        y_pixels_right = np.arange(x_com - 115, x_com - 50)
-        y_pixels_left = np.arange(x_com + 50, x_com + 115)
-        y_pixels = np.concatenate(
-            (
-                y_pixels_right,
-                y_pixels_left,
-            )
-        )
-
-        self.optimization_result.x_pixel_iliac = self._get_pixel_location(
-            best_x_pixel_spine, y_pixels, location="iliac"
-        )
-        self.optimization_result.x_pixel_ribs = self._get_pixel_location(
-            best_x_pixel_spine, y_pixels, location="ribs"
-        )
-
+        self._search_iliac_and_ribs()
+        logging.info("%s", self.optimization_search_space)
         logging.info("%s", self.optimization_result)
 
         logging.info("Predicted field geometry: %s", self.field_geometry)
         self._adjust_abdominal_fields_geometry()
         logging.info("Adjusted field geometry: %s", self.field_geometry)
-
-        if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
-                save_local_opt,
-            )
-
-            save_local_opt(
-                self.image,
-                best_x_pixel_spine,
-                y_pixels_right,
-                y_pixels_left,
-                self.optimization_result.x_pixel_ribs,
-                self.optimization_result.x_pixel_iliac,
-            )

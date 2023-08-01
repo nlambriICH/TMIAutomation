@@ -10,7 +10,6 @@ from rt_utils import RTStructBuilder
 from rt_utils.image_helper import get_spacing_between_slices
 import imgaug.augmenters as iaa
 from imgaug.augmentables import Keypoint, KeypointsOnImage
-import matplotlib.pyplot as plt
 from scipy import ndimage
 from flask import abort
 import config
@@ -63,7 +62,6 @@ class Pipeline:
         request_info: RequestInfo,
     ) -> None:
         self.request_info = request_info
-        self.save_io = not config.BUNDLED
 
         rt_struct_path = glob.glob(
             os.path.join(self.request_info.dicom_path, "RTSTRUCT*")
@@ -210,11 +208,12 @@ class Pipeline:
         image = np.stack((ptv_img_2d, 0.3 * ptv_mask_2d, oars_channel), axis=-1)
         self.image.pixels = self._transform(image)
 
-        if self.save_io:
-            plt.imsave(
-                "logs/input_img.png",
-                self.image.pixels,
-            )
+        if not config.BUNDLED:
+            from visualize import save_input_img
+
+            patient_id = os.path.basename(self.request_info.dicom_path)
+
+            save_input_img(patient_id, self.image)
 
     def _build_output(self, model_output: np.ndarray) -> np.ndarray:
         """Build the flat output of the regression.
@@ -533,18 +532,29 @@ class Pipeline:
                 LocalOptimization,
             )
 
-            LocalOptimization(
-                self.request_info.model_name, self.image, self.field_geometry
-            ).optimize()
-
-        if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
-                save_field_geometry,
+            local_optimization = LocalOptimization(
+                self.request_info.model_name,
+                self.image,
+                self.field_geometry,
             )
+            local_optimization.optimize()
 
-            save_field_geometry(
-                self.request_info.model_name, self.image, self.field_geometry
-            )
+            if not config.BUNDLED:
+                from visualize import (  # pylint: disable=import-outside-toplevel
+                    save_field_geometry,
+                    save_local_opt,
+                )
+
+                patient_id = os.path.basename(self.request_info.dicom_path)
+
+                save_local_opt(patient_id, self.image, local_optimization)
+
+                save_field_geometry(
+                    patient_id,
+                    self.request_info.model_name,
+                    self.image,
+                    self.field_geometry,
+                )
 
         (
             isocenters_pat_coord,
