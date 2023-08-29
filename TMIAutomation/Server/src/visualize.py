@@ -14,8 +14,11 @@ def save_input_img(patient_id: str, image: Image) -> None:
         patient_id (str): The patient ID used to name the saved image.
         image (Image): The original image with shape (H, W, C).
     """
+    if not os.path.exists("logs/input_img/"):
+        os.makedirs("logs/input_img/")
+
     plt.imsave(
-        f"logs/input_img_{patient_id}.png",
+        f"logs/input_img/input_img_{patient_id}.png",
         image.pixels,
     )
 

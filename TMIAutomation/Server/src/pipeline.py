@@ -209,7 +209,9 @@ class Pipeline:
         self.image.pixels = self._transform(image)
 
         if not config.BUNDLED:
-            from visualize import save_input_img
+            from visualize import (  # pylint: disable=import-outside-toplevel
+                save_input_img,
+            )
 
             patient_id = os.path.basename(self.request_info.dicom_path)
 
@@ -488,12 +490,12 @@ class Pipeline:
         ) = self._inverse_transform(isocenters_hat, jaws_X_hat, jaws_Y_hat)
 
     def predict(
-        self, local_optimization: bool = True
+        self, local_opt: bool = True
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Execute the entire pipeline to produce predictions from raw data to patient coordinate system.
 
         Args:
-            local_optimization (bool): Whether to perform the local optimization of the model's output
+            local_opt (bool): Whether to perform the local optimization of the model's output
             for the abdominal field geometry. Defaults to True.
 
         Returns:
@@ -527,7 +529,7 @@ class Pipeline:
 
         self.postprocess(model_output)
 
-        if local_optimization:
+        if local_opt:
             from local_optimization import (  # pylint: disable=import-outside-toplevel
                 LocalOptimization,
             )
