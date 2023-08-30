@@ -175,8 +175,8 @@ namespace TMIAutomation
                 StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.HeadFirstSupine);
 
                 ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
-                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIupperAuto"));
-                newPlan.Id = numOfAutoPlans == 0 ? "TMLIupperAuto" : string.Concat("TMLIupperAuto", numOfAutoPlans);
+                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIupperAut"));
+                newPlan.Id = numOfAutoPlans == 0 ? "TMLIupperAuto" : string.Concat("TMLIupperAut", numOfAutoPlans);
 
                 scriptContext.PlanSetup = newPlan;  // set the new plan in context
             });
