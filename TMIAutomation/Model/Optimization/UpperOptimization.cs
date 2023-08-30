@@ -41,8 +41,9 @@ namespace TMIAutomation
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 Structure upperPTV = upperPlan.StructureSet.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
 
-                string modelName = upperPTV.MeshGeometry.Bounds.SizeX > 450 ? Client.MODEL_NAME_ARMS : Client.MODEL_NAME_BODY;
-                logger.Information("Calling model {modelName}", modelName);
+                double upperPTVSizeX = Math.Round(upperPTV.MeshGeometry.Bounds.SizeX);
+                string modelName = upperPTVSizeX > 475 ? Client.MODEL_NAME_ARMS : Client.MODEL_NAME_BODY;
+                logger.Information("{UpperPTVId} X size was {upperPTVSizeX}. Calling model {modelName}", upperPTV.Id, upperPTVSizeX, modelName);
 
                 progress.Report(0.50);
                 message.Report("Get model predictions...");
@@ -54,6 +55,6 @@ namespace TMIAutomation
             });
         }
 
-        
+
     }
 }
