@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass, field
 import numpy as np
 from scipy import ndimage
-from gradient_free_optimizers import ParallelTemperingOptimizer
+from gradient_free_optimizers import ParallelTemperingOptimizer, GridSearchOptimizer
 import config
 from pipeline import Image, FieldGeometry
 
@@ -156,6 +156,8 @@ class LocalOptimization:
                 * self.image.aspect_ratio
             )
 
+        self._fit_collimator_pelvic_field()
+
     def _adjust_field_geometry_arms(self) -> None:
         """Adjust the field geometry predicted by the arms model, according to the maximum extension
         of iliac crests and ribs."""
@@ -236,6 +238,50 @@ class LocalOptimization:
             - self.field_geometry.isocenters_pix[2, 2]
             + self.field_overlap_pixels
         ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[7, 0]
+
+        self._fit_collimator_pelvic_field()
+
+    def _fit_collimator_pelvic_field(self):
+        ptv_mask = self.image.pixels[..., 1]
+        y_pixels = np.arange(
+            round(
+                self.field_geometry.isocenters_pix[0, 0]
+                + self.field_geometry.jaws_Y_pix[1, 0] * self.image.aspect_ratio
+            ),
+            round(
+                self.field_geometry.isocenters_pix[0, 0]
+                + self.field_geometry.jaws_Y_pix[1, 1] * self.image.aspect_ratio
+            ),
+            1,
+            dtype=int,
+        )
+        x_lower_field = round(self.field_geometry.isocenters_pix[0, 2])
+        search_space = {
+            "x_lowest": np.arange(
+                0,
+                x_lower_field + 1,
+                1,
+                dtype=int,
+            )
+        }
+
+        def _loss(pos_new):
+            # Maximize the ptv field coverage while minimizing the field aperture
+            x_lowest = pos_new["x_lowest"]
+            return np.count_nonzero(ptv_mask[y_pixels, x_lowest:x_lower_field] != 0) - (
+                x_lower_field - x_lowest
+            )
+
+        opt = GridSearchOptimizer(search_space)
+        opt.search(
+            _loss,
+            n_iter=search_space["x_lowest"].size,
+            verbosity=False,
+        )
+
+        self.field_geometry.jaws_X_pix[1, 0] = (
+            opt.best_value[0] - self.field_geometry.isocenters_pix[0, 2] - 3
+        ) * self.image.aspect_ratio
 
     def _define_search_space(self):
         """Define the optimization search space: 'x' pixel boundary and 'y' pixels range."""
