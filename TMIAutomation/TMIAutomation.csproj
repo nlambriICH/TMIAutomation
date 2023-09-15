@@ -134,7 +134,9 @@
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
     <Compile Include="Client\Client.cs" />
-    <Compile Include="Helper\Configuration.cs" />
+    <Compile Include="Helper\ConfigExport.cs" />
+    <Compile Include="Helper\ConfigOARNames.cs" />
+    <Compile Include="Helper\ConfigOptions.cs" />
     <Compile Include="Model\Optimization\OptimizationCycleTarget.cs" />
     <Compile Include="Model\Optimization\Calculation\Calculation.cs" />
     <Compile Include="Model\Optimization\Calculation\PostCalculation.cs" />
@@ -253,6 +255,9 @@
   <ItemGroup>
     <Resource Include="Configuration\OARNames.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\DCMExport.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
@@ -264,6 +269,8 @@ IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(ProjectDir)Configuration $(TargetDir)Configuration OARNames.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration DCMExport.txt
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
 IF %25ERRORLEVEL%25 GEQ 8 exit 1

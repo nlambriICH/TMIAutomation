@@ -22,7 +22,7 @@ namespace TMIAutomation.ViewModel
         }
 
         private static readonly int similarityThreshold = 80;
-        private static readonly List<string> targetOARNames = Configuration.OarNames;
+        private static readonly List<string> targetOARNames = ConfigOARNames.OarNames;
 
         public OARSelectionViewModel(List<string> structureNames)
         {
