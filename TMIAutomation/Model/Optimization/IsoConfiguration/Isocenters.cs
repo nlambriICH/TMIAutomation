@@ -34,7 +34,7 @@ namespace TMIAutomation
                 isoRounded.Add(isoDicom);
             }
 
-            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(ConfigOptions.TreatmentMachine,
+            ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(ConfigOptOptions.TreatmentMachine,
                                                                                                    "6X",
                                                                                                    600,
                                                                                                    "ARC",

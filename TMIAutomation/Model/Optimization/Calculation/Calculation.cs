@@ -25,7 +25,7 @@ namespace TMIAutomation
 
         public static void SetupOptimization(this ExternalPlanSetup externalPlanSetup)
         {
-            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, ConfigOptions.OptimizationAlgorithm);
+            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, ConfigOptOptions.OptimizationAlgorithm);
             // Calculation options: \\machinename\dcf$\client
 #if ESAPI16
             if (!externalPlanSetup.SetCalculationOption(Configuration.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU", "No"))
@@ -41,17 +41,17 @@ namespace TMIAutomation
                 logger.Warning("Could not set MR3 level restart for intermediate dose");
             }
 #else
-            if (!externalPlanSetup.SetCalculationOption(ConfigOptions.OptimizationAlgorithm, "/PhotonOptCalculationOptions/@MRLevelAtRestart", "MR3"))
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptCalculationOptions/@MRLevelAtRestart", "MR3"))
             {
                 logger.Warning("Could not set MR3 level restart for intermediate dose");
             }
-            if (!externalPlanSetup.SetCalculationOption(ConfigOptions.OptimizationAlgorithm, "/PhotonOptCalculationOptions/@AutoFeathering", "Off"))
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptCalculationOptions/@AutoFeathering", "Off"))
             {
                 logger.Warning("Could not set Autofeathering to Off");
             }
 #endif
-            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, ConfigOptions.DoseAlgorithm);
-            externalPlanSetup.SetPrescription(int.Parse(ConfigOptions.NumberOfFractions), new DoseValue(double.Parse(ConfigOptions.DosePerFraction), DoseValue.DoseUnit.Gy), 1.0);
+            externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, ConfigOptOptions.DoseAlgorithm);
+            externalPlanSetup.SetPrescription(int.Parse(ConfigOptOptions.NumberOfFractions), new DoseValue(double.Parse(ConfigOptOptions.DosePerFraction), DoseValue.DoseUnit.Gy), 1.0);
 #if ESAPI16
             StringBuilder errorHint = new StringBuilder();
             bool success = externalPlanSetup.SetTargetStructureIfNoDose(externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION),
@@ -69,7 +69,7 @@ namespace TMIAutomation
             using (SerilogTraceListener.SerilogTraceListener serilogListener = new SerilogTraceListener.SerilogTraceListener(logger))
             {
                 Trace.Listeners.Add(serilogListener);
-                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationIntermediateDoseOption.UseIntermediateDose, ConfigOptions.MLCID));
+                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationIntermediateDoseOption.UseIntermediateDose, ConfigOptOptions.MLCID));
             }
 
             if (optimizerResult.Success)
@@ -109,7 +109,7 @@ namespace TMIAutomation
             using (SerilogTraceListener.SerilogTraceListener serilogListener = new SerilogTraceListener.SerilogTraceListener(logger))
             {
                 Trace.Listeners.Add(serilogListener);
-                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationOption.ContinueOptimizationWithPlanDoseAsIntermediateDose, ConfigOptions.MLCID));
+                optimizerResult = externalPlanSetup.OptimizeVMAT(new OptimizationOptionsVMAT(OptimizationOption.ContinueOptimizationWithPlanDoseAsIntermediateDose, ConfigOptOptions.MLCID));
             }
 
             if (optimizerResult.Success)

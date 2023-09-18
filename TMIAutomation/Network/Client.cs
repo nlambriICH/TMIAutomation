@@ -16,19 +16,16 @@ namespace TMIAutomation
         public static readonly string MODEL_NAME_BODY = "body_cnn";
         public static readonly string MODEL_NAME_ARMS = "arms_cnn";
 
-        public static Dictionary<string, List<List<double>>> GetFieldGeometry(string modelName, string patientId, string upperPTVId, List<string> oarIds)
+        public static Dictionary<string, List<List<double>>> GetFieldGeometry(string modelName, string dicomPath, string upperPTVId, List<string> oarIds)
         {
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>> { };
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    string dicomPath = GetDicomPath(patientId);
-                    if (!Directory.Exists(dicomPath)) throw new InvalidOperationException($"Could not find DICOM path {dicomPath}.");
-
                     ClientRequest request = new ClientRequest
                     {
-                        ModelName = modelName == MODEL_NAME_BODY ? MODEL_NAME_BODY : MODEL_NAME_ARMS,
+                        ModelName = modelName,
                         DicomPath = dicomPath,
                         IdPTV = upperPTVId,
                         IdOARs = oarIds
@@ -52,14 +49,6 @@ namespace TMIAutomation
             }
 
             return fieldGeometry;
-        }
-
-        private static string GetDicomPath(string patientId)
-        {
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string dicomPath = Path.Combine(assemblyDir, "Dicoms", patientId);
-
-            return dicomPath;
         }
 
         private static int? GetServerPort()

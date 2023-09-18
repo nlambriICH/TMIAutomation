@@ -55,6 +55,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EvilDICOM, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EvilDICOM.2.0.5\lib\net46\EvilDICOM.dll</HintPath>
+    </Reference>
     <Reference Include="FuzzySharp, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\FuzzySharp.2.0.2\lib\net461\FuzzySharp.dll</HintPath>
     </Reference>
@@ -133,10 +136,11 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
-    <Compile Include="Client\Client.cs" />
-    <Compile Include="Helper\ConfigExport.cs" />
-    <Compile Include="Helper\ConfigOARNames.cs" />
-    <Compile Include="Helper\ConfigOptions.cs" />
+    <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\DICOMServices.cs" />
+    <Compile Include="Helper\Configuration\ConfigExport.cs" />
+    <Compile Include="Helper\Configuration\ConfigOARNames.cs" />
+    <Compile Include="Helper\Configuration\ConfigOptOptions.cs" />
     <Compile Include="Model\Optimization\OptimizationCycleTarget.cs" />
     <Compile Include="Model\Optimization\Calculation\Calculation.cs" />
     <Compile Include="Model\Optimization\Calculation\PostCalculation.cs" />

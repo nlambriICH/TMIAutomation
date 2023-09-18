@@ -44,6 +44,11 @@ namespace VMS.TPS
             this.logger = Log.ForContext<Script>();
 
             logger.Verbose("TMIJunction script instance created");
+
+            // Load settings to avoid null refs when static members are called from UI thread 
+            ConfigExport.Init();
+            ConfigOARNames.Init();
+            ConfigOptOptions.Init();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

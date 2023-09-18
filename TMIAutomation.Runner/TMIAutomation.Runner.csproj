@@ -181,6 +181,8 @@ IF $(ConfigurationName) == Debug-15.6 robocopy $(SolutionDir)$(SolutionName)\Con
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(SolutionDir)$(SolutionName)\Configuration $(TargetDir)Configuration OARNames.txt
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Configuration $(TargetDir)Configuration DCMExport.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(SolutionDir)$(SolutionName)\Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>

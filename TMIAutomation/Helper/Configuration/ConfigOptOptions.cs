@@ -6,27 +6,25 @@ using Serilog;
 
 namespace TMIAutomation
 {
-    public static class ConfigOptions
+    public static class ConfigOptOptions
     {
-        private static readonly ILogger logger = Log.ForContext(typeof(ConfigOptions));
+        private static readonly ILogger logger = Log.ForContext(typeof(ConfigOptOptions));
         private static readonly string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static readonly Dictionary<string, string> optSettings = InitOptSettings();
+        private static Dictionary<string, string> optSettings;
 
-        private static Dictionary<string, string> InitOptSettings()
+        public static void Init()
         {
+            optSettings = new Dictionary<string, string>();
             string optOptionsPath = Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
             logger.Verbose("Reading optimization options from {optOptionsPath}", optOptionsPath);
-            Dictionary<string, string> dict = new Dictionary<string, string>();
             foreach (string line in File.ReadLines(optOptionsPath))
             {
                 if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
                 string[] optSetup = line.Split('\t');
                 if (optSetup.Length == 1) continue;
                 logger.Verbose("Read parameters: {@optSetup}", optSetup);
-                dict.Add(optSetup[0], optSetup[1]);
+                optSettings.Add(optSetup[0], optSetup[1]);
             }
-
-            return dict;
         }
 
         public static string OptimizationAlgorithm => optSettings["OptimizationAlgorithm"];

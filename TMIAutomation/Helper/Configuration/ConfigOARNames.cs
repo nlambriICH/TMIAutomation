@@ -13,23 +13,20 @@ namespace TMIAutomation
     {
         private static readonly ILogger logger = Log.ForContext(typeof(ConfigOARNames));
         private static readonly string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static readonly List<string> oarNames = InitOARNames();
 
-        private static List<string> InitOARNames()
+        public static void Init()
         {
+            OarNames = new List<string>();
             string oarNamesPath = Path.Combine(assemblyDir, "Configuration", "OARNames.txt");
             logger.Verbose("Reading OAR names from {oarNamesPath}", oarNamesPath);
-            List<string> list = new List<string>();
             foreach (string line in File.ReadLines(oarNamesPath))
             {
                 if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
                 logger.Verbose("Read name: {line}", line);
-                list.Add(line);
+                OarNames.Add(line);
             }
-
-            return list;
         }
 
-        public static List<string> OarNames => oarNames;
+        public static List<string> OarNames { get; private set; }
     }
 }
