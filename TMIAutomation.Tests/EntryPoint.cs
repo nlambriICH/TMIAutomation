@@ -17,6 +17,8 @@ namespace TMIAutomation.Tests
         [STAThread]
         public static void Main(string[] args)
         {
+            ConfigOptOptions.Init();
+
             using (EclipseApp = Application.CreateApplication())
             {
                 string patientID = testData["PatientID"];

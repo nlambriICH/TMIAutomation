@@ -15,6 +15,8 @@ namespace TMIAutomation.Tests
     class ClientTests : TestBase
     {
         private string patientID;
+        private static readonly string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
         public override ITestBase Init(object testObject, params object[] optParams)
         {
             this.patientID = optParams.OfType<string>().FirstOrDefault() as string;
@@ -23,7 +25,6 @@ namespace TMIAutomation.Tests
 
         private static Process StartLocalServer()
         {
-            string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string serverDirectory = Path.Combine(executingPath, "dist", "app");
             string serverPath = Path.Combine(serverDirectory, "app.exe");
             ProcessStartInfo startInfo = new ProcessStartInfo(serverPath)
@@ -46,7 +47,8 @@ namespace TMIAutomation.Tests
             try
             {
                 Thread.Sleep(TimeSpan.FromSeconds(15)); // bad practice but easier way to wait the server startup
-                Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(modelName, this.patientID,
+                Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(modelName,
+                                                                                               Path.Combine(executingPath, "Dicoms", this.patientID),
                                                                                                "PTV_totFIN_Crop",
                                                                                                new List<string> { "Encefalo", "Polmone SX", "Polmone DX", "Fegato", "Intestino", "Vescica" });
 
@@ -73,6 +75,11 @@ namespace TMIAutomation.Tests
             {
                 throw new Exception($"Could not find expected dictionary key", e);
             }
+            catch (EqualException)
+            {
+                // Re-throw exception to shut down server
+                throw;
+            }
             finally
             {
                 serverProcess?.CloseMainWindow();
@@ -86,10 +93,10 @@ namespace TMIAutomation.Tests
                 new List<List<double>> { // isocenters
                     new List<double> { 25.98, 118.0, -844.55 },
                     new List<double> { 25.98, 118.0, -844.55 },
-                    new List<double> { 25.98, 118.0, -626.96 },
-                    new List<double> { 25.98, 118.0, -626.96 },
-                    new List<double> { 25.98, 118.0, -416.92 },
-                    new List<double> { 25.98, 118.0, -416.92 },
+                    new List<double> { 25.98, 118.0, -640.87 },
+                    new List<double> { 25.98, 118.0, -640.87 },
+                    new List<double> { 25.98, 118.0, -457.58 },
+                    new List<double> { 25.98, 118.0, -457.58 },
                     new List<double> { 25.98, 118.0, -206.89 },
                     new List<double> { 25.98, 118.0, -206.89 },
                     new List<double> { 25.98, 118.0, -4.55 },
@@ -98,12 +105,12 @@ namespace TMIAutomation.Tests
                     new List<double> { -300.0, 118.0, 163.40 },
                 },
                 new List<List<double>> { // jawX
-                    new List<double> { -15.51, 168.12 },
-                    new List<double> { -173.93, 14.18 },
-                    new List<double> { -9.55, 95.36 },
-                    new List<double> { -129.60, 11.54 },
-                    new List<double> { -8.99, 126.88 },
-                    new List<double> { -124.68, 8.99 },
+                    new List<double> { -15.51, 126.84 },
+                    new List<double> { -157.05, 14.18 },
+                    new List<double> { -9.55, 109.27 },
+                    new List<double> { -126.84, 11.54 },
+                    new List<double> { -8.99, 171.74 },
+                    new List<double> { -84.02, 8.99 },
                     new List<double> { -8.36, 110.68 },
                     new List<double> { -128.96, 8.36 },
                     new List<double> { -9.48, 129.17 },
@@ -131,8 +138,8 @@ namespace TMIAutomation.Tests
                 new List<List<double>> { // isocenters
                     new List<double> { 25.98, 118.0, -811.53 },
                     new List<double> { 25.98, 118.0, -811.53 },
-                    new List<double> { 25.98, 118.0, -531.60 },
-                    new List<double> { 25.98, 118.0, -531.60 },
+                    new List<double> { 25.98, 118.0, -534.10 },
+                    new List<double> { 25.98, 118.0, -534.10 },
                     new List<double> { 25.98, 118.0, 163.40 },
                     new List<double> { 25.98, 118.0, 163.40 },
                     new List<double> { 25.98, 118.0, -260.63 },
@@ -143,10 +150,10 @@ namespace TMIAutomation.Tests
                     new List<double> { 201.95, 118.0, -510.19 },
                 },
                 new List<List<double>> { // jawX
-                    new List<double> { -28.67, 153.74 },
-                    new List<double> { -160.31, 13.12 },
-                    new List<double> { -5.0, 133.63 },
-                    new List<double> { -142.34, 0.0 },
+                    new List<double> { -28.67, 185.08 },
+                    new List<double> { -190.07, 13.12 },
+                    new List<double> { -3.75, 179.77 },
+                    new List<double> { -142.34, 1.25 },
                     new List<double> { 25.98, 25.98 },
                     new List<double> { 25.98, 25.98 },
                     new List<double> { -10.19, 161.93 },
