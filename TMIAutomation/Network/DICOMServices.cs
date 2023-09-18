@@ -24,7 +24,7 @@ namespace TMIAutomation
             logger.Information("Daemon entity {@entity}", daemon);
 
             local = Entity.CreateLocal(ConfigExport.LocalAETitle, int.Parse(ConfigExport.LocalPort));
-            logger.Information("Local entity {@entity}", local);
+            logger.Information("DICOM SCU {@entity}", local);
             client = new DICOMSCU(local);
         }
 
@@ -55,6 +55,8 @@ namespace TMIAutomation
             };
 
             receiver.ListenForIncomingAssociations(true);
+
+            logger.Information("DICOM SCP {@entity}", receiver);
         }
 
         public static bool ExportDCM(StructureSet ssToExport, string patientId)

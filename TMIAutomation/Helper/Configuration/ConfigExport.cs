@@ -36,6 +36,7 @@ namespace TMIAutomation
             }
         }
 
+        public static string ExportType => exportSettings["ExportType"];
         public static string DaemonAETitle => exportSettings["DaemonAETitle"];
         public static string DaemonIP => exportSettings["DaemonIP"];
         public static string DaemonPort => exportSettings["DaemonPort"];
