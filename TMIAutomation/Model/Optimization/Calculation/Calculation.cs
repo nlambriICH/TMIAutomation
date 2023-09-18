@@ -28,15 +28,15 @@ namespace TMIAutomation
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, ConfigOptOptions.OptimizationAlgorithm);
             // Calculation options: \\machinename\dcf$\client
 #if ESAPI16
-            if (!externalPlanSetup.SetCalculationOption(Configuration.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU", "No"))
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU", "No"))
             {
                 logger.Warning("Could not set UseGPU to No");
             }
-            if (!externalPlanSetup.SetCalculationOption(Configuration.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/AutoFeathering/@AutoFeathering", "Off"))
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/AutoFeathering/@AutoFeathering", "Off"))
             {
                 logger.Warning("Could not set Autofeathering to Off");
             }
-            if (!externalPlanSetup.SetCalculationOption(Configuration.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart", "MR3"))
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart", "MR3"))
             {
                 logger.Warning("Could not set MR3 level restart for intermediate dose");
             }
