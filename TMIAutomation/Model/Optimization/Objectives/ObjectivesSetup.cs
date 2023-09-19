@@ -25,9 +25,7 @@ namespace TMIAutomation
         public static void AddPointObjectives(
             this OptimizationSetup optSetup,
             StructureSet ss,
-#if ESAPI15
             bool isBaseDosePlanning = false
-#endif
             )
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -62,7 +60,7 @@ namespace TMIAutomation
 #if ESAPI15
                 if (isBaseDosePlanning && junctionIds.Contains(structure.Id))
                 {
-                    logger.Information("Base dose plan is selected. Skip PointObjective for {structureId}", structure.Id);
+                    logger.Information("Base-dose planning is selected. Skip PointObjective for {structureId}", structure.Id);
                     continue;
                 }
 #endif
