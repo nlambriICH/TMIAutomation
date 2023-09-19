@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,11 +22,28 @@ namespace TMIAutomation
             }
         }
 
-        public static void AddPointObjectives(this OptimizationSetup optSetup, StructureSet ss)
+        public static void AddPointObjectives(
+            this OptimizationSetup optSetup,
+            StructureSet ss,
+#if ESAPI15
+            bool isBaseDosePlanning = false
+#endif
+            )
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string pointObjPath = Path.Combine(assemblyDir, "Configuration", "PointOptimizationObjectives.txt");
             logger.Verbose("Reading PointObjectives from {pointObjPath}", pointObjPath);
+
+#if ESAPI15
+            List<string> junctionIds = new List<string> {
+                StructureHelper.PTV_JUNCTION25,
+                StructureHelper.PTV_JUNCTION50,
+                StructureHelper.PTV_JUNCTION75,
+                StructureHelper.PTV_JUNCTION100,
+                StructureHelper.DOSE_100
+            };
+#endif
+
             foreach (string line in File.ReadLines(pointObjPath).Skip(4))
             {
                 if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
@@ -40,6 +58,14 @@ namespace TMIAutomation
                                  "The following error occured during the script execution");
                     continue;
                 }
+
+#if ESAPI15
+                if (isBaseDosePlanning && junctionIds.Contains(structure.Id))
+                {
+                    logger.Information("Base dose plan is selected. Skip PointObjective for {structureId}", structure.Id);
+                    continue;
+                }
+#endif
 
                 OptimizationObjectiveOperator limit = (OptimizationObjectiveOperator)Enum.Parse(typeof(OptimizationObjectiveOperator), pointObjectiveParams[1], true);
                 if (double.TryParse(pointObjectiveParams[2], out double volume)
