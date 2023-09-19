@@ -68,7 +68,7 @@ namespace TMIAutomation
                 if (this.generateBaseDosePlanOnly)
                 {
                     GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
-                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message);
+                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message, isBaseDosePlanning: this.generateBaseDosePlanOnly);
                 }
                 else
                 {
@@ -220,7 +220,9 @@ namespace TMIAutomation
         private void ConfigureLowerPlanSetup(ExternalPlanSetup upperPlan,
                                              ExternalPlanSetup lowerPlan,
                                              IProgress<double> progress,
-                                             IProgress<string> message)
+                                             IProgress<string> message,
+                                             bool isBaseDosePlanning = false
+            )
         {
             progress.Report(0.05);
             message.Report("Setup isocenters and objectives...");
@@ -231,7 +233,7 @@ namespace TMIAutomation
             StructureSet lowerSS = lowerPlan.StructureSet;
 
             optSetup.ClearObjectives();
-            optSetup.AddPointObjectives(lowerSS);
+            optSetup.AddPointObjectives(lowerSS, isBaseDosePlanning);
             optSetup.AddEUDObjectives(lowerSS);
             optSetup.UseJawTracking = false;
             optSetup.AddAutomaticNormalTissueObjective(150);
