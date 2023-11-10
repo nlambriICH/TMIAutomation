@@ -82,11 +82,12 @@ namespace TMIAutomation
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-            return selectedPlan == null ? new List<string>()
-            : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
-                                                  .OrderByDescending(s => s.Volume)
-                                                  .Select(s => s.Id)
-                                                  .ToList();
+
+            StructureSet targetStructueSet = selectedPlan == null ? scriptContext.StructureSet : selectedPlan.StructureSet;
+            return targetStructueSet.Structures.Where(s => s.DicomType == "PTV")
+                                        .OrderByDescending(s => s.Volume)
+                                        .Select(s => s.Id)
+                                        .ToList();
         }
 
         public Task<List<string>> GetOARNamesAsync(string courseId, string planId)

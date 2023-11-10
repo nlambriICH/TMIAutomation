@@ -156,6 +156,9 @@ namespace TMIAutomation.ViewModel
 
             try
             {
+                await this.modelBase.GenerateUpperPlanAsync(this.selectedCourseId);
+                UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+
                 List<string> oarIds = new List<string> { };
                 if (this.isOptimizationChecked)
                 {
@@ -168,9 +171,6 @@ namespace TMIAutomation.ViewModel
                         .Select(s => s.StructureName)
                         .ToList();
                 }
-
-                await this.modelBase.GenerateUpperPlanAsync(this.selectedCourseId);
-                UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
 
                 if (this.isJunctionChecked)
                 {

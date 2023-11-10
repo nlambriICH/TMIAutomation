@@ -28,7 +28,7 @@ namespace TMIAutomation.Tests
 #if ESAPI16
             List<string> expectedCourses = new List<string> { "CDemoTest", "CLowerAutoAddOpt", "TEst", "CBaseDoseAddOpt", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
 #else
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
 #endif
             List<string> courses = modelBase.GetCourses(scriptContext);
             Assert.Equal(expectedCourses, courses);
@@ -60,16 +60,16 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [MemberData(nameof(GetPTVsFromPlan_Data))]
-        private void GetPTVsFromPlan(string planId, int index, string expectedPlanId)
+        private void GetPTVsFromPlan(string planId, int index, string expectedPTVId)
         {
             List<string> ptvs = modelBase.GetPTVsFromPlan(scriptContext, scriptContext.Course.Id, planId);
             try
             {
-                Assert.Equal(expectedPlanId, ptvs[index]);
+                Assert.Equal(expectedPTVId, ptvs[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planId}, {index}, {expectedPlanId}", e);
+                throw new Exception($"Input parameters: {planId}, {index}, {expectedPTVId}", e);
             }
         }
 
@@ -81,6 +81,7 @@ namespace TMIAutomation.Tests
             yield return new object[] { "RA_TMLIup3", 1, "PTV_totFIN_Crop" };
             yield return new object[] { "TMLIdownAuto", 0, "PTV_Tot_Start" };
             yield return new object[] { "TMLIdownAuto", 1, "PTV_Total" };
+            yield return new object[] { "", 0, "PTV_Tot_Start" };
         }
 
         [Theory]
