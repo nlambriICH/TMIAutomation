@@ -28,8 +28,8 @@ namespace TMIAutomation.View
 
         private void Button_Click_Confirm(object sender, RoutedEventArgs e)
         {
-            this.Close();
             this.buttonClickClose = true;
+            this.Close();
         }
     }
 }
