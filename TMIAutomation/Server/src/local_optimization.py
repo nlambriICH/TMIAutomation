@@ -109,16 +109,6 @@ class LocalOptimization:
 
         # Set distance between pelvis-abdomen isocenters to have symmetric fields
         if self.field_geometry.isocenters_pix[2, 2] < x_iliac:
-            # Thorax isocenters
-            self.field_geometry.isocenters_pix[4, 2] = (
-                self.field_geometry.isocenters_pix[3, 2]
-                + self.field_geometry.isocenters_pix[6, 2]
-            ) / 2.1
-            self.field_geometry.isocenters_pix[5, 2] = (
-                self.field_geometry.isocenters_pix[3, 2]
-                + self.field_geometry.isocenters_pix[6, 2]
-            ) / 2.1
-
             # Adjust fields of abdomen and thorax iso to the positions of ribs and iliac crests
             self.field_geometry.jaws_X_pix[2, 1] = (
                 self.optimization_result.x_pixel_ribs
@@ -157,6 +147,7 @@ class LocalOptimization:
             )
 
         self._fit_collimator_pelvic_field()
+        self._fit_collimator_head_field()
 
     def _adjust_field_geometry_arms(self) -> None:
         """Adjust the field geometry predicted by the arms model, according to the maximum extension
@@ -240,6 +231,7 @@ class LocalOptimization:
         ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[7, 0]
 
         self._fit_collimator_pelvic_field()
+        self._fit_collimator_head_field()
 
     def _fit_collimator_pelvic_field(self):
         ptv_mask = self.image.pixels[..., 1]
@@ -281,6 +273,48 @@ class LocalOptimization:
 
         self.field_geometry.jaws_X_pix[1, 0] = (
             opt.best_value[0] - self.field_geometry.isocenters_pix[0, 2] - 3
+        ) * self.image.aspect_ratio
+
+    def _fit_collimator_head_field(self):
+        ptv_mask = self.image.pixels[..., 1]
+        y_pixels = np.arange(
+            round(
+                self.field_geometry.isocenters_pix[8, 0]
+                + self.field_geometry.jaws_Y_pix[9, 0] * self.image.aspect_ratio
+            ),
+            round(
+                self.field_geometry.isocenters_pix[8, 0]
+                + self.field_geometry.jaws_Y_pix[9, 1] * self.image.aspect_ratio
+            ),
+            1,
+            dtype=int,
+        )
+        x_upper_field = round(self.field_geometry.isocenters_pix[8, 2])
+        search_space = {
+            "x_highest": np.arange(
+                x_upper_field,
+                ptv_mask.shape[-1],
+                1,
+                dtype=int,
+            )
+        }
+
+        def _loss(pos_new):
+            # Maximize the ptv field coverage while minimizing the field aperture
+            x_highest = pos_new["x_highest"]
+            return np.count_nonzero(
+                ptv_mask[y_pixels, x_upper_field:x_highest] != 0
+            ) - (x_highest - x_upper_field)
+
+        opt = GridSearchOptimizer(search_space)
+        opt.search(
+            _loss,
+            n_iter=search_space["x_highest"].size,
+            verbosity=False,
+        )
+
+        self.field_geometry.jaws_X_pix[8, 1] = (
+            opt.best_value[0] - self.field_geometry.isocenters_pix[8, 2] + 3
         ) * self.image.aspect_ratio
 
     def _define_search_space(self):
