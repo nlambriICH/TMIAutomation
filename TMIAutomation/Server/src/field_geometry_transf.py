@@ -23,17 +23,20 @@ def get_zero_row_idx(arr: np.ndarray) -> np.ndarray:
     return np.where(np.all(arr == 0, axis=1))[0]
 
 
-def restrict_to_max_aperture(jaw_apertures: np.ndarray) -> np.ndarray:
-    """Ensure that jaw apertures are <= 200 mm.
+def adjust_to_max_aperture(
+    jaw_apertures: np.ndarray, threshold: int = 200
+) -> np.ndarray:
+    """Set jaw apertures to 200 mm if aperture is greater than the threshold value.
 
     Args:
-        jaw_aperture (np.ndarray): Array containing the jaw apertures in the patient coordinate system.
+        jaw_apertures (np.ndarray): Array containing the jaw apertures in the patient coordinate system.
+        threshold (int): Threshold value in mm.
 
     Returns:
-        np.ndarray: Array of jaw apertures with restricted maximum apertures.
+        np.ndarray: Array of jaw apertures with adjusted apertures.
     """
     return np.where(
-        np.absolute(jaw_apertures) > 200,
+        np.absolute(jaw_apertures) >= threshold,
         np.sign(jaw_apertures) * 200,
         jaw_apertures,
     )

@@ -16,7 +16,7 @@ import config
 from field_geometry_transf import (
     transform_field_geometry,
     get_zero_row_idx,
-    restrict_to_max_aperture,
+    adjust_to_max_aperture,
 )
 
 
@@ -62,6 +62,7 @@ class Pipeline:
         request_info: RequestInfo,
     ) -> None:
         self.request_info = request_info
+        self.patient_id = os.path.basename(self.request_info.dicom_path)
 
         rt_struct_path = glob.glob(
             os.path.join(self.request_info.dicom_path, "RTSTRUCT*")
@@ -161,9 +162,22 @@ class Pipeline:
             np.ndarray: The preprocessed image with shape (H, W, C), representing the input of the model. The image
             has three channels (C=3) for, respectively, the 2D HUdensity of the PTV, 2D PTV mask, and 2D OARs mask (overlap).
         """
-        ptv_mask_3d = self.rtstruct.get_roi_mask_by_name(
-            self.request_info.ptv_name
-        )  # axis0=y, axis1=x, axis2=z
+        if config.BUNDLED:
+            ptv_mask_3d = self.rtstruct.get_roi_mask_by_name(
+                self.request_info.ptv_name
+            )  # axis0=y, axis1=x, axis2=z
+        else:
+            ptv_mask_3d_ = self.rtstruct.get_roi_mask_by_name(
+                self.request_info.ptv_name[0]
+            )  # axis0=y, axis1=x, axis2=z
+
+            junction_mask_3d = np.zeros_like(ptv_mask_3d_)
+            for junc in self.request_info.ptv_name[1]:
+                junction_mask_3d |= self.rtstruct.get_roi_mask_by_name(
+                    junc
+                )  # axis0=y, axis1=x, axis2=z
+
+            ptv_mask_3d = ptv_mask_3d_ | junction_mask_3d
 
         ptv_img_3d = self._get_masked_image_3d(ptv_mask_3d)
         with warnings.catch_warnings():
@@ -213,9 +227,7 @@ class Pipeline:
                 save_input_img,
             )
 
-            patient_id = os.path.basename(self.request_info.dicom_path)
-
-            save_input_img(patient_id, self.image)
+            save_input_img(self.patient_id, self.image)
 
     def _build_output(self, model_output: np.ndarray) -> np.ndarray:
         """Build the flat output of the regression.
@@ -543,20 +555,22 @@ class Pipeline:
 
             if not config.BUNDLED:
                 from visualize import (  # pylint: disable=import-outside-toplevel
-                    save_field_geometry,
                     save_local_opt,
                 )
 
-                patient_id = os.path.basename(self.request_info.dicom_path)
+                save_local_opt(self.patient_id, self.image, local_optimization)
 
-                save_local_opt(patient_id, self.image, local_optimization)
+        if not config.BUNDLED:
+            from visualize import (  # pylint: disable=import-outside-toplevel
+                save_field_geometry,
+            )
 
-                save_field_geometry(
-                    patient_id,
-                    self.request_info.model_name,
-                    self.image,
-                    self.field_geometry,
-                )
+            save_field_geometry(
+                self.patient_id,
+                self.request_info.model_name,
+                self.image,
+                self.field_geometry,
+            )
 
         (
             isocenters_pat_coord,
@@ -572,6 +586,6 @@ class Pipeline:
 
         return (
             isocenters_pat_coord,
-            restrict_to_max_aperture(jaws_X_pat_coord),
-            restrict_to_max_aperture(jaws_Y_pat_coord),
+            adjust_to_max_aperture(jaws_X_pat_coord),
+            adjust_to_max_aperture(jaws_Y_pat_coord, 175),
         )

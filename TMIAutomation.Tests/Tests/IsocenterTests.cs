@@ -104,14 +104,14 @@ namespace TMIAutomation.Tests
             };
             List<List<double>> jawY = new List<List<double>>
             {
-                new List<double> { -195.5, 195.5 }, // pelvis
-                new List<double> { -199.7, 199.7 },
-                new List<double> { -199.8, 199.8 }, // abdomen
-                new List<double> { -199.8, 199.8 },
-                new List<double> { -199.8, 199.8 }, // thorax
-                new List<double> { -199.8, 199.8 },
-                new List<double> { -199.8, 199.8 }, // shoulders
-                new List<double> { -199.8, 199.8 },
+                new List<double> { -200, 200 }, // pelvis
+                new List<double> { -200, 200 },
+                new List<double> { -200, 200 }, // abdomen
+                new List<double> { -200, 200 },
+                new List<double> { -200, 200 }, // thorax
+                new List<double> { -200, 200 },
+                new List<double> { -200, 200 }, // shoulders
+                new List<double> { -200, 200 },
                 new List<double> { -128.2, 132.4 }, // head
                 new List<double> { -116.8, 122.1 },
                 new List<double> { -163.4, -163.4 }, // arms
@@ -191,13 +191,13 @@ namespace TMIAutomation.Tests
             List<List<double>> jawY = new List<List<double>>
             {
                 new List<double> { -200, 200 }, // pelvis
-                new List<double> { -197.2, 197.2 },
-                new List<double> { -197.2, 197.2 }, // abdomen
-                new List<double> { -197.2, 197.2 },
+                new List<double> { -200, 200 },
+                new List<double> { -200, 200 }, // abdomen
+                new List<double> { -200, 200 },
                 new List<double> { -163.4, -163.4 }, // thorax
                 new List<double> { -163.4, -163.4 },
-                new List<double> { -197.2, 197.2 }, // shoulders
-                new List<double> { -197.2, 197.2 },
+                new List<double> { -200, 200 }, // shoulders
+                new List<double> { -200, 200 },
                 new List<double> { -124.0, 119.8 }, // head
                 new List<double> { -133.8, 133.2 },
                 new List<double> { -200.0, 200.0 }, // arms

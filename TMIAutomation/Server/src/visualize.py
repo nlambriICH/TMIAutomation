@@ -1,3 +1,4 @@
+"""Module implementing debug visualizations."""
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -141,7 +142,7 @@ def save_field_geometry(
                 angle=angle,
                 rotation_point=(iso_pixel_col, iso_pixel_row),
                 linestyle="-" if color == "r" else "--",
-                linewidth=0.5,
+                linewidth=1,
                 edgecolor=color,
                 facecolor="none",
             )
