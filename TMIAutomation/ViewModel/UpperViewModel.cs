@@ -167,6 +167,11 @@ namespace TMIAutomation.ViewModel
                     OARSelection oarSelectionWindow = new OARSelection(oarSelectionViewModel);
                     oarSelectionWindow.ShowDialog();
 
+                    if (oarSelectionWindow.userClosing)
+                    {
+                        throw new InvalidOperationException(); // window closed by user
+                    }
+
                     oarIds = oarSelectionViewModel.StructureSelection.Where(s => s.IsChecked)
                         .Select(s => s.StructureName)
                         .ToList();
@@ -187,6 +192,10 @@ namespace TMIAutomation.ViewModel
                 {
                     await this.modelBase.OptimizeAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
                 }
+            }
+            catch (InvalidOperationException)
+            {
+                success = false;
             }
             catch (Exception e)
             {
