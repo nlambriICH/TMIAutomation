@@ -50,7 +50,7 @@ namespace TMIAutomation
 
                 double upperPTVSizeX = Math.Round(upperPTV.MeshGeometry.Bounds.SizeX);
                 string modelName = upperPTVSizeX > 475 ? Client.MODEL_NAME_ARMS : Client.MODEL_NAME_BODY;
-                logger.Information("{UpperPTVId} X size was {upperPTVSizeX}. Calling model {modelName}", upperPTV.Id, upperPTVSizeX, modelName);
+                logger.Information("{UpperPTVId} X size was {upperPTVSizeX} mm. Calling model {modelName}", upperPTV.Id, upperPTVSizeX, modelName);
 
                 string dicomPath = Path.Combine(ConfigExport.DICOMStorage, scriptContext.Patient.Id);
 

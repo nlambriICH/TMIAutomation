@@ -27,10 +27,11 @@ namespace TMIAutomation
             List<VVector> isoRounded = new List<VVector>();
             foreach (List<double> iso in isocenters)
             {
-                VVector isoUserCoord = targetPlan.StructureSet.Image.DicomToUser(new VVector(iso[0], iso[1], iso[2]), targetPlan);
-                isoUserCoord.z = Math.Round(isoUserCoord.z, 0);
+                VVector isoUserCoord = targetPlan.StructureSet.Image.DicomToUser(new VVector(iso[0], isoCoordY, iso[2]), targetPlan);
+                isoUserCoord.x = Math.Round(isoUserCoord.x / 10, 0) * 10;
+                isoUserCoord.y = Math.Round(isoUserCoord.y / 10, 0) * 10;
+                isoUserCoord.z = Math.Round(isoUserCoord.z / 10, 0) * 10;
                 VVector isoDicom = targetPlan.StructureSet.Image.UserToDicom(isoUserCoord, targetPlan);
-                isoDicom.y = isoCoordY;
                 isoRounded.Add(isoDicom);
             }
 
@@ -45,6 +46,7 @@ namespace TMIAutomation
                 {
                     int firstIsoInGroup = i - 1;
                     VVector isocenter = isoRounded[firstIsoInGroup];
+                    if (i == 9) isocenter.y -= 20; // shift y-coord toward the brain (anterior)
                     VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -60,6 +62,7 @@ namespace TMIAutomation
 
                     int secondIsoInGroup = i;
                     isocenter = isoRounded[secondIsoInGroup];
+                    if (i == 9) isocenter.y -= 20; // shift y-coord toward the brain (anterior)
                     jawPositions = new VRect<double>(jawX[secondIsoInGroup][0], jawY[secondIsoInGroup][0], jawX[secondIsoInGroup][1], jawY[secondIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -81,6 +84,7 @@ namespace TMIAutomation
                     if (i == 5) continue; // skip thorax isocenter not present with iso on arms
                     int firstIsoInGroup = i - 1;
                     VVector isocenter = isoRounded[firstIsoInGroup];
+                    if (i == 9) isocenter.y -= 20; // shift y-coord toward the brain (anterior)
                     VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
@@ -96,6 +100,7 @@ namespace TMIAutomation
 
                     int secondIsoInGroup = i;
                     isocenter = isoRounded[secondIsoInGroup];
+                    if (i == 9) isocenter.y -= 20; // shift y-coord toward the brain (anterior)
                     jawPositions = new VRect<double>(jawX[secondIsoInGroup][0], jawY[secondIsoInGroup][0], jawX[secondIsoInGroup][1], jawY[secondIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
                     targetPlan.AddArcBeam(
