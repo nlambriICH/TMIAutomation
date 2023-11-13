@@ -156,7 +156,7 @@ namespace TMIAutomation.ViewModel
 
             try
             {
-                await this.modelBase.GenerateUpperPlanAsync(this.selectedCourseId);
+                await this.modelBase.SetInContextOrCreateAutoPlanAsync(this.selectedCourseId, ModelBase.PlanType.Up);
                 UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
 
                 List<string> oarIds = new List<string> { };

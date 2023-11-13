@@ -14,12 +14,22 @@ namespace TMIAutomation
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Calculation));
 
-        public static ExternalPlanSetup AddBaseDosePlan(this Course targetCourse, StructureSet targetSS)
+        public static ExternalPlanSetup GetOrCreateBaseDosePlan(this Course targetCourse, StructureSet targetSS)
         {
-            ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
-            int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("LowerBase"));
-            newPlan.Id = numOfAutoPlans == 0 ? "LowerBase" : string.Concat("LowerBase", numOfAutoPlans);
-            logger.Information("Created lower dose-base plan {lowerPlanBase}", newPlan.Id);
+            string planId = "LowerBase";
+            ExternalPlanSetup newPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == planId);
+
+            if (newPlan == null)
+            {
+                newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+                newPlan.Id = planId;
+                logger.Information("Created lower base-dose plan {lowerPlanBase}", newPlan.Id);
+            }
+            else
+            {
+                logger.Information("Using existing lower base-dose plan {lowerPlanBase}", newPlan.Id);
+            }
+
             return newPlan;
         }
 

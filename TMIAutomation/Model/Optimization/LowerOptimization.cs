@@ -138,7 +138,7 @@ namespace TMIAutomation
             /* CopyPlanSetup creates a plan with correct fields but in HFS
              * The dose is lost once the plan is changed to FFS
              */
-            ExternalPlanSetup lowerPlanBase = targetCourse.AddBaseDosePlan(lowerPlan.StructureSet);
+            ExternalPlanSetup lowerPlanBase = targetCourse.GetOrCreateBaseDosePlan(lowerPlan.StructureSet);
             lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration);
 
             progress.Report(0.10);

@@ -46,7 +46,7 @@ namespace TMIAutomation.Tests
             Process serverProcess = StartLocalServer();
             try
             {
-                Thread.Sleep(TimeSpan.FromSeconds(15)); // bad practice but easier way to wait the server startup
+                Thread.Sleep(TimeSpan.FromSeconds(20)); // bad practice but easier way to wait the server startup
                 Dictionary<string, List<List<double>>> fieldGeometry = Client.GetFieldGeometry(modelName,
                                                                                                Path.Combine(executingPath, "Dicoms", this.patientID),
                                                                                                "PTV_totFIN_Crop",

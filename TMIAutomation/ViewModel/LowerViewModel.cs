@@ -234,7 +234,7 @@ namespace TMIAutomation.ViewModel
                     generateBaseDosePlanOnly = lowerPlanOptSelWindow.GenerateBaseDosePlanOnly() ?? false;
                 }
 #endif
-                await this.modelBase.GenerateLowerPlanAsync(this.selectedCourseId);
+                await this.modelBase.SetInContextOrCreateAutoPlanAsync(this.selectedCourseId, ModelBase.PlanType.Down);
                 LowerPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Down);
 
                 if (this.isJunctionChecked)

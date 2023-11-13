@@ -153,33 +153,24 @@ namespace TMIAutomation
             return upperControl.CreateAsync(progress, message);
         }
 
-        public Task GenerateLowerPlanAsync(string courseId)
+        public Task SetInContextOrCreateAutoPlanAsync(string courseId, PlanType planType)
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
+                PatientOrientation patientOrientation = planType == PlanType.Up ? PatientOrientation.HeadFirstSupine : PatientOrientation.FeetFirstSupine;
+                string planId = planType == PlanType.Up ? "TMLIupperAuto" : "TMLIdownAuto";
+
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
-                StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.FeetFirstSupine);
+                ExternalPlanSetup newPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == planId);
 
-                ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
-                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIdownAuto"));
-                newPlan.Id = numOfAutoPlans == 0 ? "TMLIdownAuto" : string.Concat("TMLIdownAuto", numOfAutoPlans);
+                if (newPlan == null)
+                {
+                    StructureSet targetSS = GetTargetStructureSet(scriptContext, patientOrientation);
+                    newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+                    newPlan.Id = planId;
+                }
 
-                scriptContext.PlanSetup = newPlan; // set the new plan in context
-            });
-        }
-
-        public Task GenerateUpperPlanAsync(string courseId)
-        {
-            return this.esapiWorker.RunAsync(scriptContext =>
-            {
-                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
-                StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.HeadFirstSupine);
-
-                ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
-                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIupperAut"));
-                newPlan.Id = numOfAutoPlans == 0 ? "TMLIupperAuto" : string.Concat("TMLIupperAut", numOfAutoPlans);
-
-                scriptContext.PlanSetup = newPlan;  // set the new plan in context
+                scriptContext.PlanSetup = newPlan;  // set the plan in context
             });
         }
 

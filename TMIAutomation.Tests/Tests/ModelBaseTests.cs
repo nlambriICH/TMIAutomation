@@ -102,7 +102,7 @@ namespace TMIAutomation.Tests
         public static IEnumerable<object[]> GetPTVsFromImgOrientation_Data()
         {
             yield return new object[] { PatientOrientation.HeadFirstSupine, 0, "PTV_totFIN" };
-            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "UpperPTVNoJ" };
+            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "PTV_totFIN_Crop" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 0, "PTV_Tot_Start" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 1, "PTV_Total" };
         }
