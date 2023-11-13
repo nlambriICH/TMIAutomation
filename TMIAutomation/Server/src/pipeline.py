@@ -64,12 +64,14 @@ class Pipeline:
         self.request_info = request_info
         self.patient_id = os.path.basename(self.request_info.dicom_path)
 
-        rt_struct_path = glob.glob(
-            os.path.join(self.request_info.dicom_path, "RTSTRUCT*")
-        )[0]
+        rt_struct_path = []
+        for root in ("RTSTRUCT*", "RS*"):
+            rt_struct_path.extend(
+                glob.glob(os.path.join(self.request_info.dicom_path, root))
+            )
         self.rtstruct = RTStructBuilder.create_from(
             dicom_series_path=self.request_info.dicom_path,
-            rt_struct_path=rt_struct_path,
+            rt_struct_path=rt_struct_path[0],
         )
 
         pixel_spacing = self.rtstruct.series_data[0].PixelSpacing[0]

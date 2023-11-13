@@ -1,6 +1,6 @@
-# Set to Automatic for the automatic export of CT and RTSTRUCT
+# Set to "Automatic" for the automatic export of CT and RTSTRUCT
 # Otherwise it is assumed that DICOMs are exported manually and located in the folder Dicoms
-ExportType	Automatic
+ExportType	Manual
 
 # Daemon settings
 DaemonAETitle	AETitle
