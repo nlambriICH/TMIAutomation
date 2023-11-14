@@ -286,8 +286,8 @@ class Pipeline:
             norm (float): Normalization factor used to scale the field coordinates to compute the
             overlap of fields along X.
         """
-        output[30] = y_hat[0]  # z coord right arm
-        output[33] = y_hat[1]  # z coord left arm
+        output[30] = y_hat[0]  # x coord right arm
+        output[33] = y_hat[1]  # x coord left arm
 
         for z in range(2):  # first two z coords
             output[z * 3 * 2 + 2] = y_hat[z + 2]
@@ -298,8 +298,8 @@ class Pipeline:
             output[(z + 3) * 3 * 2 + 2] = y_hat[z + 4]
             output[(z + 3) * 3 * 2 + 5] = y_hat[z + 4]
 
-            # Begin jaw_X
-            # 4 legs + 3 pelvis
+        # Begin jaw_X
+        # 4 legs + 3 pelvis
         for i in range(5):
             output[36 + i] = y_hat[7 + i]  # retrieve apertures of first 11 fields
         output[42] = y_hat[12]
@@ -307,7 +307,7 @@ class Pipeline:
         # 3 for third iso = null + one symmetric (thus 0)
         for i in range(3):
             output[44 + i] = 0
-            # 3 for chest iso = null + one symmetric (again 0)
+        # 3 for chest iso = null + one symmetric (again 0)
         output[48] = y_hat[14]
         output[50] = y_hat[15]  # add in groups of three avoiding repetitions
 
@@ -315,34 +315,32 @@ class Pipeline:
             output[52 + i] = y_hat[16 + i]  # head
             output[56 + i] = y_hat[19 + i]  # arms
 
-            # Symmetric apertures
-        output[47] = -output[44]
+        # Symmetric apertures
         output[51] = -output[48]
         output[55] = -output[52]
 
         output[59] = y_hat[22]
         # Overlap fields
-
         output[41] = (y_hat[3] - y_hat[4] + 0.01) * norm + output[50]  # abdomen
         output[49] = (y_hat[4] - y_hat[5] + 0.03) * norm + output[54]  # chest
 
         # Begin jaw_Y
         for i in range(4):
-            output[76 + i] = y_hat[26 + i].item()  # apertures for the head
+            output[76 + i] = y_hat[26 + i]  # apertures for the head
             if i < 2:
                 # Same apertures opposite signs #LEGS
-                output[60 + 2 * i] = y_hat[i + 23].item()
-                output[61 + 2 * i] = -y_hat[i + 23].item()
+                output[60 + 2 * i] = y_hat[i + 23]
+                output[61 + 2 * i] = -y_hat[i + 23]
 
                 # 4 fields with equal (and opposite) apertures
-                output[64 + 2 * i] = y_hat[24].item()
-                output[65 + 2 * i] = -y_hat[24].item()
+                output[64 + 2 * i] = y_hat[24]
+                output[65 + 2 * i] = -y_hat[24]
                 output[68 + 2 * i] = 0  # index 35 == thorax iso
                 output[69 + 2 * i] = 0
 
                 # 2 fields with equal (and opposite) apertures
-                output[72 + 2 * i] = y_hat[24].item()
-                output[73 + 2 * i] = -y_hat[24].item()
+                output[72 + 2 * i] = y_hat[24]
+                output[73 + 2 * i] = -y_hat[24]
 
                 # Arms apertures with opposite sign
                 scaling_factor_mm_norm = (
