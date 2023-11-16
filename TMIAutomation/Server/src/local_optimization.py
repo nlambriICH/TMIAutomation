@@ -109,6 +109,16 @@ class LocalOptimization:
 
         # Set distance between pelvis-abdomen isocenters to have symmetric fields
         if self.field_geometry.isocenters_pix[2, 2] < x_iliac:
+            # Thorax isocenters
+            self.field_geometry.isocenters_pix[4, 2] = (
+                self.field_geometry.isocenters_pix[3, 2]
+                + self.field_geometry.isocenters_pix[6, 2]
+            ) / 2
+            self.field_geometry.isocenters_pix[5, 2] = (
+                self.field_geometry.isocenters_pix[3, 2]
+                + self.field_geometry.isocenters_pix[6, 2]
+            ) / 2
+
             # Adjust fields of abdomen and thorax iso to the positions of ribs and iliac crests
             self.field_geometry.jaws_X_pix[2, 1] = (
                 self.optimization_result.x_pixel_ribs
