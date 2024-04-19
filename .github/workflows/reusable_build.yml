@@ -17,11 +17,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
             python-version: '3.11'
-      - name: Setup venv
+      - name: Setup env
         run: |
             cd TMIAutomation\Server
-            python -m venv venv
-            .\venv\Scripts\Activate.ps1
             pip install -r requirements.txt
       - name: Build server app
         run: |
