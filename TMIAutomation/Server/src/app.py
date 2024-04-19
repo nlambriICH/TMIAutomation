@@ -1,4 +1,5 @@
 """Module implementing the local server of the models."""
+
 import os
 import socket
 import logging
@@ -61,19 +62,25 @@ def predict() -> Response | None:
         Response: Response object with application/json mime type containing the
         isocenters, jaw X apertures, and jaw Y apertures in patient coordinate system.
     """
-    if config.ORT_SESSION_BODY is None and config.ORT_SESSION_ARMS is None:
-        abort(503)
-
     if request.method == "POST":
         model_name = request.json["model_name"]
         dicom_path = request.json["dicom_path"]
         ptv_name = request.json["ptv_name"]
         oars_name = request.json["oars_name"]
 
+        if model_name == config.MODEL_NAME_BODY and config.ORT_SESSION_BODY is not None:
+            ort_session = config.ORT_SESSION_BODY
+        elif (
+            model_name == config.MODEL_NAME_ARMS and config.ORT_SESSION_ARMS is not None
+        ):
+            ort_session = config.ORT_SESSION_ARMS
+        else:
+            abort(503)
+
         pipeline = Pipeline(
             RequestInfo(model_name, dicom_path, ptv_name, oars_name),
         )
-        pipeline_out = pipeline.predict()
+        pipeline_out = pipeline.predict(ort_session)
 
         return jsonify(
             {

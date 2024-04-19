@@ -1,4 +1,5 @@
 """Module implementing the inference pipeline."""
+
 import os
 import glob
 import warnings
@@ -10,8 +11,8 @@ from rt_utils import RTStructBuilder
 from rt_utils.image_helper import get_spacing_between_slices
 import imgaug.augmenters as iaa
 from imgaug.augmentables import Keypoint, KeypointsOnImage
+from onnxruntime import InferenceSession
 from scipy import ndimage
-from flask import abort
 import config
 from field_geometry_transf import (
     transform_field_geometry,
@@ -263,9 +264,9 @@ class Pipeline:
             ndimage.center_of_mass(self.image.pixels[..., 0])[1]
             / self.image.width_resize
         )  # x coord repeated 8 times + 2 times for iso thorax
-        output[
-            index_y
-        ] = 0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
+        output[index_y] = (
+            0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
+        )
 
         if y_hat.shape[0] == 25:
             self._build_body_cnn_output(output, y_hat, norm)
@@ -502,11 +503,12 @@ class Pipeline:
         ) = self._inverse_transform(isocenters_hat, jaws_X_hat, jaws_Y_hat)
 
     def predict(
-        self, local_opt: bool = True
+        self, ort_session: InferenceSession, local_opt: bool = True
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Execute the entire pipeline to produce predictions from raw data to patient coordinate system.
 
         Args:
+            ort_session (InferenceSession): The ONNX runtime session to run predictions.
             local_opt (bool): Whether to perform the local optimization of the model's output
             for the abdominal field geometry. Defaults to True.
 
@@ -514,19 +516,6 @@ class Pipeline:
             tuple[np.ndarray, np.ndarray, np.ndarray]: Isocenters, jaw X apertures, and jaw Y apertures
             in patient coordinate system.
         """
-        if (
-            self.request_info.model_name == config.MODEL_NAME_BODY
-            and config.ORT_SESSION_BODY is not None
-        ):
-            ort_session = config.ORT_SESSION_BODY
-        elif (
-            self.request_info.model_name == config.MODEL_NAME_ARMS
-            and config.ORT_SESSION_ARMS is not None
-        ):
-            ort_session = config.ORT_SESSION_ARMS
-        else:
-            abort(503)
-
         self.preprocess()
 
         model_input = np.transpose(
