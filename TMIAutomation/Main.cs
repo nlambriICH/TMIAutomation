@@ -98,7 +98,7 @@ namespace VMS.TPS
                 }
                 finally
                 {
-                    this.serverProcess?.CloseMainWindow();
+                    this.serverProcess?.Kill();
                 }
             });
         }
@@ -112,7 +112,8 @@ namespace VMS.TPS
                 ProcessStartInfo startInfo = new ProcessStartInfo(serverPath)
                 {
                     WorkingDirectory = serverDirectory,
-                    WindowStyle = ProcessWindowStyle.Minimized
+                    UseShellExecute = false,
+                    CreateNoWindow = true
                 };
                 this.serverProcess = Process.Start(startInfo);
             }
