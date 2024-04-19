@@ -1,4 +1,5 @@
 """Module implementing debug visualizations."""
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -93,24 +94,26 @@ def save_field_geometry(
         aspect=1 / image.aspect_ratio,
     )
 
-    plt.scatter(
-        field_geometry.isocenters_pix[:, 2],
-        field_geometry.isocenters_pix[:, 0],
-        color="red",
-        s=7,
-    )
+    num_iso = field_geometry.isocenters_pix.shape[0]
 
-    angles = np.repeat(90, field_geometry.isocenters_pix.shape[0])
+    # Same color for each isocenter group and arms
+    # Different linestyle for fields of the same group
+    palette_plots = [
+        color for color in plt.color_sequences["tab10"][:num_iso] for _ in range(2)
+    ]
+    linestyles = ["--", "-"] * (num_iso // 2)
+
+    angles = np.repeat(90, num_iso)
     if model_name == config.MODEL_NAME_ARMS:
+        linestyles[-2] = "-"  # same linestyle for isocenters on the arms
         angles[-2:] = 0
 
-    for i, (iso, jaw_X, jaw_Y, angle, color) in enumerate(
+    for i, (iso, jaw_X, jaw_Y, angle) in enumerate(
         zip(
             field_geometry.isocenters_pix,
             field_geometry.jaws_X_pix,
             field_geometry.jaws_Y_pix,
             angles,
-            ["b", "r"] * (field_geometry.isocenters_pix.shape[0] // 2),
         )
     ):
         if all(iso == 0):
@@ -134,6 +137,13 @@ def save_field_geometry(
             width *= image.aspect_ratio
             height /= image.aspect_ratio
 
+        plt.scatter(
+            iso[2],
+            iso[0],
+            color=palette_plots[i],
+            s=30,
+        )
+
         plt.gca().add_patch(
             mpatches.Rectangle(
                 (iso_pixel_col + offset_col, iso_pixel_row - offset_row),
@@ -141,9 +151,9 @@ def save_field_geometry(
                 height,
                 angle=angle,
                 rotation_point=(iso_pixel_col, iso_pixel_row),
-                linestyle="-" if color == "r" else "--",
-                linewidth=1,
-                edgecolor=color,
+                linestyle=linestyles[i],
+                linewidth=2,
+                edgecolor=palette_plots[i],
                 facecolor="none",
             )
         )
