@@ -97,6 +97,7 @@ namespace TMIAutomation.ViewModel
 
     public enum Operation
     {
+        Unknown,
         Rename,
         Remove
     }
