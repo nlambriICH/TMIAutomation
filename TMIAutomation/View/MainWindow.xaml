@@ -40,7 +40,8 @@
 
             <TabItem Width="100"
                      Background="#FDFDFD"
-                     DataContext="{Binding UpperVM}">
+                     DataContext="{Binding UpperVM}"
+                     x:Name="UpperTabItem">
                 
                 <TabItem.Header>
                     <TextBlock Text="Upper"
@@ -55,8 +56,8 @@
 
             <TabItem Width="100"
                      Background="#FDFDFD"
-                     IsSelected="True"
-                     DataContext="{Binding LowerVM}">
+                     DataContext="{Binding LowerVM}"
+                     x:Name="LowerTabItem">
 
                 <TabItem.Header>
                     <TextBlock Text="Lower"

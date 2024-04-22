@@ -367,3 +367,4 @@ TMIAutomation.Tests/Configuration/SensitiveData.txt
 TMIAutomation/Library/
 Docs/*
 !Docs/*.pdf
+TMIAutomation.Tests/Dicoms/

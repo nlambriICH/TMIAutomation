@@ -1,0 +1,12 @@
+﻿# Lines starting with a hash sign '#' are ignored
+# Empty lines are ignored
+brain
+encefalo
+lung
+polmone
+liver
+fegato
+bowel
+intestino
+bladder
+vescica

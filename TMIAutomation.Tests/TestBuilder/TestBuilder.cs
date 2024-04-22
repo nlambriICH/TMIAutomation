@@ -38,5 +38,12 @@ namespace TMIAutomation.Tests
                 throw new ArgumentException($"Could not find a private testObject of type {testObject.GetType()} in {testBase.GetType()}");
             }
         }
+
+        public TestBuilder AddStatic<T>(params object[] optParams) where T : ITestBase, new()
+        {
+            T testBase = new T();
+            testBase.Init(null, optParams).DiscoverTests();
+            return testBuilderInstance;
+        }
     }
 }

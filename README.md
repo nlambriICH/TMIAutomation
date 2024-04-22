@@ -2,12 +2,15 @@
 
 Plug-in script for the Eclipse Treatment Planning System to automate Total Marrow (Lymph-node) Irradiation (TMI/TMLI).
 
-The script was introduced and validated in [this paper](https://doi.org/10.1007/s00066-022-02014-0).
+The script was introduced and validated in [this paper](https://doi.org/10.1007/s00066-022-02014-0) on Strahlentherapie und Onkologie.
+
+The generation of the field geometry of TMI/TMLI with deep-learning was introduced in [this paper](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089) on Medical Physics.
 
 If you liked/used this project, don't forget to give it a star! :star:
 
 ## Key features
 
+* Field geometry for the TMI/TMLI upper-body generated with deep-learning models
 * Automatic planning of the lower-extremities for TMI/TMLI
 * Extendible to VMAT-TBI (Total Body Irradiation delivered with Volumetric Modulated Arc Therapy)
 
@@ -36,9 +39,6 @@ Go to the latest release [page](https://github.com/nlambriICH/TMIAutomation/rele
 If you are on a research workstation (_TBox_), you can immediately run the script `TMIAutomation.esapi.dll`
 by setting the database in research mode from the RT Administration module of Eclipse.
 Otherwise, the plug-in script `TMIAutomation.esapi.dll` needs to be **approved** in the Eclipse application.
-
-The `Configuration` folder contains config files with objectives and parameters to optimize the lower-extremities plan.
-Example values are provided in order for the script to execute properly.
 
 ## Contributing
 

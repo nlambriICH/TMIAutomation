@@ -117,8 +117,6 @@ namespace TMIAutomation
                 rem.SegmentVolume = rem.Sub(upperJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
 
                 logger.Information("Structure created: {rem}", rem.Id);
-                progress.Report(0.4);
-                message.Report("Done!");
             });
         }
     }

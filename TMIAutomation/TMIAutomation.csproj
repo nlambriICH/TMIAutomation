@@ -55,6 +55,12 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EvilDICOM, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EvilDICOM.2.0.5\lib\net46\EvilDICOM.dll</HintPath>
+    </Reference>
+    <Reference Include="FuzzySharp, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FuzzySharp.2.0.2\lib\net461\FuzzySharp.dll</HintPath>
+    </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
     </Reference>
@@ -64,8 +70,11 @@
     <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.2.12.0\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\packages\Serilog.3.0.1\lib\net462\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.File, Version=5.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.Sinks.File.5.0.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
@@ -84,9 +93,11 @@
       <HintPath>..\packages\System.Diagnostics.TraceSource.4.3.0\lib\net46\System.Diagnostics.TraceSource.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Security" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -125,14 +136,20 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
+    <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\DICOMServices.cs" />
+    <Compile Include="Helper\Configuration\ConfigExport.cs" />
+    <Compile Include="Helper\Configuration\ConfigOARNames.cs" />
+    <Compile Include="Helper\Configuration\ConfigOptOptions.cs" />
     <Compile Include="Model\Optimization\OptimizationCycleTarget.cs" />
     <Compile Include="Model\Optimization\Calculation\Calculation.cs" />
     <Compile Include="Model\Optimization\Calculation\PostCalculation.cs" />
     <Compile Include="Model\Optimization\Calculation\PostOptimization.cs" />
-    <Compile Include="Model\Optimization\IsoConfiguration\Isocenter.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\Isocenters.cs" />
     <Compile Include="Model\Optimization\Objectives\ObjectivesSetup.cs" />
-    <Compile Include="Model\Optimization\Optimization.cs" />
+    <Compile Include="Model\Optimization\LowerOptimization.cs" />
     <Compile Include="Model\ModelBase.cs" />
+    <Compile Include="Model\Optimization\UpperOptimization.cs" />
     <Compile Include="PluginScriptContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\StructureCreation\ControlStructures\UpperControl.cs" />
@@ -142,11 +159,15 @@
     <Compile Include="Model\StructureCreation\Junction\LowerJunction.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
+    <Compile Include="ViewModel\OARSelectionViewModel.cs" />
     <Compile Include="ViewModel\StructureOpViewModel.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProgressBarViewModel.cs" />
     <Compile Include="ViewModel\UpperViewModel.cs" />
+    <Compile Include="View\OARSelection.xaml.cs">
+      <DependentUpon>OARSelection.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\StructureOpWindow.xaml.cs">
       <DependentUpon>StructureOpWindow.xaml</DependentUpon>
     </Compile>
@@ -184,6 +205,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Theme\MenuButtonTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\OARSelection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -231,9 +256,16 @@
   <ItemGroup>
     <Resource Include="Configuration\ESAPI15\PointOptimizationObjectives.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\OARNames.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Configuration\DCMExport.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+    <PostBuildEvent>IF NOT EXIST $(TargetDir)\Dicoms mkdir $(TargetDir)\Dicoms
+IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
@@ -241,9 +273,13 @@ IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI1
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
-IF $(ConfigurationName) == Release-16.1 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration OARNames.txt
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
-IF $(ConfigurationName) == Release-15.6 robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration DCMExport.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)Docs $(TargetDir)Docs TMIAutomation.pdf
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(ProjectDir)Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>
