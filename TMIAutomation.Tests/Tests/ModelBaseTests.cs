@@ -26,7 +26,7 @@ namespace TMIAutomation.Tests
         private void GetCourses()
         {
 #if ESAPI16
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CLowerAutoAddOpt", "TEst", "CBaseDoseAddOpt", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
 #else
             List<string> expectedCourses = new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
 #endif
@@ -102,7 +102,11 @@ namespace TMIAutomation.Tests
         public static IEnumerable<object[]> GetPTVsFromImgOrientation_Data()
         {
             yield return new object[] { PatientOrientation.HeadFirstSupine, 0, "PTV_totFIN" };
+#if ESAPI16
+            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "UpperPTVNoJ" };
+#else
             yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "PTV_totFIN_Crop" };
+#endif
             yield return new object[] { PatientOrientation.FeetFirstSupine, 0, "PTV_Tot_Start" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 1, "PTV_Total" };
         }
