@@ -80,10 +80,12 @@ namespace TMIAutomation.ViewModel
                 }
 
                 // Need esapi worker to work directly on the Structure
-                this.oldStructure.Id = this.structureId;
-                TooltipRename = $"Rename Structure {this.oldStructure.Id} to {this.StructureId}";
+                // Perform operation to trigger possible errors from ESAPI
+                this.oldStructure.Id = this.StructureId;
+                TooltipRename = $"Rename Structure {this.originalId} to {this.StructureId}";
 
-                // Revert to the original Id, otherwise it could be possible to re-assign the original Id
+                // Revert to the original Id, otherwise the previous check fails
+                // and it may be allowed to re-assign the original Id
                 this.oldStructure.Id = this.originalId;
                 IsValidId = true;
             }
