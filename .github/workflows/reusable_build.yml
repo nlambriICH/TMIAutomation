@@ -20,7 +20,7 @@ jobs:
       - name: Setup env
         run: |
             cd TMIAutomation\Server
-            pip install -r requirements.txt
+            pip install . -r requirements.txt
       - name: Build server app
         run: |
             cd TMIAutomation\Server
