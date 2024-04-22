@@ -264,7 +264,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+    <PostBuildEvent>IF NOT EXIST $(TargetDir)\Dicoms mkdir $(TargetDir)\Dicoms
+IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
