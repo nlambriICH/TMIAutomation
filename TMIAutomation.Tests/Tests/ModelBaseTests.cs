@@ -26,9 +26,9 @@ namespace TMIAutomation.Tests
         private void GetCourses()
         {
 #if ESAPI16
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CLowerAutoAddOpt", "TEst", "CBaseDoseAddOpt", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
 #else
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+            List<string> expectedCourses = new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
 #endif
             List<string> courses = modelBase.GetCourses(scriptContext);
             Assert.Equal(expectedCourses, courses);
@@ -54,22 +54,22 @@ namespace TMIAutomation.Tests
             yield return new object[] { ModelBase.PlanType.Up, 0, "RA_TMLIup5" };
             yield return new object[] { ModelBase.PlanType.Up, 1, "RA_TMLIup4" };
             yield return new object[] { ModelBase.PlanType.Up, 2, "RA_TMLIup3" };
-            yield return new object[] { ModelBase.PlanType.Down, 0, "TMLIdownAuto1" };
-            yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto" };
+            yield return new object[] { ModelBase.PlanType.Down, 0, "TMLIdownAuto" };
+            yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto1" };
         }
 
         [Theory]
         [MemberData(nameof(GetPTVsFromPlan_Data))]
-        private void GetPTVsFromPlan(string planId, int index, string expectedPlanId)
+        private void GetPTVsFromPlan(string planId, int index, string expectedPTVId)
         {
             List<string> ptvs = modelBase.GetPTVsFromPlan(scriptContext, scriptContext.Course.Id, planId);
             try
             {
-                Assert.Equal(expectedPlanId, ptvs[index]);
+                Assert.Equal(expectedPTVId, ptvs[index]);
             }
             catch (EqualException e)
             {
-                throw new Exception($"Input parameters: {planId}, {index}, {expectedPlanId}", e);
+                throw new Exception($"Input parameters: {planId}, {index}, {expectedPTVId}", e);
             }
         }
 
@@ -81,6 +81,7 @@ namespace TMIAutomation.Tests
             yield return new object[] { "RA_TMLIup3", 1, "PTV_totFIN_Crop" };
             yield return new object[] { "TMLIdownAuto", 0, "PTV_Tot_Start" };
             yield return new object[] { "TMLIdownAuto", 1, "PTV_Total" };
+            yield return new object[] { "", 0, "PTV_Tot_Start" };
         }
 
         [Theory]
@@ -101,7 +102,11 @@ namespace TMIAutomation.Tests
         public static IEnumerable<object[]> GetPTVsFromImgOrientation_Data()
         {
             yield return new object[] { PatientOrientation.HeadFirstSupine, 0, "PTV_totFIN" };
+#if ESAPI16
             yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "UpperPTVNoJ" };
+#else
+            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "PTV_totFIN_Crop" };
+#endif
             yield return new object[] { PatientOrientation.FeetFirstSupine, 0, "PTV_Tot_Start" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 1, "PTV_Total" };
         }

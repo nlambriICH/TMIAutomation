@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ using TMIAutomation.Async;
 using TMIAutomation.View;
 using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.API;
+using VMS.TPS.Common.Model.Types;
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
@@ -18,11 +20,13 @@ namespace VMS.TPS
     {
         private readonly ILogger logger;
         private readonly string logPath;
+        private readonly string executingPath;
+        private Process serverProcess;
 
         public Script()
         {
-            string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(executingPath, "LOG"));
+            this.executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            DirectoryInfo directory = Directory.CreateDirectory(Path.Combine(this.executingPath, "LOG"));
             this.logPath = directory.FullName;
 
             Log.Logger = new LoggerConfiguration()
@@ -40,6 +44,11 @@ namespace VMS.TPS
             this.logger = Log.ForContext<Script>();
 
             logger.Verbose("TMIJunction script instance created");
+
+            // Load settings to avoid null refs when static members are called from UI thread 
+            ConfigExport.Init();
+            ConfigOARNames.Init();
+            ConfigOptOptions.Init();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -58,6 +67,7 @@ namespace VMS.TPS
                                context.Patient.FirstName,
                                context.Patient.Id
                                );
+            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine;
             context.Patient.BeginModifications();
 
             // Create and show the main window on a separate thread
@@ -65,8 +75,18 @@ namespace VMS.TPS
             {
                 try
                 {
+                    this.StartLocalServer();
+
                     MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
+                    if (feetFirstSupine)
+                    {
+                        mainWindow.LowerTabItem.IsSelected = true;
+                    }
+                    else
+                    {
+                        mainWindow.UpperTabItem.IsSelected = true;
+                    }
                     mainWindow.ShowDialog();
                 }
                 catch (Exception exc)
@@ -76,7 +96,31 @@ namespace VMS.TPS
                     MessageBox.Show(new Form { TopMost = true }, msgBoxMessage, "TMIAutomation - Error");
                     logger.Fatal(exc, "The following fatal error occured during the script execution");
                 }
+                finally
+                {
+                    this.serverProcess?.Kill();
+                }
             });
+        }
+
+        private void StartLocalServer()
+        {
+            try
+            {
+                string serverDirectory = Path.Combine(this.executingPath, "dist", "app");
+                string serverPath = Path.Combine(serverDirectory, "app.exe");
+                ProcessStartInfo startInfo = new ProcessStartInfo(serverPath)
+                {
+                    WorkingDirectory = serverDirectory,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                this.serverProcess = Process.Start(startInfo);
+            }
+            catch (Exception e)
+            {
+                logger.Error("Could not start the local server", e);
+            }
         }
     }
 }

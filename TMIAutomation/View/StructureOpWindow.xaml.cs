@@ -31,14 +31,6 @@ namespace TMIAutomation.View
             this.Close();
         }
 
-        private void StructureIdTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                RenameStructureIdButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            }
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.Activate();

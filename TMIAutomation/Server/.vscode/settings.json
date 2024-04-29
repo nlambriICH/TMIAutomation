@@ -1,0 +1,47 @@
+{
+    "pylint.args": [
+        "--max-line-length=150"
+    ],
+    "flake8.args": [
+        "--max-line-length=150"
+    ],
+    "editor.formatOnSave": true,
+    "cSpell.words": [
+        "arange",
+        "astype",
+        "augmentables",
+        "cmap",
+        "dicom",
+        "dtype",
+        "edgecolor",
+        "facecolor",
+        "hlines",
+        "imgaug",
+        "imsave",
+        "imshow",
+        "intestino",
+        "isocenter",
+        "isocenters",
+        "jsonify",
+        "junc",
+        "Keypoint",
+        "Keypoints",
+        "levelname",
+        "Limegreen",
+        "linestyle",
+        "linestyles",
+        "linewidth",
+        "linewidths",
+        "MEIPASS",
+        "mpatches",
+        "ndarray",
+        "ndimage",
+        "newaxis",
+        "onnxruntime",
+        "postprocess",
+        "pydicom",
+        "RTSTRUCT",
+        "thefuzz",
+        "vlines"
+    ],
+}

@@ -9,9 +9,9 @@ using VMS.TPS.Common.Model.Types;
 
 namespace TMIAutomation
 {
-    public class Optimization
+    public class LowerOptimization
     {
-        private readonly ILogger logger = Log.ForContext<Optimization>();
+        private readonly ILogger logger = Log.ForContext<LowerOptimization>();
         private readonly EsapiWorker esapiWorker;
         private readonly string courseId;
         private readonly string upperPlanId;
@@ -22,7 +22,7 @@ namespace TMIAutomation
 #endif
 
 #if ESAPI16
-        public Optimization(EsapiWorker esapiWorker,
+        public LowerOptimization(EsapiWorker esapiWorker,
                             string courseId,
                             string upperPlanId,
                             string registrationId,
@@ -35,7 +35,7 @@ namespace TMIAutomation
             this.lowerPlanId = lowerPlanId;
         }
 #else
-        public Optimization(EsapiWorker esapiWorker,
+        public LowerOptimization(EsapiWorker esapiWorker,
                             string courseId,
                             string upperPlanId,
                             string registrationId,
@@ -56,9 +56,9 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
 #if ESAPI16
-                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
+                logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
 #else
-                logger.Information("Optimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
+                logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
 #endif
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
@@ -138,7 +138,7 @@ namespace TMIAutomation
             /* CopyPlanSetup creates a plan with correct fields but in HFS
              * The dose is lost once the plan is changed to FFS
              */
-            ExternalPlanSetup lowerPlanBase = targetCourse.AddBaseDosePlan(lowerPlan.StructureSet);
+            ExternalPlanSetup lowerPlanBase = targetCourse.GetOrCreateBaseDosePlan(lowerPlan.StructureSet);
             lowerPlanBase.CopyCaudalIsocenter(upperPlan, registration);
 
             progress.Report(0.10);
@@ -226,7 +226,7 @@ namespace TMIAutomation
         {
             progress.Report(0.05);
             message.Report("Setup isocenters and objectives...");
-            lowerPlan.SetIsocenters(upperPlan);
+            lowerPlan.SetIsocentersLower(upperPlan);
             lowerPlan.SetupOptimization(); // must set dose prescription before adding objectives
 
             OptimizationSetup optSetup = lowerPlan.OptimizationSetup;

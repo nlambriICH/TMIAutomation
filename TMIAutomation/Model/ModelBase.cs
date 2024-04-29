@@ -48,23 +48,29 @@ namespace TMIAutomation
         public List<string> GetPlans(PluginScriptContext scriptContext, string courseId, PlanType planType)
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
-            List<string> orderedPlans = new List<string>();
+            PlanSetup planInScope = scriptContext.PlanSetup;
+
+            List<PlanSetup> orderedPlans = new List<PlanSetup>();
             switch (planType)
             {
                 case PlanType.Up:
                     orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
                                         .OrderByDescending(p => p.CreationDateTime)
-                                        .Select(s => s.Id)
                                         .ToList();
                     break;
                 case PlanType.Down:
                     orderedPlans = targetCourse.PlanSetups.Where(p => p.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine)
                                         .OrderByDescending(p => p.CreationDateTime)
-                                        .Select(s => s.Id)
                                         .ToList();
                     break;
             }
-            return orderedPlans;
+
+            if (orderedPlans.Remove(planInScope))
+            {
+                orderedPlans.Insert(0, planInScope);
+            }
+
+            return orderedPlans.Select(ps => ps.Id).ToList();
         }
 
         public Task<List<string>> GetPTVsFromPlanAsync(string courseId, string planId)
@@ -76,11 +82,27 @@ namespace TMIAutomation
         {
             Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
             PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
-            return selectedPlan == null ? new List<string>()
-            : selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "PTV")
-                                                  .OrderByDescending(s => s.Volume)
-                                                  .Select(s => s.Id)
-                                                  .ToList();
+            StructureSet targetStructureSet = selectedPlan == null ? scriptContext.StructureSet : selectedPlan.StructureSet;
+
+            return targetStructureSet == null ? new List<string>() : targetStructureSet.Structures.Where(s => s.DicomType == "PTV")
+                                                                                                  .OrderByDescending(s => s.Volume)
+                                                                                                  .Select(s => s.Id)
+                                                                                                  .ToList();
+        }
+
+        public Task<List<string>> GetOARNamesAsync(string courseId, string planId)
+        {
+            return this.esapiWorker.RunAsync(scriptContext => GetOARNames(scriptContext, courseId, planId), isWriteable: false);
+        }
+
+        public List<string> GetOARNames(PluginScriptContext scriptContext, string courseId, string planId)
+        {
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
+            PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
+            return selectedPlan.StructureSet.Structures.Where(s => s.DicomType == "ORGAN" || s.DicomType == "AVOIDANCE")
+                .OrderBy(s => s.Id)
+                .Select(s => s.Id)
+                .ToList();
         }
 
         public Task<List<string>> GetPTVsFromImgOrientationAsync(PatientOrientation patientOrientation)
@@ -131,16 +153,24 @@ namespace TMIAutomation
             return upperControl.CreateAsync(progress, message);
         }
 
-        public Task GenerateLowerPlanAsync(string courseId)
+        public Task SetInContextOrCreateAutoPlanAsync(string courseId, PlanType planType)
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
-                StructureSet targetSS = GetTargetStructureSet(scriptContext, PatientOrientation.FeetFirstSupine);
+                PatientOrientation patientOrientation = planType == PlanType.Up ? PatientOrientation.HeadFirstSupine : PatientOrientation.FeetFirstSupine;
+                string planId = planType == PlanType.Up ? "TMLIupperAuto" : "TMLIdownAuto";
 
-                ExternalPlanSetup newPlan = targetCourse.AddExternalPlanSetup(targetSS);
-                int numOfAutoPlans = targetCourse.PlanSetups.Count(p => p.Id.Contains("TMLIdownAuto"));
-                newPlan.Id = numOfAutoPlans == 0 ? "TMLIdownAuto" : string.Concat("TMLIdownAuto", numOfAutoPlans);
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
+                ExternalPlanSetup newPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == planId);
+
+                if (newPlan == null)
+                {
+                    StructureSet targetSS = GetTargetStructureSet(scriptContext, patientOrientation);
+                    newPlan = targetCourse.AddExternalPlanSetup(targetSS);
+                    newPlan.Id = planId;
+                }
+
+                scriptContext.PlanSetup = newPlan;  // set the plan in context
             });
         }
 
@@ -195,6 +225,21 @@ namespace TMIAutomation
                 : selectedPlan.Beams.Select(b => b.TreatmentUnit.Id).FirstOrDefault();
         }
 
+        public Task OptimizeAsync(string courseId,
+                                  string upperPlanId,
+                                  string upperPTVId,
+                                  List<string> oarIds,
+                                  IProgress<double> progress,
+                                  IProgress<string> message)
+        {
+            UpperOptimization optimization = new UpperOptimization(this.esapiWorker,
+                                                                   courseId,
+                                                                   upperPlanId,
+                                                                   upperPTVId,
+                                                                   oarIds);
+            return optimization.ComputeAsync(progress, message);
+        }
+
 #if ESAPI16
         public Task OptimizeAsync(string courseId,
                                   string upperPlanId,
@@ -203,7 +248,7 @@ namespace TMIAutomation
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId);
+            LowerOptimization optimization = new LowerOptimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId);
             return optimization.ComputeAsync(progress, message);
         }
 #else
@@ -215,7 +260,12 @@ namespace TMIAutomation
                                   IProgress<double> progress,
                                   IProgress<string> message)
         {
-            Optimization optimization = new Optimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId, generateBaseDosePlanOnly);
+            LowerOptimization optimization = new LowerOptimization(this.esapiWorker,
+                                                                   courseId,
+                                                                   upperPlanId,
+                                                                   registrationId,
+                                                                   lowerPlanId,
+                                                                   generateBaseDosePlanOnly);
             return optimization.ComputeAsync(progress, message);
         }
 #endif

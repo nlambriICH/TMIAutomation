@@ -93,6 +93,13 @@ namespace TMIAutomation.ViewModel
             set => Set(ref isControlChecked, value);
         }
 
+        private bool isOptimizationChecked;
+        public bool IsOptimizationChecked
+        {
+            get => isOptimizationChecked;
+            set => Set(ref isOptimizationChecked, value);
+        }
+
         private readonly ModelBase modelBase;
 
         public ICommand StartExecutionCommand { get; }
@@ -109,6 +116,7 @@ namespace TMIAutomation.ViewModel
             this.modelBase = modelBase;
             IsJunctionChecked = true;
             IsControlChecked = true;
+            IsOptimizationChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
             RetrieveCourses();
         }
@@ -141,13 +149,34 @@ namespace TMIAutomation.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked };
+            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.IsOptimizationChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
             bool success = true; // show "Complete" message box
 
             try
             {
+                await this.modelBase.SetInContextOrCreateAutoPlanAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+                UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+
+                List<string> oarIds = new List<string> { };
+                if (this.isOptimizationChecked)
+                {
+                    List<string> structureNames = await this.modelBase.GetOARNamesAsync(this.selectedCourseId, this.selectedPlanId);
+                    OARSelectionViewModel oarSelectionViewModel = new OARSelectionViewModel(structureNames);
+                    OARSelection oarSelectionWindow = new OARSelection(oarSelectionViewModel);
+                    oarSelectionWindow.ShowDialog();
+
+                    if (oarSelectionWindow.userClosing)
+                    {
+                        throw new InvalidOperationException(); // window closed by user
+                    }
+
+                    oarIds = oarSelectionViewModel.StructureSelection.Where(s => s.IsChecked)
+                        .Select(s => s.StructureName)
+                        .ToList();
+                }
+
                 if (this.isJunctionChecked)
                 {
                     await this.modelBase.GenerateUpperJunctionAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
@@ -158,6 +187,15 @@ namespace TMIAutomation.ViewModel
                 {
                     await this.modelBase.GenerateUpperControlAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
                 }
+
+                if (this.isOptimizationChecked)
+                {
+                    await this.modelBase.OptimizeAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                success = false;
             }
             catch (Exception e)
             {

@@ -36,8 +36,7 @@
                  Width="200"
                  Height="25"
                  VerticalContentAlignment="Center"
-                 FontSize="14"
-                 KeyDown="StructureIdTextBox_KeyDown">
+                 FontSize="14">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SourceUpdated">
                     <i:InvokeCommandAction Command="{Binding AssignStructureIdCommand}" />

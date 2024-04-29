@@ -17,30 +17,28 @@ namespace TMIAutomation.Tests
         [STAThread]
         public static void Main(string[] args)
         {
+            ConfigOptOptions.Init();
+
             using (EclipseApp = Application.CreateApplication())
             {
                 string patientID = testData["PatientID"];
                 Patient patient = EclipseApp.OpenPatientById(patientID);
                 Course course = patient.Courses.FirstOrDefault(c => c.Id == testData["CourseID"]);
-                PlanSetup planSetup = course.PlanSetups.FirstOrDefault(ps => ps.Id == testData["PlanID"]);
-                PluginScriptContext scriptContext = new PluginScriptContext
-                {
-                    Patient = patient,
-                    Course = course,
-                    PlanSetup = planSetup,
-                    StructureSet = planSetup.StructureSet
-                };
-                EsapiWorker esapiWorker = new EsapiWorker(scriptContext);
+                PlanSetup planSetupLower = course.PlanSetups.FirstOrDefault(ps => ps.Id == testData["PlanIDLower"]);
+                PlanSetup planSetupUpper = course.PlanSetups.FirstOrDefault(ps => ps.Id == testData["PlanIDUpper"]);
+
+                SetUpContext(patient, course, planSetupLower, out PluginScriptContext scriptContextLower, out EsapiWorker esapiWorkerLower);
 
                 patient.BeginModifications();
                 try
                 {
                     TestBuilder.Create()
-                            .Add<ModelBaseTests>(new ModelBase(esapiWorker), scriptContext)
-                            .Add<ObjectiveSetupTests>(scriptContext.PlanSetup.OptimizationSetup, scriptContext.PlanSetup)
-                            .Add<CalculationTests>(scriptContext.PlanSetup, scriptContext)
-                            .Add<IsocenterTests>(scriptContext.PlanSetup, scriptContext)
-                            .Add<StructureHelperTests>(scriptContext.StructureSet);
+                            .Add<ModelBaseTests>(new ModelBase(esapiWorkerLower), scriptContextLower)
+                            .Add<ObjectiveSetupTests>(scriptContextLower.PlanSetup.OptimizationSetup, scriptContextLower.PlanSetup)
+                            .Add<CalculationTests>(scriptContextLower.PlanSetup, scriptContextLower)
+                            .Add<IsocenterTests>(scriptContextLower.PlanSetup, planSetupUpper, scriptContextLower)
+                            .Add<StructureHelperTests>(scriptContextLower.StructureSet)
+                            .AddStatic<ClientTests>(patientID);
                     TestBase.RunTests();
                 }
                 catch (Exception e)
@@ -52,6 +50,18 @@ namespace TMIAutomation.Tests
                     EclipseApp.ClosePatient();
                 }
             }
+        }
+
+        private static void SetUpContext(Patient patient, Course course, PlanSetup planSetupLower, out PluginScriptContext scriptContextLower, out EsapiWorker esapiWorkerLower)
+        {
+            scriptContextLower = new PluginScriptContext
+            {
+                Patient = patient,
+                Course = course,
+                PlanSetup = planSetupLower,
+                StructureSet = planSetupLower.StructureSet
+            };
+            esapiWorkerLower = new EsapiWorker(scriptContextLower);
         }
 
         private static Dictionary<string, string> InitializeTestData()

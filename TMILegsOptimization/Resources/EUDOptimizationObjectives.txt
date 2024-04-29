@@ -1,8 +1,0 @@
-﻿# Move this file into the same folder where the executable runs. Values must be tab separated
-### DO NOT DELETE THIS LINE ###
-Structure	Limit	DoseValue	DoseUnit	Priority	gEUD a
-Dose_100%	upper	0.15	Gy	100	40
-HT_AUTO	upper	1.9	Gy	70	40
-HT2_AUTO	upper	1.5	Gy	70	40
-Body_Free_AUTO	upper	1.3	Gy	70	40
-REM_AUTO	upper	0.25	Gy	70	40

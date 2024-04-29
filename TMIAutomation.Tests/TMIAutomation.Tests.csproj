@@ -64,6 +64,7 @@
     <Compile Include="Attributes\TheoryAttribute.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="Tests\CalculationTests.cs" />
+    <Compile Include="Tests\ClientTests.cs" />
     <Compile Include="Tests\IsocenterTests.cs" />
     <Compile Include="Tests\ObjectiveSetupTests.cs" />
     <Compile Include="TestRunner\ITestBase.cs" />
@@ -105,6 +106,7 @@
     <Content Include="Configuration\EUDOptimizationObjectives.txt" />
     <Content Include="Configuration\ESAPI15\OptimizationOptions.txt" />
     <Content Include="Configuration\ESAPI16\OptimizationOptions.txt" />
+    <Resource Include="Configuration\OARNames.txt" />
     <Content Include="Configuration\PointOptimizationObjectives.txt" />
     <Content Include="Configuration\SensitiveData.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -121,7 +123,11 @@
     <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
-robocopy $(ProjectDir)Configuration $(TargetDir)Configuration PointOptimizationObjectives.txt EUDOptimizationObjectives.txt SensitiveData.txt 
+robocopy $(ProjectDir)Configuration $(TargetDir)Configuration PointOptimizationObjectives.txt EUDOptimizationObjectives.txt SensitiveData.txt OARNames.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(ProjectDir)Dicoms $(TargetDir)Dicoms /mir /ns /nc /nfl /ndl
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>
