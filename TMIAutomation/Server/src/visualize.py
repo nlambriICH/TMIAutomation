@@ -107,6 +107,9 @@ def save_field_geometry(
     if model_name == config.MODEL_NAME_ARMS:
         linestyles[-2] = "-"  # same linestyle for isocenters on the arms
         angles[-2:] = 0
+    if config.YML["coll_pelvis"]:
+        angles[0] = 0
+        angles[1] = 0
 
     for i, (iso, jaw_X, jaw_Y, angle) in enumerate(
         zip(

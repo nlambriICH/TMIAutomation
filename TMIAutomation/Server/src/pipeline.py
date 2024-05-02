@@ -268,13 +268,72 @@ class Pipeline:
             0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
         )
 
-        if y_hat.shape[0] == 25:
-            self._build_body_cnn_output(output, y_hat, norm)
+        y_hat = self._reshape_to_90_model(y_hat)
 
-        elif y_hat.shape[0] == 30:
+        if y_hat.shape[0] == config.MODEL_OUTPUT_BODY_90:
+            self._build_body_cnn_output(output, y_hat, norm)
+        elif y_hat.shape[0] == config.MODEL_OUTPUT_ARMS_90:
             self._build_arms_cnn_output(output, y_hat, norm)
 
         return output
+
+    def _reshape_to_90_model(self, y_hat: np.ndarray) -> np.ndarray:
+        """
+        Reshape the output array of the 5_355 model to the 90 model.
+
+        Parameters:
+        - y_hat (np.ndarray): Predicted array from the 5_355 model.
+
+        Returns:
+        - np.ndarray: output array with resized shape.
+        """
+        # X and Y jaws: Fixed aperture
+        X1 = -170 / (self.image.pixel_spacing * self.image.width_resize)
+        X2 = 30 / (self.image.pixel_spacing * self.image.width_resize)
+        Y1 = -200 / (self.image.slice_thickness * self.image.num_slices)
+
+        if y_hat.shape[0] == config.MODEL_OUTPUT_BODY_5_355:
+            y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_BODY_90)
+
+            for z in range(4):
+                y_hat_new[z] = y_hat[z].item()
+
+            y_hat_new[4] = X1
+            y_hat_new[5] = X2
+            y_hat_new[6] = -X1
+            y_hat_new[7] = -X2
+
+            for z in range(10):
+                y_hat_new[z + 8] = y_hat[z + 4]
+
+            y_hat_new[18] = Y1
+            y_hat_new[19] = Y1
+
+            for z in range(5):
+                y_hat_new[z + 20] = y_hat[z + 14]
+        elif y_hat.shape[0] == config.MODEL_OUTPUT_ARMS_5_355:
+            y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_ARMS_90)
+
+            for z in range(7):
+                y_hat_new[z] = y_hat[z].item()
+
+            y_hat_new[7] = X1
+            y_hat_new[8] = X2
+            y_hat_new[9] = -X1
+            y_hat_new[10] = -X2
+
+            for z in range(12):
+                y_hat_new[z + 11] = y_hat[z + 7]
+
+            y_hat_new[23] = Y1
+            y_hat_new[24] = Y1
+
+            for z in range(5):
+                y_hat_new[z + 25] = y_hat[z + 19]
+        else:
+            y_hat_new = y_hat
+
+        return y_hat_new
 
     def _build_arms_cnn_output(
         self, output: np.ndarray, y_hat: np.ndarray, norm: float
