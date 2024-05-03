@@ -591,15 +591,27 @@ class Pipeline:
         self.postprocess(model_output)
 
         if local_opt:
-            from local_optimization import (  # pylint: disable=import-outside-toplevel
-                LocalOptimization,
-            )
+            if config.YML["coll_pelvis"]:
+                from local_optimization.optimization_5_355 import (  # pylint: disable=import-outside-toplevel
+                    LocalOptimization5355,
+                )
 
-            local_optimization = LocalOptimization(
-                self.request_info.model_name,
-                self.image,
-                self.field_geometry,
-            )
+                local_optimization = LocalOptimization5355(
+                    self.request_info.model_name,
+                    self.image,
+                    self.field_geometry,
+                )
+            else:
+                from local_optimization.optimization_90 import (  # pylint: disable=import-outside-toplevel
+                    LocalOptimization90,
+                )
+
+                local_optimization = LocalOptimization90(
+                    self.request_info.model_name,
+                    self.image,
+                    self.field_geometry,
+                )
+
             local_optimization.optimize()
 
             if not config.BUNDLED:

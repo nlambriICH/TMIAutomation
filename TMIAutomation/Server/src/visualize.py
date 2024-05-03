@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from pipeline import Image, FieldGeometry
-from local_optimization import LocalOptimization
+from local_optimization.local_optimization import LocalOptimization
 import config
 
 matplotlib.use("agg")
