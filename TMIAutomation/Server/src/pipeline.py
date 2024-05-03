@@ -268,7 +268,8 @@ class Pipeline:
             0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
         )
 
-        y_hat = self._reshape_to_90_model(y_hat)
+        if config.YML["coll_pelvis"]:
+            y_hat = self._reshape_to_90_model(y_hat)
 
         if y_hat.shape[0] == config.MODEL_OUTPUT_BODY_90:
             self._build_body_cnn_output(output, y_hat, norm)

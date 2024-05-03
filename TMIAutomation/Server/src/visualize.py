@@ -2,11 +2,14 @@
 
 import os
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from pipeline import Image, FieldGeometry
 from local_optimization import LocalOptimization
 import config
+
+matplotlib.use("agg")
 
 
 def save_input_img(patient_id: str, image: Image) -> None:
