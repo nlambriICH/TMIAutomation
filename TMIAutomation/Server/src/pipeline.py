@@ -13,8 +13,8 @@ import imgaug.augmenters as iaa
 from imgaug.augmentables import Keypoint, KeypointsOnImage
 from onnxruntime import InferenceSession
 from scipy import ndimage
-import config
-from field_geometry_transf import (
+from src import config
+from src.field_geometry_transf import (
     transform_field_geometry,
     get_zero_row_idx,
     adjust_to_max_aperture,
@@ -226,7 +226,7 @@ class Pipeline:
         self.image.pixels = self._transform(image)
 
         if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
+            from src.visualize import (  # pylint: disable=import-outside-toplevel
                 save_input_img,
             )
 
@@ -268,13 +268,73 @@ class Pipeline:
             0.5  # y coord repeated 8 times + 2 times for iso thorax, set to 0
         )
 
-        if y_hat.shape[0] == 25:
-            self._build_body_cnn_output(output, y_hat, norm)
+        if config.YML["coll_pelvis"]:
+            y_hat = self._reshape_to_90_model(y_hat)
 
-        elif y_hat.shape[0] == 30:
+        if y_hat.shape[0] == config.MODEL_OUTPUT_BODY_90:
+            self._build_body_cnn_output(output, y_hat, norm)
+        elif y_hat.shape[0] == config.MODEL_OUTPUT_ARMS_90:
             self._build_arms_cnn_output(output, y_hat, norm)
 
         return output
+
+    def _reshape_to_90_model(self, y_hat: np.ndarray) -> np.ndarray:
+        """
+        Reshape the output array of the 5_355 model to the 90 model.
+
+        Parameters:
+        - y_hat (np.ndarray): Predicted array from the 5_355 model.
+
+        Returns:
+        - np.ndarray: output array with resized shape.
+        """
+        # X and Y jaws: Fixed aperture
+        X1 = -170 / (self.image.pixel_spacing * self.image.width_resize)
+        X2 = 30 / (self.image.pixel_spacing * self.image.width_resize)
+        Y1 = -200 / (self.image.slice_thickness * self.image.num_slices)
+
+        if y_hat.shape[0] == config.MODEL_OUTPUT_BODY_5_355:
+            y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_BODY_90)
+
+            for z in range(4):
+                y_hat_new[z] = y_hat[z]
+
+            y_hat_new[4] = X1
+            y_hat_new[5] = X2
+            y_hat_new[6] = -X2
+            y_hat_new[7] = -X1
+
+            for z in range(10):
+                y_hat_new[z + 8] = y_hat[z + 4]
+
+            y_hat_new[18] = Y1
+            y_hat_new[19] = Y1
+
+            for z in range(5):
+                y_hat_new[z + 20] = y_hat[z + 14]
+        elif y_hat.shape[0] == config.MODEL_OUTPUT_ARMS_5_355:
+            y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_ARMS_90)
+
+            for z in range(7):
+                y_hat_new[z] = y_hat[z]
+
+            y_hat_new[7] = X1
+            y_hat_new[8] = X2
+            y_hat_new[9] = -X2
+            y_hat_new[10] = -X1
+
+            for z in range(12):
+                y_hat_new[z + 11] = y_hat[z + 7]
+
+            y_hat_new[23] = Y1
+            y_hat_new[24] = Y1
+
+            for z in range(5):
+                y_hat_new[z + 25] = y_hat[z + 19]
+        else:
+            y_hat_new = y_hat
+
+        return y_hat_new
 
     def _build_arms_cnn_output(
         self, output: np.ndarray, y_hat: np.ndarray, norm: float
@@ -531,26 +591,38 @@ class Pipeline:
         self.postprocess(model_output)
 
         if local_opt:
-            from local_optimization import (  # pylint: disable=import-outside-toplevel
-                LocalOptimization,
-            )
+            if config.YML["coll_pelvis"]:
+                from src.local_optimization.optimization_5_355 import (  # pylint: disable=import-outside-toplevel
+                    LocalOptimization5355,
+                )
 
-            local_optimization = LocalOptimization(
-                self.request_info.model_name,
-                self.image,
-                self.field_geometry,
-            )
+                local_optimization = LocalOptimization5355(
+                    self.request_info.model_name,
+                    self.image,
+                    self.field_geometry,
+                )
+            else:
+                from src.local_optimization.optimization_90 import (  # pylint: disable=import-outside-toplevel
+                    LocalOptimization90,
+                )
+
+                local_optimization = LocalOptimization90(
+                    self.request_info.model_name,
+                    self.image,
+                    self.field_geometry,
+                )
+
             local_optimization.optimize()
 
             if not config.BUNDLED:
-                from visualize import (  # pylint: disable=import-outside-toplevel
+                from src.visualize import (  # pylint: disable=import-outside-toplevel
                     save_local_opt,
                 )
 
                 save_local_opt(self.patient_id, self.image, local_optimization)
 
         if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
+            from src.visualize import (  # pylint: disable=import-outside-toplevel
                 save_field_geometry,
             )
 

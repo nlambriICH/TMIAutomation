@@ -6,13 +6,15 @@ import logging
 from flask import Flask, Response, request, jsonify, abort
 import onnxruntime
 import yaml
-import config
-from pipeline import Pipeline, RequestInfo
+from src import config
+from src.pipeline import Pipeline, RequestInfo
 
 app = Flask(__name__)
 
 try:
-    model_path = os.path.join("models", f"{config.MODEL_NAME_BODY}.onnx")
+    model_path = os.path.join(
+        "models", config.MODEL_DIR, f"{config.MODEL_NAME_BODY}.onnx"
+    )
     config.ORT_SESSION_BODY = onnxruntime.InferenceSession(model_path)
     logging.info("Loaded model %s from %s.", config.MODEL_NAME_BODY, model_path)
 except Exception:  # pylint: disable=broad-exception-caught
@@ -21,7 +23,9 @@ except Exception:  # pylint: disable=broad-exception-caught
     )
 
 try:
-    model_path = os.path.join("models", f"{config.MODEL_NAME_ARMS}.onnx")
+    model_path = os.path.join(
+        "models", config.MODEL_DIR, f"{config.MODEL_NAME_ARMS}.onnx"
+    )
     config.ORT_SESSION_ARMS = onnxruntime.InferenceSession(model_path)
     logging.info("Loaded model %s from %s.", config.MODEL_NAME_ARMS, model_path)
 except Exception:  # pylint: disable=broad-exception-caught

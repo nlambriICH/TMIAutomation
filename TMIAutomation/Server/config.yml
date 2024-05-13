@@ -1,3 +1,4 @@
+coll_pelvis: true
 end_port: 6000
 field_overlap_pixels: 10
 log_level: INFO

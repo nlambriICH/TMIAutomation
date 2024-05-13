@@ -2,11 +2,14 @@
 
 import os
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from pipeline import Image, FieldGeometry
-from local_optimization import LocalOptimization
-import config
+from src.pipeline import Image, FieldGeometry
+from src.local_optimization.local_optimization import LocalOptimization
+from src import config
+
+matplotlib.use("agg")
 
 
 def save_input_img(patient_id: str, image: Image) -> None:
@@ -107,6 +110,8 @@ def save_field_geometry(
     if model_name == config.MODEL_NAME_ARMS:
         linestyles[-2] = "-"  # same linestyle for isocenters on the arms
         angles[-2:] = 0
+    if config.YML["coll_pelvis"]:
+        angles[:2] = 0
 
     for i, (iso, jaw_X, jaw_Y, angle) in enumerate(
         zip(
