@@ -13,8 +13,8 @@ import imgaug.augmenters as iaa
 from imgaug.augmentables import Keypoint, KeypointsOnImage
 from onnxruntime import InferenceSession
 from scipy import ndimage
-import config
-from field_geometry_transf import (
+from src import config
+from src.field_geometry_transf import (
     transform_field_geometry,
     get_zero_row_idx,
     adjust_to_max_aperture,
@@ -226,7 +226,7 @@ class Pipeline:
         self.image.pixels = self._transform(image)
 
         if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
+            from src.visualize import (  # pylint: disable=import-outside-toplevel
                 save_input_img,
             )
 
@@ -297,12 +297,12 @@ class Pipeline:
             y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_BODY_90)
 
             for z in range(4):
-                y_hat_new[z] = y_hat[z].item()
+                y_hat_new[z] = y_hat[z]
 
             y_hat_new[4] = X1
             y_hat_new[5] = X2
-            y_hat_new[6] = -X1
-            y_hat_new[7] = -X2
+            y_hat_new[6] = -X2
+            y_hat_new[7] = -X1
 
             for z in range(10):
                 y_hat_new[z + 8] = y_hat[z + 4]
@@ -316,12 +316,12 @@ class Pipeline:
             y_hat_new = np.zeros(shape=config.MODEL_OUTPUT_ARMS_90)
 
             for z in range(7):
-                y_hat_new[z] = y_hat[z].item()
+                y_hat_new[z] = y_hat[z]
 
             y_hat_new[7] = X1
             y_hat_new[8] = X2
-            y_hat_new[9] = -X1
-            y_hat_new[10] = -X2
+            y_hat_new[9] = -X2
+            y_hat_new[10] = -X1
 
             for z in range(12):
                 y_hat_new[z + 11] = y_hat[z + 7]
@@ -592,7 +592,7 @@ class Pipeline:
 
         if local_opt:
             if config.YML["coll_pelvis"]:
-                from local_optimization.optimization_5_355 import (  # pylint: disable=import-outside-toplevel
+                from src.local_optimization.optimization_5_355 import (  # pylint: disable=import-outside-toplevel
                     LocalOptimization5355,
                 )
 
@@ -602,7 +602,7 @@ class Pipeline:
                     self.field_geometry,
                 )
             else:
-                from local_optimization.optimization_90 import (  # pylint: disable=import-outside-toplevel
+                from src.local_optimization.optimization_90 import (  # pylint: disable=import-outside-toplevel
                     LocalOptimization90,
                 )
 
@@ -615,14 +615,14 @@ class Pipeline:
             local_optimization.optimize()
 
             if not config.BUNDLED:
-                from visualize import (  # pylint: disable=import-outside-toplevel
+                from src.visualize import (  # pylint: disable=import-outside-toplevel
                     save_local_opt,
                 )
 
                 save_local_opt(self.patient_id, self.image, local_optimization)
 
         if not config.BUNDLED:
-            from visualize import (  # pylint: disable=import-outside-toplevel
+            from src.visualize import (  # pylint: disable=import-outside-toplevel
                 save_field_geometry,
             )
 

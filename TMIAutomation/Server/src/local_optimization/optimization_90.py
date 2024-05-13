@@ -5,7 +5,7 @@ import logging
 import numpy as np
 from gradient_free_optimizers import GridSearchOptimizer
 from src import config
-from local_optimization.local_optimization import LocalOptimization
+from src.local_optimization.local_optimization import LocalOptimization
 
 
 class LocalOptimization90(LocalOptimization):

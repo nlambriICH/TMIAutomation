@@ -6,8 +6,8 @@ import logging
 from flask import Flask, Response, request, jsonify, abort
 import onnxruntime
 import yaml
-import config
-from pipeline import Pipeline, RequestInfo
+from src import config
+from src.pipeline import Pipeline, RequestInfo
 
 app = Flask(__name__)
 

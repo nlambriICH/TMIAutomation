@@ -3,7 +3,7 @@ and related fields for the models output with 5/355 deg collimator angle on the 
 
 import logging
 from src import config
-from local_optimization.local_optimization import LocalOptimization
+from src.local_optimization.local_optimization import LocalOptimization
 
 
 class LocalOptimization5355(LocalOptimization):
@@ -97,12 +97,14 @@ class LocalOptimization5355(LocalOptimization):
         )
 
         # Fix overlap of pelvis and abdomen field
-        self.field_geometry.jaws_X_pix[3, 0] = (
+        min_aperture = (
             self.field_geometry.isocenters_pix[0, 2]
             - self.field_geometry.isocenters_pix[2, 2]
             + self.field_geometry.jaws_Y_pix[0, 1]
             - self.field_overlap_pixels
         ) * self.image.aspect_ratio
+        if abs(self.field_geometry.jaws_X_pix[3, 0]) < abs(min_aperture):
+            self.field_geometry.jaws_X_pix[3, 0] = min_aperture
 
     def _adjust_field_geometry_arms(self) -> None:
         x_iliac = (
@@ -154,15 +156,12 @@ class LocalOptimization5355(LocalOptimization):
             ) / 2
 
             # Ensure overlap of abdominal field (lower) and pelvic field (upper), with an overlap specified in config.yml
-            min_aperture = -(  # minimum aperture of the lower abdominal field needed to guarantee minimum overlap
-                (
-                    self.field_geometry.isocenters_pix[2, 2]
-                    - self.field_geometry.isocenters_pix[0, 2]
-                    + self.field_overlap_pixels
-                    - self.field_geometry.jaws_Y_pix[0, 1]
-                )
-                * self.image.aspect_ratio
-            )
+            min_aperture = (
+                self.field_geometry.isocenters_pix[0, 2]
+                - self.field_geometry.isocenters_pix[2, 2]
+                + self.field_geometry.jaws_Y_pix[0, 1]
+                - self.field_overlap_pixels
+            ) * self.image.aspect_ratio
             if abs(self.field_geometry.jaws_X_pix[3, 0]) < abs(min_aperture):
                 self.field_geometry.jaws_X_pix[3, 0] = min_aperture
 
@@ -172,6 +171,13 @@ class LocalOptimization5355(LocalOptimization):
                 - self.field_geometry.isocenters_pix[2, 2]
                 + self.field_overlap_pixels
             ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[7, 0]
+
+            # Ensure overlap of shoulders field (upper) and head field (lower), with an overlap specified in config.yml
+            self.field_geometry.jaws_X_pix[6, 1] = (
+                self.field_geometry.isocenters_pix[8, 2]
+                - self.field_geometry.isocenters_pix[6, 2]
+                + self.field_overlap_pixels
+            ) * self.image.aspect_ratio + self.field_geometry.jaws_X_pix[9, 0]
 
     def optimize(self) -> None:
         """Search the 'x' pixel coordinates of the maximum extension
