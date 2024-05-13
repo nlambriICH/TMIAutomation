@@ -40,6 +40,8 @@ namespace TMIAutomation
                                                                                                    600,
                                                                                                    "ARC",
                                                                                                    "");
+            double collimatorAngleFirstIso = 90;
+            double collimatorAngleSecondIso = 90;
             if (modelName == Client.MODEL_NAME_BODY)
             {
                 for (int i = isocenters.Count() - 3; i >= 0; i -= 2) // -3 because of body model (skip last 2 iso for arms)
@@ -49,10 +51,17 @@ namespace TMIAutomation
                     if (i == 9) isocenter.y -= 20; // shift y-coord toward the brain (anterior)
                     VRect<double> jawPositions = new VRect<double>(jawX[firstIsoInGroup][0], jawY[firstIsoInGroup][0], jawX[firstIsoInGroup][1], jawY[firstIsoInGroup][1]);
                     LogNewBeamInfo(targetPlan, isocenter, jawPositions);
+                    
+                    if (i == 1 && Client.collPelvis)
+                    {
+                        collimatorAngleFirstIso = 355;
+                        collimatorAngleSecondIso = 5;
+                    }
+
                     targetPlan.AddArcBeam(
                         sourcePlanBeamParams,
                         jawPositions,
-                        90,
+                        collimatorAngleFirstIso,
                         179.9,
                         180.1,
                         GantryDirection.CounterClockwise,
@@ -68,7 +77,7 @@ namespace TMIAutomation
                     targetPlan.AddArcBeam(
                         sourcePlanBeamParams,
                         jawPositions,
-                        90,
+                        collimatorAngleSecondIso,
                         180.1,
                         179.9,
                         GantryDirection.Clockwise,
@@ -90,7 +99,7 @@ namespace TMIAutomation
                     targetPlan.AddArcBeam(
                         sourcePlanBeamParams,
                         jawPositions,
-                        90,
+                        collimatorAngleFirstIso,
                         179.9,
                         180.1,
                         GantryDirection.CounterClockwise,
@@ -106,7 +115,7 @@ namespace TMIAutomation
                     targetPlan.AddArcBeam(
                         sourcePlanBeamParams,
                         jawPositions,
-                        90,
+                        collimatorAngleSecondIso,
                         180.1,
                         179.9,
                         GantryDirection.Clockwise,
@@ -150,13 +159,19 @@ namespace TMIAutomation
                 );
 
                 // Isocenters pelvis
+                if (Client.collPelvis)
+                {
+                    collimatorAngleFirstIso = 355;
+                    collimatorAngleSecondIso = 5;
+                }
+
                 VVector isocenterPelivs = isoRounded[0];
                 VRect<double> jawPositionsPelvis = new VRect<double>(jawX[0][0], jawY[0][0], jawX[0][1], jawY[0][1]);
                 LogNewBeamInfo(targetPlan, isocenterPelivs, jawPositionsPelvis);
                 targetPlan.AddArcBeam(
                     sourcePlanBeamParams,
                     jawPositionsPelvis,
-                    90,
+                    collimatorAngleFirstIso,
                     179.9,
                     180.1,
                     GantryDirection.CounterClockwise,
@@ -170,7 +185,7 @@ namespace TMIAutomation
                 targetPlan.AddArcBeam(
                     sourcePlanBeamParams,
                     jawPositionsPelvis,
-                    90,
+                    collimatorAngleSecondIso,
                     180.1,
                     179.9,
                     GantryDirection.Clockwise,

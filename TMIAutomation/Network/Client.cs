@@ -13,8 +13,11 @@ namespace TMIAutomation
     public static class Client
     {
         private static readonly ILogger logger = Log.ForContext(typeof(Client));
+        private static readonly string serverConfig = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "dist", "app", "config.yml");
         public static readonly string MODEL_NAME_BODY = "body_cnn";
         public static readonly string MODEL_NAME_ARMS = "arms_cnn";
+        public static readonly bool collPelvis = GetCollPelvis();
+        private static readonly int? port = GetServerPort();
 
         public static Dictionary<string, List<List<double>>> GetFieldGeometry(string modelName, string dicomPath, string upperPTVId, List<string> oarIds)
         {
@@ -31,7 +34,7 @@ namespace TMIAutomation
                         IdOARs = oarIds
                     };
 
-                    int port = GetServerPort() ?? throw new InvalidOperationException("Could not retrieve the server port.");
+                    if (port == null) throw new InvalidOperationException("Could not retrieve the server port.");
                     StringContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
 
                     logger.Information("Sending request {@request}", request);
@@ -51,11 +54,26 @@ namespace TMIAutomation
             return fieldGeometry;
         }
 
+        private static bool GetCollPelvis()
+        {
+            bool collPelvis = false;
+            logger.Verbose("Reading coll_pelvis from {serverConfig}", serverConfig);
+            foreach (string line in File.ReadLines(serverConfig))
+            {
+                if (line.StartsWith("coll_pelvis:"))
+                {
+                    collPelvis = bool.Parse(line.Split(':').Last());
+                    logger.Verbose("Retrieved coll_pelvis {coll_pelvis}", collPelvis);
+                    break;
+                }
+            }
+
+            return collPelvis;
+        }
+
         private static int? GetServerPort()
         {
             int? port = null;
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string serverConfig = Path.Combine(assemblyDir, "dist", "app", "config.yml");
             logger.Verbose("Reading port from {serverConfig}", serverConfig);
             foreach (string line in File.ReadLines(serverConfig))
             {
