@@ -160,6 +160,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
     <Compile Include="ViewModel\OARSelectionViewModel.cs" />
+    <Compile Include="ViewModel\ScheduleViewModel.cs" />
     <Compile Include="ViewModel\StructureOpViewModel.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
@@ -167,6 +168,9 @@
     <Compile Include="ViewModel\UpperViewModel.cs" />
     <Compile Include="View\OARSelection.xaml.cs">
       <DependentUpon>OARSelection.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ScheduleTabItem.xaml.cs">
+      <DependentUpon>ScheduleTabItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\StructureOpWindow.xaml.cs">
       <DependentUpon>StructureOpWindow.xaml</DependentUpon>
@@ -209,6 +213,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\OARSelection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\ScheduleTabItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -67,7 +68,16 @@ namespace VMS.TPS
                                context.Patient.FirstName,
                                context.Patient.Id
                                );
-            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine;
+
+            bool schedule = false;
+            foreach (Course course in context.Patient.Courses)
+            {
+                var upperBodyPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine);
+                var lowerExtremitiesPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine);
+                schedule = upperBodyPlans.Any() && lowerExtremitiesPlans.Any();
+            }
+            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine; // false if image == null
+
             context.Patient.BeginModifications();
 
             // Create and show the main window on a separate thread
@@ -79,14 +89,9 @@ namespace VMS.TPS
 
                     MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
-                    if (feetFirstSupine)
-                    {
-                        mainWindow.LowerTabItem.IsSelected = true;
-                    }
-                    else
-                    {
-                        mainWindow.UpperTabItem.IsSelected = true;
-                    }
+                    mainWindow.ScheduleTabItem.IsSelected = schedule;
+                    mainWindow.LowerTabItem.IsSelected = !schedule && feetFirstSupine;
+                    mainWindow.UpperTabItem.IsSelected = !schedule && !feetFirstSupine;
                     mainWindow.ShowDialog();
                 }
                 catch (Exception exc)
