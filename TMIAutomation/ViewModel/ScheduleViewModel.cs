@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel
 {
@@ -86,6 +83,43 @@ namespace TMIAutomation.ViewModel
             }
         }
 
+        private List<string> scheduleCourses;
+        public List<string> ScheduleCourses
+        {
+            get => scheduleCourses;
+            set
+            {
+                Set(ref scheduleCourses, value);
+                SelectedScheduleCourseId = this.scheduleCourses.Count != 0 ? this.scheduleCourses[0] : string.Empty;
+            }
+        }
+
+        private string selectedScheduleCourseId;
+        public string SelectedScheduleCourseId
+        {
+            get => selectedScheduleCourseId;
+            set
+            {
+                if (selectedScheduleCourseId != value)
+                {
+                    Set(ref selectedScheduleCourseId, value);
+                }
+            }
+        }
+
+        private DateTime selectedDate;
+        public DateTime SelectedDate
+        {
+            get => selectedDate;
+            set
+            {
+                if (selectedDate != value)
+                {
+                    Set(ref selectedDate, value);
+                }
+            }
+        }
+
         private readonly ModelBase modelBase;
 
         public ICommand StartExecutionCommand { get; }
@@ -101,6 +135,7 @@ namespace TMIAutomation.ViewModel
         {
             this.modelBase = modelBase;
             StartExecutionCommand = new RelayCommand(StartExecution);
+            SelectedDate = DateTime.Today;
             RetrieveCourses();
         }
 
@@ -112,6 +147,7 @@ namespace TMIAutomation.ViewModel
         private async void RetrieveCourses()
         {
             Courses = await this.modelBase.GetCoursesAsync();
+            ScheduleCourses = await this.modelBase.GetCoursesAsync(schedule: true);
         }
 
         private async void RetrieveUpperPlans(string courseId)
@@ -129,10 +165,34 @@ namespace TMIAutomation.ViewModel
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Scheduling");
             IProgress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
             IProgress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
-            ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
-            pbWindow.Show();
+            bool success = true; // show "Complete" message box
 
-
+            try
+            {
+                await this.modelBase.ComputeDisplacements(this.selectedCourseId,
+                                                          this.selectedUpperPlanId,
+                                                          this.selectedLowerPlanId,
+                                                          this.selectedScheduleCourseId,
+                                                          this.selectedDate,
+                                                          progress,
+                                                          message);
+            }
+            catch (Exception e)
+            {
+                success = false;
+                throw new Exception("An error occurred during the lower-extremities workflow.", e);
+            }
+            finally
+            {
+                pbViewModel.ResetProgress();
+                if (success)
+                {
+                    MessageBox.Show("Completed!",
+                    "Lower-extremities optimization",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                }
+            }
         }
     }
 }

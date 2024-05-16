@@ -1,0 +1,122 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="VMS.TPS.Common.Model.Types" #>
+<#= patient.FirstName #> <#= patient.LastName #> TMLI <#= treatmentDate.ToString("D") #>
+
+Spostamenti: Isocentri BODY
+
+Isocentro più caudale da intersezione reperi <#= upperMarkersLocation #>: <#= Math.Abs(Math.Round(upperIsocenters.Last().z, 0)) / 10 #> cm
+Note: ...
+
+<#
+for (int i = 0; i < upperIsocenters.Count; ++i)
+{
+VVector displacement = i == 0 ? upperIsocenters[i] : upperIsocenters[i] - upperIsocenters[i - 1];
+double roundedDispX = Math.Abs(Math.Round(displacement.x, 0)) / 10;
+double roundedDispY = Math.Abs(Math.Round(displacement.y, 0)) / 10;
+double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
+string explainDisp = i == 0 ?
+        $"Rispetto a intersezione dei reperi su {upperMarkersLocation} spostarsi di:"
+        : $"Rispetto a isocentro {i} spostarsi di:";
+#>
+Isocentro <#= i + 1 #>: <#= scheduleUpperPlanName[i] #>
+    <#= explainDisp #>
+<#
+if (displacement.x > 0)
+{
+#>
+        <#= roundedDispX #> cm verso sinistra del paziente
+<#
+}
+else if (displacement.x < 0)
+{
+#>
+        <#= roundedDispX #> cm verso destra del paziente
+<#
+}
+if (displacement.y > 0)
+{
+#>
+        <#= roundedDispY #> cm verso dorso del paziente
+<#
+}
+else if (displacement.y < 0)
+{
+#>
+        <#= roundedDispY #> cm verso ventre del paziente
+<#
+}
+if (displacement.z > 0)
+{
+#>
+        <#= roundedDispZ #> cm verso testa del paziente
+<#
+}
+else if (displacement.z < 0)
+{
+#>
+        <#= roundedDispZ #> cm verso piedi del paziente
+<#
+}
+}
+#>
+
+
+Spostamenti: Isocentri GAMBE
+
+Isocentro più caudale da intersezione reperi <#= lowerMarkersLocation #>: <#= Math.Abs(Math.Round(lowerIsocenters.Last().z, 0)) / 10 #> cm
+Note: ...
+
+<#
+for (int i = 0; i < lowerIsocenters.Count; ++i)
+{
+VVector displacement = i == 0 ? lowerIsocenters[i] : lowerIsocenters[i] - lowerIsocenters[i - 1];
+double roundedDispX = Math.Abs(Math.Round(displacement.x, 0)) / 10;
+double roundedDispY = Math.Abs(Math.Round(displacement.y, 0)) / 10;
+double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
+string explainDisp = i == 0 ?
+        $"Rispetto a intersezione dei reperi {lowerMarkersLocation} spostarsi di:"
+        : $"Rispetto a isocentro {i + upperIsocenters.Count} spostarsi di:";
+#>
+Isocentro <#= i + upperIsocenters.Count + 1 #>: <#= scheduleLowerPlanName[i] #>
+    <#= explainDisp #>
+<#
+if (displacement.x > 0)
+{
+#>
+        <#= roundedDispX #> cm verso destra del paziente
+<#
+}
+else if (displacement.x < 0)
+{
+#>
+        <#= roundedDispX #> cm verso sinistra del paziente
+<#
+}
+if (displacement.y > 0)
+{
+#>
+        <#= roundedDispY #> cm verso dorso del paziente
+<#
+}
+else if (displacement.y < 0)
+{
+#>
+        <#= roundedDispY #> cm verso ventre del paziente
+<#
+}
+if (displacement.z > 0)
+{
+#>
+        <#= roundedDispZ #> cm verso piedi del paziente
+<#
+}
+else if (displacement.z < 0)
+{
+#>
+        <#= roundedDispZ #> cm verso testa del paziente
+<#
+}
+}
+#>

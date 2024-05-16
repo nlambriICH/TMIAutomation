@@ -86,6 +86,9 @@
       <HintPath>..\packages\SerilogTraceListener.3.2.0\lib\net46\SerilogTraceListener.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.CodeDom, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CodeDom.8.0.0\lib\net462\System.CodeDom.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
@@ -136,6 +139,13 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
+    <Compile Include="Model\Schedule\Displacements.cs" />
+    <Compile Include="Model\Schedule\Templates\DisplacementsPage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DisplacementsPage.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Schedule\Templates\DisplacementsPageCode.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\DICOMServices.cs" />
     <Compile Include="Helper\Configuration\ConfigExport.cs" />
@@ -197,6 +207,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Theme\ComboBoxTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Theme\DatePickerTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -269,6 +283,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Configuration\DCMExport.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Model\Schedule\Templates\DisplacementsPage.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DisplacementsPage.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

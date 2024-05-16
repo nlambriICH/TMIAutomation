@@ -15,6 +15,7 @@
                 <ResourceDictionary Source="../Theme/ComboBoxTheme.xaml"/>
                 <ResourceDictionary Source="../Theme/TextBlockTheme.xaml"/>
                 <ResourceDictionary Source="../Theme/CheckBoxTheme.xaml"/>
+                <ResourceDictionary Source="../Theme/DatePickerTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -24,13 +25,13 @@
         <TextBlock Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="230,95,0,0"
+                   Margin="50,90,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Course"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,95,0,0"
+                  Margin="215,90,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding Courses}"
                   IsSynchronizedWithCurrentItem="True"
@@ -39,13 +40,13 @@
         <TextBlock Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="230,150,0,0"
+                   Margin="50,140,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Upper Plan"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,150,0,0"
+                  Margin="215,140,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding UpperPlans}"
                   IsSynchronizedWithCurrentItem="True"
@@ -54,19 +55,54 @@
         <TextBlock Width="130"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="230,210,0,0"
+                   Margin="50,190,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Lower Plan"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,210,0,0"
+                  Margin="215,190,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding LowerPlans}"
                   IsSynchronizedWithCurrentItem="True"
                   SelectedItem="{Binding SelectedLowerPlanId}"/>
 
-        <Button HorizontalAlignment="Left"
+        <TextBlock Width="185"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Top"
+                   Margin="0,90,200,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Select Scheduling Course"/>
+
+        <ComboBox HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Margin="0,90,50,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding ScheduleCourses}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedScheduleCourseId}"/>
+
+        <TextBlock Width="185"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Top"
+                   Margin="0,152,200,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Select Treatment Date"/>
+
+        <DatePicker HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,140,50,0"
+                    Style="{StaticResource DatePickerTheme}"
+                    SelectedDate="{Binding SelectedDate, Mode=TwoWay}"
+                    Name="TreatmentDate">
+            <DatePicker.Resources>
+                <Style TargetType="DatePickerTextBox">
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+            </DatePicker.Resources>
+        </DatePicker>
+
+            <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="325,300,0,0"
                 Content="Start"

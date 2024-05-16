@@ -22,19 +22,28 @@ namespace TMIAutomation
             this.esapiWorker = esapiWorker;
         }
 
-        public Task<List<string>> GetCoursesAsync()
+        public Task<List<string>> GetCoursesAsync(bool schedule = false)
         {
-            return this.esapiWorker.RunAsync(scriptContext => GetCourses(scriptContext), isWriteable: false);
+            return this.esapiWorker.RunAsync(scriptContext => GetCourses(scriptContext, schedule), isWriteable: false);
         }
 
-        public List<string> GetCourses(PluginScriptContext scriptContext)
+        public List<string> GetCourses(PluginScriptContext scriptContext, bool schedule = false)
         {
-            List<Course> orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.HistoryDateTime).ToList();
-
-            Course courseInScope = scriptContext.Course;
-            if (orderedCourses.Remove(courseInScope))
+            List<Course> orderedCourses;
+            if (schedule)
             {
-                orderedCourses.Insert(0, courseInScope);
+                orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.PlanSetups.Count(ps => ps.ApprovalStatus == PlanSetupApprovalStatus.PlanningApproved
+                || ps.ApprovalStatus == PlanSetupApprovalStatus.TreatmentApproved
+                || ps.ApprovalStatus == PlanSetupApprovalStatus.ExternallyApproved)).ToList();
+            }
+            else
+            {
+                orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.HistoryDateTime).ToList();
+                Course courseInScope = scriptContext.Course;
+                if (orderedCourses.Remove(courseInScope))
+                {
+                    orderedCourses.Insert(0, courseInScope);
+                }
             }
 
             return orderedCourses.Select(c => c.Id).ToList();
@@ -269,5 +278,21 @@ namespace TMIAutomation
             return optimization.ComputeAsync(progress, message);
         }
 #endif
+        public Task ComputeDisplacements(string courseId,
+                                         string upperPlanId,
+                                         string lowerPlanId,
+                                         string scheduleCourseId,
+                                         DateTime treatmentDate,
+                                         IProgress<double> progress,
+                                         IProgress<string> message)
+        {
+            Displacements schedule = new Displacements(this.esapiWorker,
+                                                       courseId,
+                                                       upperPlanId,
+                                                       lowerPlanId,
+                                                       scheduleCourseId,
+                                                       treatmentDate);
+            return schedule.ComputeAsync(progress, message);
+        }
     }
 }
