@@ -22,16 +22,22 @@ namespace TMIAutomation.Tests
                 : this;
         }
 
-        [Fact]
-        private void GetCourses()
+        [Theory]
+        [MemberData(nameof(GetCourses_Data))]
+        private void GetCourses(bool schedule, List<string> expectedCourses)
+        {
+            List<string> courses = modelBase.GetCourses(scriptContext, schedule);
+            Assert.Equal(expectedCourses, courses);
+        }
+
+        public static IEnumerable<object[]> GetCourses_Data()
         {
 #if ESAPI16
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+            yield return new object[] { false, new List<string> { "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
 #else
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+            yield return new object[] { false, new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CDemo", "CJunction", "CNoPlan", "LowerAuto" } };
 #endif
-            List<string> courses = modelBase.GetCourses(scriptContext);
-            Assert.Equal(expectedCourses, courses);
         }
 
         [Theory]
