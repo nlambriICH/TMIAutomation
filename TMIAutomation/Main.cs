@@ -36,7 +36,7 @@ namespace VMS.TPS
 #else
                 .MinimumLevel.Debug()
 #endif
-                .WriteTo.File(Path.Combine(logPath, "TMIJunction.log"),
+                .WriteTo.File(Path.Combine(logPath, "TMIAutomation.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
                               shared: true)
@@ -44,10 +44,10 @@ namespace VMS.TPS
 
             this.logger = Log.ForContext<Script>();
 
-            logger.Verbose("TMIJunction script instance created");
+            logger.Verbose("TMIAutomation script instance created");
 
             // Load settings to avoid null refs when static members are called from UI thread 
-            //ConfigExport.Init();
+            ConfigExport.Init();
             ConfigOARNames.Init();
             ConfigOptOptions.Init();
         }
@@ -63,7 +63,7 @@ namespace VMS.TPS
             // The ESAPI worker needs to be created in the main thread
             EsapiWorker esapiWorker = new EsapiWorker(context);
 
-            logger.Information("TMIJunction script context patient: {lastName}, {firstName} ({patientId})",
+            logger.Information("TMIAutomation script context patient: {lastName}, {firstName} ({patientId})",
                                context.Patient.LastName,
                                context.Patient.FirstName,
                                context.Patient.Id
