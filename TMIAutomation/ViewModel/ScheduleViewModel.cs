@@ -55,6 +55,7 @@ namespace TMIAutomation.ViewModel
                 if (selectedUpperPlanId != value)
                 {
                     Set(ref selectedUpperPlanId, value);
+                    CheckIsocentersOnArms(selectedCourseId, selectedUpperPlanId);
                 }
             }
         }
@@ -120,6 +121,13 @@ namespace TMIAutomation.ViewModel
             }
         }
 
+        private bool isIsoOnArmsChecked;
+        public bool IsIsoOnArmsChecked
+        {
+            get => isIsoOnArmsChecked;
+            set => Set(ref isIsoOnArmsChecked, value);
+        }
+
         private readonly ModelBase modelBase;
 
         public ICommand StartExecutionCommand { get; }
@@ -160,6 +168,11 @@ namespace TMIAutomation.ViewModel
             LowerPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Down);
         }
 
+        private async void CheckIsocentersOnArms(string courseId, string upperPlanId)
+        {
+            IsIsoOnArmsChecked = await this.modelBase.CheckIsocentersOnArmsAsync(courseId, upperPlanId);
+        }
+
         private async void StartExecution()
         {
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Scheduling");
@@ -174,6 +187,7 @@ namespace TMIAutomation.ViewModel
                                                           this.selectedLowerPlanId,
                                                           this.selectedScheduleCourseId,
                                                           this.selectedDate,
+                                                          this.isIsoOnArmsChecked,
                                                           progress,
                                                           message);
             }

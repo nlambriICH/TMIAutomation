@@ -102,7 +102,14 @@
             </DatePicker.Resources>
         </DatePicker>
 
-            <Button HorizontalAlignment="Left"
+        <CheckBox HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Margin="0,210,45,0"
+                  Content="Isocenters on arms"
+                  Style="{StaticResource CheckBoxTheme}"
+                  IsChecked="{Binding Path=IsIsoOnArmsChecked, Mode=TwoWay}"/>
+
+        <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="325,300,0,0"
                 Content="Start"

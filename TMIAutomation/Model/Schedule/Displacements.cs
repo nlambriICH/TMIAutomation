@@ -19,6 +19,7 @@ namespace TMIAutomation
         private readonly string lowerPlanId;
         private readonly string scheduleCourseId;
         private readonly DateTime treatmentDate;
+        private readonly bool isocentersOnArms;
         private static readonly string SCHEDULE_DIR = "Schedule";
 
         public Displacements(EsapiWorker esapiWorker,
@@ -26,7 +27,8 @@ namespace TMIAutomation
                              string upperPlanId,
                              string lowerPlanId,
                              string scheduleCourseId,
-                             DateTime treatmentDate)
+                             DateTime treatmentDate,
+                             bool isocentersOnArms)
         {
             this.esapiWorker = esapiWorker;
             this.courseId = courseId;
@@ -34,19 +36,21 @@ namespace TMIAutomation
             this.lowerPlanId = lowerPlanId;
             this.scheduleCourseId = scheduleCourseId;
             this.treatmentDate = treatmentDate;
+            this.isocentersOnArms = isocentersOnArms;
         }
 
         public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("Displacements context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.scheduleCourseId });
+                logger.Information("Displacements context: {@context}",
+                                   new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.scheduleCourseId, this.isocentersOnArms.ToString() });
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 IEnumerable<PlanSetup> schedulePlans = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.scheduleCourseId).PlanSetups;
 
-                DisplacementsPage page = new DisplacementsPage(upperPlan, lowerPlan, schedulePlans, this.treatmentDate);
+                DisplacementsPage page = new DisplacementsPage(upperPlan, lowerPlan, schedulePlans, this.treatmentDate, this.isocentersOnArms);
                 string content = page.TransformText();
 
                 this.SaveDisplacements(scriptContext.Patient.LastName, scriptContext.Patient.FirstName, content);
@@ -61,7 +65,8 @@ namespace TMIAutomation
                 Directory.CreateDirectory(SCHEDULE_DIR);
             }
 
-            File.WriteAllText($"{patientLastName}_{patientFirstName}_TMLI_{this.treatmentDate:ddMMyyyy}.txt", content);
+            string savePath = Path.Combine(SCHEDULE_DIR, $"{patientLastName}_{patientFirstName}_TMLI_{this.treatmentDate:ddMMyyyy}.txt");
+            File.WriteAllText(savePath, content);
         }
     }
 }

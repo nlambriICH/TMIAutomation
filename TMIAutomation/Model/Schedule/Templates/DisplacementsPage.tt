@@ -4,22 +4,40 @@
 <#@ import namespace="VMS.TPS.Common.Model.Types" #>
 <#= patient.FirstName #> <#= patient.LastName #> TMLI <#= treatmentDate.ToString("D") #>
 
+
 Spostamenti: Isocentri BODY
 
 Isocentro più caudale da intersezione reperi <#= upperMarkersLocation #>: <#= Math.Abs(Math.Round(upperIsocenters.Last().z, 0)) / 10 #> cm
 Note: ...
-
 <#
 for (int i = 0; i < upperIsocenters.Count; ++i)
 {
-VVector displacement = i == 0 ? upperIsocenters[i] : upperIsocenters[i] - upperIsocenters[i - 1];
+VVector displacement = new VVector();
+string explainDisp = string.Empty;
+if (i == 0)
+{
+    displacement = upperIsocenters[i];
+    explainDisp =  $"Rispetto a intersezione dei reperi su {upperMarkersLocation} spostarsi di:";
+}
+else if (isocentersOnArms && i == upperIsocenters.Count - 1)
+{
+    /*
+     * Skip isocenters on the arms to compute displacement
+     * of last iso wrt previous iso along the body
+     */
+    displacement = upperIsocenters[i] - upperIsocenters[i - 3];
+    explainDisp =  $"Rispetto a isocentro {i - 2} spostarsi di:"; // i - 2 for correct iso number strating from 1
+}
+else
+{
+    displacement = upperIsocenters[i] - upperIsocenters[i - 1];
+    explainDisp =  $"Rispetto a isocentro {i} spostarsi di:";
+}
 double roundedDispX = Math.Abs(Math.Round(displacement.x, 0)) / 10;
 double roundedDispY = Math.Abs(Math.Round(displacement.y, 0)) / 10;
 double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
-string explainDisp = i == 0 ?
-        $"Rispetto a intersezione dei reperi su {upperMarkersLocation} spostarsi di:"
-        : $"Rispetto a isocentro {i} spostarsi di:";
 #>
+
 Isocentro <#= i + 1 #>: <#= scheduleUpperPlanName[i] #>
     <#= explainDisp #>
 <#
@@ -59,6 +77,12 @@ else if (displacement.z < 0)
         <#= roundedDispZ #> cm verso piedi del paziente
 <#
 }
+if (isocentersOnArms && i == 2)
+{
+#>
+    Segnare posizione isocentro sulla maschera
+<#
+}
 }
 #>
 
@@ -67,7 +91,6 @@ Spostamenti: Isocentri GAMBE
 
 Isocentro più caudale da intersezione reperi <#= lowerMarkersLocation #>: <#= Math.Abs(Math.Round(lowerIsocenters.Last().z, 0)) / 10 #> cm
 Note: ...
-
 <#
 for (int i = 0; i < lowerIsocenters.Count; ++i)
 {
@@ -79,6 +102,7 @@ string explainDisp = i == 0 ?
         $"Rispetto a intersezione dei reperi {lowerMarkersLocation} spostarsi di:"
         : $"Rispetto a isocentro {i + upperIsocenters.Count} spostarsi di:";
 #>
+
 Isocentro <#= i + upperIsocenters.Count + 1 #>: <#= scheduleLowerPlanName[i] #>
     <#= explainDisp #>
 <#

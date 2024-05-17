@@ -10,6 +10,7 @@ namespace TMIAutomation.Model.Schedule.Templates
     {
         private readonly Patient patient;
         private readonly DateTime treatmentDate;
+        private readonly bool isocentersOnArms;
         private readonly List<VVector> upperIsocenters = new List<VVector> { };
         private readonly List<string> scheduleUpperPlanName = new List<string> { };
         private static readonly List<string> upperIsoLocation = new List<string> { "testa", "spalle", "torace", "addome", "pelvi" };
@@ -20,29 +21,28 @@ namespace TMIAutomation.Model.Schedule.Templates
         private readonly string lowerMarkersLocation;
 
 
-        public DisplacementsPage(ExternalPlanSetup upperPlan, ExternalPlanSetup lowerPlan, IEnumerable<PlanSetup> schedulePlans, DateTime treatmentDate)
+        public DisplacementsPage(ExternalPlanSetup upperPlan,
+                                 ExternalPlanSetup lowerPlan,
+                                 IEnumerable<PlanSetup> schedulePlans,
+                                 DateTime treatmentDate,
+                                 bool isocentersOnArms)
         {
             this.patient = upperPlan.Course.Patient;
             this.treatmentDate = treatmentDate;
+            this.isocentersOnArms = isocentersOnArms;
 
             // Upper-body
             List<Beam> beams = upperPlan.Beams.OrderByDescending(b => b.IsocenterPosition.z).ToList();
-            for (int i = 0; i < beams.Count; i += 2)
-            {
-                this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, upperPlan));
-                foreach (var schedulePlan in schedulePlans)
-                {
-                    foreach(var beam in schedulePlan.Beams.Where(b => !b.IsSetupField))
-                    {
-                        if (Math.Abs(beam.IsocenterPosition.z - beams[i].IsocenterPosition.z) < 0.01)
-                        {
-                            scheduleUpperPlanName.Add(schedulePlan.Id);
-                        }
 
-                        break;
-                    }
-                }
+            if (this.isocentersOnArms)
+            {
+                PrepareIsocentersWithArms(upperPlan, schedulePlans, beams);
             }
+            else
+            {
+                PrepareIsocentersWithoutArms(upperPlan, schedulePlans, beams);
+            }
+
             for (int i = 0; i < upperIsocenters.Count; ++i)
             {
                 if (upperIsocenters[i].Length < 100)
@@ -58,24 +58,90 @@ namespace TMIAutomation.Model.Schedule.Templates
             for (int i = 0; i < beams.Count; i += 2)
             {
                 this.lowerIsocenters.Add(lowerPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, lowerPlan));
-                foreach (var schedulePlan in schedulePlans)
-                {
-                    foreach (var beam in schedulePlan.Beams.Where(b => !b.IsSetupField))
-                    {
-                        if (Math.Abs(beam.IsocenterPosition.z - beams[i].IsocenterPosition.z) < 0.01)
-                        {
-                            scheduleLowerPlanName.Add(schedulePlan.Id);
-                        }
-
-                        break;
-                    }
-                }
+                UpdateSchedulePlans(schedulePlans, beams[i], lowerPlan.StructureSet.Image.ImagingOrientation);
             }
             for (int i = 0; i < lowerIsocenters.Count; ++i)
             {
                 if (lowerIsocenters[i].Length < 120)
                 {
-                    this.lowerMarkersLocation = i < 1 ? "sopra ginocchia" : "sotto ginocchia";
+                    if (lowerIsocenters.Count == 3)
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                this.lowerMarkersLocation = "sopra ginocchia";
+                                break;
+                            case 1:
+                                this.lowerMarkersLocation = "sulle ginocchia";
+                                break;
+                            default:
+                                this.lowerMarkersLocation = "sotto ginocchia";
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        this.lowerMarkersLocation = i < 1 ? "sopra ginocchia" : "sotto ginocchia";
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        private void PrepareIsocentersWithArms(ExternalPlanSetup upperPlan, IEnumerable<PlanSetup> schedulePlans, List<Beam> beams)
+        {
+            var beamsAlongBody = beams.Where(b => Math.Abs(upperPlan.StructureSet.Image.DicomToUser(b.IsocenterPosition, upperPlan).x) < 150).ToList();
+            Beam beamLeftArm = beams.FirstOrDefault(b => upperPlan.StructureSet.Image.DicomToUser(b.IsocenterPosition, upperPlan).x > 150);
+            Beam beamRightArm = beams.FirstOrDefault(b => upperPlan.StructureSet.Image.DicomToUser(b.IsocenterPosition, upperPlan).x < -150);
+
+            for (int i = 0; i < beamsAlongBody.Count; i += 2)
+            {
+                this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamsAlongBody[i].IsocenterPosition, upperPlan));
+                UpdateSchedulePlans(schedulePlans, beamsAlongBody[i], upperPlan.StructureSet.Image.ImagingOrientation);
+                if (i == 4)
+                {
+                    this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamLeftArm.IsocenterPosition, upperPlan));
+                    UpdateSchedulePlans(schedulePlans, beamLeftArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = scheduleUpperPlanName.Last() + " – su braccio SINISTRO";
+
+                    this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamRightArm.IsocenterPosition, upperPlan));
+                    UpdateSchedulePlans(schedulePlans, beamRightArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = scheduleUpperPlanName.Last() + " – su braccio DESTRO";
+                }
+            }
+        }
+
+        private void PrepareIsocentersWithoutArms(ExternalPlanSetup upperPlan, IEnumerable<PlanSetup> schedulePlans, List<Beam> beams)
+        {
+            for (int i = 0; i < beams.Count; i += 2)
+            {
+                this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, upperPlan));
+                UpdateSchedulePlans(schedulePlans, beams[i], upperPlan.StructureSet.Image.ImagingOrientation);
+            }
+        }
+
+        private void UpdateSchedulePlans(IEnumerable<PlanSetup> schedulePlans, Beam currentBeam, PatientOrientation orientation)
+        {
+            foreach (var schedulePlan in schedulePlans)
+            {
+                foreach (var beam in schedulePlan.Beams.Where(b => !b.IsSetupField))
+                {
+                    if (VVector.Distance(beam.IsocenterPosition, currentBeam.IsocenterPosition) < 0.01)
+                    {
+                        if (orientation == PatientOrientation.HeadFirstSupine)
+                        {
+                            scheduleUpperPlanName.Add(schedulePlan.Id);
+                        }
+                        else if (orientation == PatientOrientation.FeetFirstSupine)
+                        {
+                             scheduleLowerPlanName.Add(schedulePlan.Id);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Scheduling supported only for HFS or FFS orientation. Orientation was {orientation}");
+                        }
+                    }
 
                     break;
                 }

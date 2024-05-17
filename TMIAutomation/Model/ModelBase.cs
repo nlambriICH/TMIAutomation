@@ -82,6 +82,19 @@ namespace TMIAutomation
             return orderedPlans.Select(ps => ps.Id).ToList();
         }
 
+        public Task<bool> CheckIsocentersOnArmsAsync(string courseId, string planId)
+        {
+            return this.esapiWorker.RunAsync(scriptContext => CheckIsocentersOnArms(scriptContext, courseId, planId), isWriteable: false);
+        }
+
+        public bool CheckIsocentersOnArms(PluginScriptContext scriptContext, string courseId, string planId)
+        {
+            Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
+            PlanSetup selectedPlan = targetCourse.PlanSetups.FirstOrDefault(ps => ps.Id == planId);
+
+            return selectedPlan.Beams.Count(b => !b.IsSetupField && Math.Abs(selectedPlan.StructureSet.Image.DicomToUser(b.IsocenterPosition, selectedPlan).x) > 10) == 2;
+        }
+
         public Task<List<string>> GetPTVsFromPlanAsync(string courseId, string planId)
         {
             return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromPlan(scriptContext, courseId, planId), isWriteable: false);
@@ -283,6 +296,7 @@ namespace TMIAutomation
                                          string lowerPlanId,
                                          string scheduleCourseId,
                                          DateTime treatmentDate,
+                                         bool isocentersOnArms,
                                          IProgress<double> progress,
                                          IProgress<string> message)
         {
@@ -291,7 +305,8 @@ namespace TMIAutomation
                                                        upperPlanId,
                                                        lowerPlanId,
                                                        scheduleCourseId,
-                                                       treatmentDate);
+                                                       treatmentDate,
+                                                       isocentersOnArms);
             return schedule.ComputeAsync(progress, message);
         }
     }
