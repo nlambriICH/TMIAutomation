@@ -47,7 +47,7 @@ namespace VMS.TPS
             logger.Verbose("TMIJunction script instance created");
 
             // Load settings to avoid null refs when static members are called from UI thread 
-            ConfigExport.Init();
+            //ConfigExport.Init();
             ConfigOARNames.Init();
             ConfigOptOptions.Init();
         }
@@ -75,6 +75,7 @@ namespace VMS.TPS
                 var upperBodyPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine);
                 var lowerExtremitiesPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine);
                 schedule = upperBodyPlans.Any() && lowerExtremitiesPlans.Any();
+                if (schedule) break;
             }
             bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine; // false if image == null
 
