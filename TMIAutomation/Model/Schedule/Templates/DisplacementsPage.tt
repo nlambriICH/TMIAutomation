@@ -2,13 +2,15 @@
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="VMS.TPS.Common.Model.Types" #>
+<#@ import namespace="TMIAutomation.Language" #>
+<#@ output extension =".txt" #>
 <#= patient.FirstName #> <#= patient.LastName #> TMLI <#= treatmentDate.ToString("D") #>
 
 
-Spostamenti: Isocentri BODY
+<#= Resources.DisplacementsHeader #> <#= Resources.Body #>
 
-Isocentro più caudale da intersezione reperi <#= upperMarkersLocation #>: <#= Math.Abs(Math.Round(upperIsocenters.Last().z, 0)) / 10 #> cm
-Note: ...
+<#= Resources.MostCaudalIsoFromMarkers #> <#= upperMarkersLocation #>: <#= Math.Abs(Math.Round(upperIsocenters.Last().z, 0)) / 10 #> cm
+<#= Resources.Notes #>: ...
 <#
 for (int i = 0; i < upperIsocenters.Count; ++i)
 {
@@ -17,7 +19,7 @@ string explainDisp = string.Empty;
 if (i == 0)
 {
     displacement = upperIsocenters[i];
-    explainDisp =  $"Rispetto a intersezione dei reperi su {upperMarkersLocation} spostarsi di:";
+    explainDisp =  string.Join(" ", Resources.WrtMarkersNear, upperMarkersLocation, Resources.MoveBy);
 }
 else if (isocentersOnArms && i == upperIsocenters.Count - 1)
 {
@@ -26,71 +28,71 @@ else if (isocentersOnArms && i == upperIsocenters.Count - 1)
      * of last iso wrt previous iso along the body
      */
     displacement = upperIsocenters[i] - upperIsocenters[i - 3];
-    explainDisp =  $"Rispetto a isocentro {i - 2} spostarsi di:"; // i - 2 for correct iso number strating from 1
+    explainDisp =  string.Join(" ", Resources.WrtIsocenter, i - 2, Resources.MoveBy); // i - 2 for correct iso number strating from 1
 }
 else
 {
     displacement = upperIsocenters[i] - upperIsocenters[i - 1];
-    explainDisp =  $"Rispetto a isocentro {i} spostarsi di:";
+    explainDisp =  string.Join(" ", Resources.WrtIsocenter, i, Resources.MoveBy);
 }
 double roundedDispX = Math.Abs(Math.Round(displacement.x, 0)) / 10;
 double roundedDispY = Math.Abs(Math.Round(displacement.y, 0)) / 10;
 double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
 #>
 
-Isocentro <#= i + 1 #>: <#= scheduleUpperPlanName[i] #>
+<#= Resources.Isocenter #> <#= i + 1 #>: <#= scheduleUpperPlanName[i] #>
     <#= explainDisp #>
 <#
 if (displacement.x > 0)
 {
 #>
-        <#= roundedDispX #> cm verso sinistra del paziente
+        <#= roundedDispX #> cm <#= Resources.TowardLeftOfPatient #>
 <#
 }
 else if (displacement.x < 0)
 {
 #>
-        <#= roundedDispX #> cm verso destra del paziente
+        <#= roundedDispX #> cm <#= Resources.TowardRightOfPatient #>
 <#
 }
 if (displacement.y > 0)
 {
 #>
-        <#= roundedDispY #> cm verso dorso del paziente
+        <#= roundedDispY #> cm <#= Resources.TowardBackOfPatient #>
 <#
 }
 else if (displacement.y < 0)
 {
 #>
-        <#= roundedDispY #> cm verso ventre del paziente
+        <#= roundedDispY #> cm <#= Resources.TowardFrontOfPatient #>
 <#
 }
 if (displacement.z > 0)
 {
 #>
-        <#= roundedDispZ #> cm verso testa del paziente
+        <#= roundedDispZ #> cm <#= Resources.TowardHeadOfPatient #>
 <#
 }
 else if (displacement.z < 0)
 {
 #>
-        <#= roundedDispZ #> cm verso piedi del paziente
+        <#= roundedDispZ #> cm <#= Resources.TowardFeetOfPatient #>
 <#
 }
 if (isocentersOnArms && i == 2)
 {
 #>
-    Segnare posizione isocentro sulla maschera
+    <#= Resources.IsoOnArmsMarkerWarning #>
 <#
 }
 }
 #>
 
 
-Spostamenti: Isocentri GAMBE
+<#= Resources.DisplacementsHeader #> <#= Resources.Legs #>
 
-Isocentro più caudale da intersezione reperi <#= lowerMarkersLocation #>: <#= Math.Abs(Math.Round(lowerIsocenters.Last().z, 0)) / 10 #> cm
-Note: ...
+<#= Resources.MostCaudalIsoFromMarkers #> <#= lowerMarkersLocation #>: <#= Math.Abs(Math.Round(lowerIsocenters.Last().z, 0)) / 10 #> cm
+<#= Resources.Notes #>: ...
 <#
 for (int i = 0; i < lowerIsocenters.Count; ++i)
 {
@@ -99,47 +101,47 @@ double roundedDispX = Math.Abs(Math.Round(displacement.x, 0)) / 10;
 double roundedDispY = Math.Abs(Math.Round(displacement.y, 0)) / 10;
 double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
 string explainDisp = i == 0 ?
-        $"Rispetto a intersezione dei reperi {lowerMarkersLocation} spostarsi di:"
-        : $"Rispetto a isocentro {i + upperIsocenters.Count} spostarsi di:";
+        string.Join(" ", Resources.WrtMarkersNear, lowerMarkersLocation, Resources.MoveBy)
+        : string.Join(" ", Resources.WrtIsocenter, i + upperIsocenters.Count, Resources.MoveBy);
 #>
 
-Isocentro <#= i + upperIsocenters.Count + 1 #>: <#= scheduleLowerPlanName[i] #>
+<#= Resources.Isocenter #> <#= i + upperIsocenters.Count + 1 #>: <#= scheduleLowerPlanName[i] #>
     <#= explainDisp #>
 <#
 if (displacement.x > 0)
 {
 #>
-        <#= roundedDispX #> cm verso destra del paziente
+        <#= roundedDispX #> cm <#= Resources.TowardRightOfPatient #>
 <#
 }
 else if (displacement.x < 0)
 {
 #>
-        <#= roundedDispX #> cm verso sinistra del paziente
+        <#= roundedDispX #> cm <#= Resources.TowardLeftOfPatient #>
 <#
 }
 if (displacement.y > 0)
 {
 #>
-        <#= roundedDispY #> cm verso dorso del paziente
+        <#= roundedDispY #> cm <#= Resources.TowardBackOfPatient #>
 <#
 }
 else if (displacement.y < 0)
 {
 #>
-        <#= roundedDispY #> cm verso ventre del paziente
+        <#= roundedDispY #> cm <#= Resources.TowardFrontOfPatient #>
 <#
 }
 if (displacement.z > 0)
 {
 #>
-        <#= roundedDispZ #> cm verso piedi del paziente
+        <#= roundedDispZ #> cm <#= Resources.TowardFeetOfPatient #>
 <#
 }
 else if (displacement.z < 0)
 {
 #>
-        <#= roundedDispZ #> cm verso testa del paziente
+        <#= roundedDispZ #> cm <#= Resources.TowardHeadOfPatient #>
 <#
 }
 }

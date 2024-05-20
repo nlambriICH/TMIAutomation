@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
+using TMIAutomation.Language;
 
 namespace TMIAutomation.Model.Schedule.Templates
 {
@@ -13,13 +14,12 @@ namespace TMIAutomation.Model.Schedule.Templates
         private readonly bool isocentersOnArms;
         private readonly List<VVector> upperIsocenters = new List<VVector> { };
         private readonly List<string> scheduleUpperPlanName = new List<string> { };
-        private static readonly List<string> upperIsoLocation = new List<string> { "testa", "spalle", "torace", "addome", "pelvi" };
+        private static readonly List<string> upperIsoLocation = new List<string> { Resources.Head, Resources.Shoulders, Resources.Thorax, Resources.Abdomen, Resources.Pelvis };
         private readonly string upperMarkersLocation;
 
         private readonly List<VVector> lowerIsocenters = new List<VVector> { };
         private readonly List<string> scheduleLowerPlanName = new List<string> { };
         private readonly string lowerMarkersLocation;
-
 
         public DisplacementsPage(ExternalPlanSetup upperPlan,
                                  ExternalPlanSetup lowerPlan,
@@ -69,19 +69,19 @@ namespace TMIAutomation.Model.Schedule.Templates
                         switch (i)
                         {
                             case 0:
-                                this.lowerMarkersLocation = "sopra ginocchia";
+                                this.lowerMarkersLocation = Resources.AboveKnees;
                                 break;
                             case 1:
-                                this.lowerMarkersLocation = "sulle ginocchia";
+                                this.lowerMarkersLocation = Resources.OnKnees;
                                 break;
                             default:
-                                this.lowerMarkersLocation = "sotto ginocchia";
+                                this.lowerMarkersLocation = Resources.BelowKnees;
                                 break;
                         }
                     }
                     else
                     {
-                        this.lowerMarkersLocation = i < 1 ? "sopra ginocchia" : "sotto ginocchia";
+                        this.lowerMarkersLocation = i < 1 ? Resources.AboveKnees : Resources.BelowKnees;
                     }
 
                     break;
@@ -103,11 +103,11 @@ namespace TMIAutomation.Model.Schedule.Templates
                 {
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamLeftArm.IsocenterPosition, upperPlan));
                     UpdateSchedulePlans(schedulePlans, beamLeftArm, upperPlan.StructureSet.Image.ImagingOrientation);
-                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = scheduleUpperPlanName.Last() + " – su braccio SINISTRO";
+                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnLeftArm);
 
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamRightArm.IsocenterPosition, upperPlan));
                     UpdateSchedulePlans(schedulePlans, beamRightArm, upperPlan.StructureSet.Image.ImagingOrientation);
-                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = scheduleUpperPlanName.Last() + " – su braccio DESTRO";
+                    scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnRightArm);
                 }
             }
         }
