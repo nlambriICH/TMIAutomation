@@ -52,7 +52,9 @@ Global
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-16.1|x64.ActiveCfg = Debug-16.1|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-16.1|x64.Build.0 = Debug-16.1|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-15.6|x64.ActiveCfg = Release-15.6|x64
+		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-15.6|x64.Build.0 = Release-15.6|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-16.1|x64.ActiveCfg = Release-16.1|x64
+		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-16.1|x64.Build.0 = Release-16.1|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
