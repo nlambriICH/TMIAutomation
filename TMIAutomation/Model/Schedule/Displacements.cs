@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Serilog;
 using TMIAutomation.Async;
@@ -13,6 +14,7 @@ namespace TMIAutomation
     public class Displacements
     {
         private readonly ILogger logger = Log.ForContext<Displacements>();
+        private static readonly string SCHEDULE_DIR = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Schedule");
         private readonly EsapiWorker esapiWorker;
         private readonly string courseId;
         private readonly string upperPlanId;
@@ -20,7 +22,6 @@ namespace TMIAutomation
         private readonly string scheduleCourseId;
         private readonly DateTime treatmentDate;
         private readonly bool isocentersOnArms;
-        private static readonly string SCHEDULE_DIR = "Schedule";
 
         public Displacements(EsapiWorker esapiWorker,
                              string courseId,
@@ -60,10 +61,7 @@ namespace TMIAutomation
 
         private void SaveDisplacements(string patientLastName, string patientFirstName, string content)
         {
-            if (!Directory.Exists(SCHEDULE_DIR))
-            {
-                Directory.CreateDirectory(SCHEDULE_DIR);
-            }
+            Directory.CreateDirectory(SCHEDULE_DIR);
 
             string savePath = Path.Combine(SCHEDULE_DIR, $"{patientLastName}_{patientFirstName}_TMLI_{this.treatmentDate:ddMMyyyy}.txt");
             File.WriteAllText(savePath, content);
