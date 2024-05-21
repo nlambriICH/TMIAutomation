@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -17,38 +18,52 @@ namespace TMIAutomation
         public static readonly string MODEL_NAME_BODY = "body_cnn";
         public static readonly string MODEL_NAME_ARMS = "arms_cnn";
         public static readonly bool collPelvis = GetCollPelvis();
-        private static readonly int? port = GetServerPort();
 
         public static Dictionary<string, List<List<double>>> GetFieldGeometry(string modelName, string dicomPath, string upperPTVId, List<string> oarIds)
         {
             Dictionary<string, List<List<double>>> fieldGeometry = new Dictionary<string, List<List<double>>> { };
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    ClientRequest request = new ClientRequest
-                    {
-                        ModelName = modelName,
-                        DicomPath = dicomPath,
-                        IdPTV = upperPTVId,
-                        IdOARs = oarIds
-                    };
 
-                    if (port == null) throw new InvalidOperationException("Could not retrieve the server port.");
+            ClientRequest request = new ClientRequest
+            {
+                ModelName = modelName,
+                DicomPath = dicomPath,
+                IdPTV = upperPTVId,
+                IdOARs = oarIds
+            };
+
+            int retries = 5;
+            logger.Information("Sending request {@request}", request);
+
+            using (HttpClient client = new HttpClient())
+            {
+                while (retries >= 0)
+                {
+                    // Redefine content because client disposes it after request
                     StringContent content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
 
-                    logger.Information("Sending request {@request}", request);
-                    HttpResponseMessage response = client.PostAsync($"http://localhost:{port}/predict", content).Result;
-                    if (response != null)
+                    // Read port because seerver can start and modify it after client read
+                    int? port = GetServerPort();
+                    if (port == null) throw new InvalidOperationException("Could not retrieve the server port.");
+
+                    try
                     {
+                        HttpResponseMessage response = client.PostAsync($"http://localhost:{port}/predict", content).Result;
                         string jsonString = response.Content.ReadAsStringAsync().Result;
                         fieldGeometry = JsonConvert.DeserializeObject<Dictionary<string, List<List<double>>>>(jsonString);
+                        break;
+                    }
+                    catch (AggregateException exc)
+                    {
+                        if (retries == 0)
+                        {
+                            logger.Error(exc, "Call to web server failed");
+                            throw;
+                        }
+                        logger.Warning("Call to web server failed. Number of remaining retries: {retries}", retries);
+                        retries -= 1;
+                        Thread.Sleep(TimeSpan.FromMilliseconds(300));
                     }
                 }
-            }
-            catch (Exception exc)
-            {
-                logger.Error(exc, "Call to web server failed");
             }
 
             return fieldGeometry;
