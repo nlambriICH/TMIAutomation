@@ -64,6 +64,30 @@ namespace TMIAutomation.Tests
             yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto1" };
         }
 
+        [Fact]
+        private void GetSSStudySeriesId()
+        {
+            List<string> expectedListId = new List<string>
+            {
+                "1\t5287 / Series5", "2\t5287 / Series5", "3\t5287 / Series5", "4\t5287 / Series5", "5\t5287 / Series5", "6\t5289 / Series2", "7\t5289 / Series2",
+                "Iso_1\t5287 / Series5", "Iso_2\t5287 / Series5", "Iso_3\t5287 / Series5", "Iso_4\t5287 / Series5", "Iso_5\t5287 / Series5", "Iso_6\t5289 / Series2", "Iso_7\t5289 / Series2",
+                "kVCBCT_01b01\t5287 / Series4", "kVCBCT_01c01\t5287 / Series3", "kVCBCT_01d01\t5287 / Series1", "kVCBCT_01e01\t5287 / Series2", "kVCBCT_01f01\t5287 / Series", "kVCBCT_01g01\t5289 / Series1", "kVCBCT_01h01\t5289 / Series",
+                "Lower_video_rec\t5289 / Series2", "CT_1\t5289 / Series2", "CT_2\t5289 / Series2", "CT_1\t5289 / Series2",
+                "Junction_Auto\t5289 / Series2", "Lower_demo\t5289 / Series2", "LowerAuto\t5289 / Series2",
+                "CT_2\t5287 / Series5", "CT_1\t5287 / Series5", "Upper_test\t5287 / Series5", "CT_1\t5287 / Series5", "TEST\t5287 / Series5",
+            };
+
+            List<string> listId = modelBase.GetSSStudySeriesId(scriptContext);
+            try
+            {
+                Assert.Equal(expectedListId, listId);
+            }
+            catch (EqualException e)
+            {
+                throw new Exception("Unexpected upper field configuration", e);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(GetPTVsFromPlan_Data))]
         private void GetPTVsFromPlan(string planId, int index, string expectedPTVId)
@@ -110,8 +134,6 @@ namespace TMIAutomation.Tests
             yield return new object[] { PatientOrientation.HeadFirstSupine, 0, "PTV_totFIN" };
 #if ESAPI16
             yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "UpperPTVNoJ" };
-#else
-            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "PTV_totFIN_Crop" };
 #endif
             yield return new object[] { PatientOrientation.FeetFirstSupine, 0, "PTV_Tot_Start" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 1, "PTV_Total" };

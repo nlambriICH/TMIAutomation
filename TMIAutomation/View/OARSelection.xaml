@@ -4,6 +4,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
+        xmlns:tmih="clr-namespace:TMIAutomation.Helper"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         d:DataContext="{d:DesignInstance Type=viewmodel:OARSelectionViewModel}"
         mc:Ignorable="d"
@@ -12,6 +13,11 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
         Topmost="True">
+
+    <Window.Resources>
+        <tmih:UnderscoreConverter x:Key="UnderscoreConverter"/>
+    </Window.Resources>
+
     <Grid Background="#b6b5bd">
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
@@ -36,7 +42,7 @@
                  ItemsSource="{Binding ItemSelection}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <CheckBox Content="{Binding ItemName}" IsChecked="{Binding IsChecked}"/>
+                    <CheckBox Content="{Binding ItemName, Converter={StaticResource UnderscoreConverter}}" IsChecked="{Binding IsChecked}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
