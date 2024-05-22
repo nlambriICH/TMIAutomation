@@ -127,6 +127,19 @@ namespace TMIAutomation
                 .ToList();
         }
 
+        public Task<List<string>> GetSSStudySeriesIdAsync()
+        {
+            return this.esapiWorker.RunAsync(scriptContext => GetSSStudySeriesId(scriptContext), isWriteable: false);
+        }
+
+        public List<string> GetSSStudySeriesId(PluginScriptContext scriptContext)
+        {
+            return scriptContext.Patient.StructureSets.OrderBy(s => s.Structures.Count())
+                .ThenBy(s => s.Id)
+                .Select(s => string.Concat(s.Id, "\t", s.Image.Series.Study.Id, " / ", s.Image.Series.Id))
+                .ToList();
+        }
+
         public Task<List<string>> GetPTVsFromImgOrientationAsync(PatientOrientation patientOrientation)
         {
             return this.esapiWorker.RunAsync(scriptContext => GetPTVsFromImgOrientation(scriptContext, patientOrientation), isWriteable: false);
@@ -291,7 +304,25 @@ namespace TMIAutomation
             return optimization.ComputeAsync(progress, message);
         }
 #endif
-        public Task ComputeDisplacements(string courseId,
+
+        public Task SchedulePlansAsync(string courseId,
+                                       string upperPlanId,
+                                       string lowerPlanId,
+                                       bool isocentersOnArms,
+                                       List<string> scheduleSSStudySeriesId,
+                                       IProgress<double> progress,
+                                       IProgress<string> message)
+        {
+            Schedule schedule = new Schedule(this.esapiWorker,
+                                             courseId,
+                                             upperPlanId,
+                                             lowerPlanId,
+                                             isocentersOnArms,
+                                             scheduleSSStudySeriesId);
+            return schedule.ComputeAsync(progress, message);
+        }
+
+        public Task ComputeDisplacementsAsync(string courseId,
                                          string upperPlanId,
                                          string lowerPlanId,
                                          string scheduleCourseId,

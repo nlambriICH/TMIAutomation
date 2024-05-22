@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel
 {
@@ -182,14 +184,41 @@ namespace TMIAutomation.ViewModel
 
             try
             {
-                await this.modelBase.ComputeDisplacements(this.selectedCourseId,
-                                                          this.selectedUpperPlanId,
-                                                          this.selectedLowerPlanId,
-                                                          this.selectedScheduleCourseId,
-                                                          this.selectedDate,
-                                                          this.isIsoOnArmsChecked,
-                                                          progress,
-                                                          message);
+                List<string> ssStudySeriesId = await this.modelBase.GetSSStudySeriesIdAsync();
+                StructureSetSelectionViewModel ssSelectionViewModel = new StructureSetSelectionViewModel(ssStudySeriesId);
+                StructureSetSelection ssSelectionWindow = new StructureSetSelection(ssSelectionViewModel);
+                ssSelectionWindow.ShowDialog();
+
+                if (ssSelectionWindow.userClosing)
+                {
+                    throw new InvalidOperationException(); // window closed by user
+                }
+
+                List<string> scheduleSSStudySeriesId = ssSelectionViewModel.ItemSelection.Where(s => s.IsChecked)
+                        .Select(s => s.ItemName)
+                        .ToList();
+
+                await this.modelBase.SchedulePlansAsync(this.selectedCourseId,
+                                                        this.selectedUpperPlanId,
+                                                        this.selectedLowerPlanId,
+                                                        this.isIsoOnArmsChecked,
+                                                        scheduleSSStudySeriesId,
+                                                        progress,
+                                                        message);
+
+                // TODO: Fix selected schedule course Id
+                await this.modelBase.ComputeDisplacementsAsync(this.selectedCourseId,
+                                                               this.selectedUpperPlanId,
+                                                               this.selectedLowerPlanId,
+                                                               this.selectedScheduleCourseId,
+                                                               this.selectedDate,
+                                                               this.isIsoOnArmsChecked,
+                                                               progress,
+                                                               message);
+            }
+            catch (InvalidOperationException)
+            {
+                success = false;
             }
             catch (Exception e)
             {
