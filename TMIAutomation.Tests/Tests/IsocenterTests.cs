@@ -133,13 +133,13 @@ namespace TMIAutomation.Tests
                     switch (beam.BeamNumber)
                     {
                         case 9:
-                            Assert.Equal(355.0, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(Client.collPelvis ? 355.0 : 90, beam.ControlPoints.First().CollimatorAngle);
                             Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
                             Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
                             Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
                             break;
                         case 10:
-                            Assert.Equal(5, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(Client.collPelvis ? 5 : 90, beam.ControlPoints.First().CollimatorAngle);
                             Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
                             Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
                             Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
