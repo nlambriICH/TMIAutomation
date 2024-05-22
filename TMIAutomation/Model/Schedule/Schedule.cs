@@ -115,6 +115,19 @@ namespace TMIAutomation
                         logger.Information("Remove beam {beam}", newPlanBeams[i + 1].Id);
                         newPlan.RemoveBeam(newPlanBeams[i + 1]);
                     }
+                    else
+                    {
+#if ESAPI16
+                        /*
+                         * ESAPI v15 allows only to modify setup fields
+                         * Copying params for last field in group like Eclipse
+                         */
+                        BeamParameters beamParams = newPlanBeams[i + 1].GetEditableParameters();
+                        ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(newPlanBeams[i + 1].TreatmentUnit.Id, "6X", 600, "STATIC", "");
+                        Beam cbct = newPlan.AddSetupBeam(beamMachineParams, beamParams.ControlPoints.First().JawPositions, 0, 0, 0, newPlanBeams[i + 1].IsocenterPosition);
+                        cbct.Id = "CBCT";
+#endif
+                    }
                 }
                 isoGroupKeep += 2;
             }
