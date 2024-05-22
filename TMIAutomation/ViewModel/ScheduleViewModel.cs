@@ -180,6 +180,9 @@ namespace TMIAutomation.ViewModel
             ProgressBarViewModel pbViewModel = new ProgressBarViewModel("Scheduling");
             IProgress<double> progress = new Progress<double>(pbViewModel.IncrementProgress);
             IProgress<string> message = new Progress<string>(pbViewModel.UpdateMessage);
+            ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
+            pbWindow.Show();
+
             bool success = true; // show "Complete" message box
 
             try
@@ -228,6 +231,7 @@ namespace TMIAutomation.ViewModel
             finally
             {
                 pbViewModel.ResetProgress();
+                pbWindow.Close();
                 if (success)
                 {
                     MessageBox.Show("Completed!",

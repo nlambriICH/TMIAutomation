@@ -49,8 +49,11 @@ namespace TMIAutomation
                 Course newCourse = scriptContext.Patient.AddCourse();
                 newCourse.Id = "CScheduleAuto";
 
+                message.Report("Generating schedule plans...");
                 AddSchedulePlan(upperPlan, newCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
+                progress.Report(0.4);
                 AddSchedulePlan(lowerPlan, newCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
+                progress.Report(0.4);
             });
         }
 
@@ -63,7 +66,7 @@ namespace TMIAutomation
 
                 if (parts.Length != 2)
                 {
-                    Log.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
+                    logger.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
                     continue;
                 }
 
@@ -71,7 +74,7 @@ namespace TMIAutomation
 
                 if (subParts.Length != 2)
                 {
-                    Log.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
+                    logger.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
                     continue;
                 }
 
@@ -92,7 +95,7 @@ namespace TMIAutomation
             {
                 StringBuilder outputDiagnostics = new StringBuilder();
                 ExternalPlanSetup newPlan = newCourse.CopyPlanSetup(sourcePlan, ss, outputDiagnostics) as ExternalPlanSetup;
-                Log.Information("Copied source plan {sourcePlanId} using structure set {ssId} into course {newCourse}. "
+                logger.Information("Copied source plan {sourcePlanId} using structure set {ssId} into course {newCourse}. "
                                 + "New plan {newPlanId}. "
                                 + "Output diagnostics: {diagnostics}",
                                 sourcePlan.Id,
@@ -107,9 +110,9 @@ namespace TMIAutomation
                 {
                     if (i != isoGroupKeep)
                     {
-                        Log.Information("Remove beam {beam}", newPlanBeams[i].Id);
+                        logger.Information("Remove beam {beam}", newPlanBeams[i].Id);
                         newPlan.RemoveBeam(newPlanBeams[i]);
-                        Log.Information("Remove beam {beam}", newPlanBeams[i + 1].Id);
+                        logger.Information("Remove beam {beam}", newPlanBeams[i + 1].Id);
                         newPlan.RemoveBeam(newPlanBeams[i + 1]);
                     }
                 }
