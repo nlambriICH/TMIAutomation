@@ -58,7 +58,7 @@ namespace TMIAutomation.Model.Schedule.Templates
             for (int i = 0; i < beams.Count; i += 2)
             {
                 this.lowerIsocenters.Add(lowerPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, lowerPlan));
-                UpdateSchedulePlans(schedulePlans, beams[i], lowerPlan.StructureSet.Image.ImagingOrientation);
+                UpdateSchedulePlanNames(schedulePlans, beams[i], lowerPlan.StructureSet.Image.ImagingOrientation);
             }
             for (int i = 0; i < lowerIsocenters.Count; ++i)
             {
@@ -98,15 +98,15 @@ namespace TMIAutomation.Model.Schedule.Templates
             for (int i = 0; i < beamsAlongBody.Count; i += 2)
             {
                 this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamsAlongBody[i].IsocenterPosition, upperPlan));
-                UpdateSchedulePlans(schedulePlans, beamsAlongBody[i], upperPlan.StructureSet.Image.ImagingOrientation);
+                UpdateSchedulePlanNames(schedulePlans, beamsAlongBody[i], upperPlan.StructureSet.Image.ImagingOrientation);
                 if (i == 4)
                 {
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamLeftArm.IsocenterPosition, upperPlan));
-                    UpdateSchedulePlans(schedulePlans, beamLeftArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    UpdateSchedulePlanNames(schedulePlans, beamLeftArm, upperPlan.StructureSet.Image.ImagingOrientation);
                     scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnLeftArm);
 
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamRightArm.IsocenterPosition, upperPlan));
-                    UpdateSchedulePlans(schedulePlans, beamRightArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    UpdateSchedulePlanNames(schedulePlans, beamRightArm, upperPlan.StructureSet.Image.ImagingOrientation);
                     scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnRightArm);
                 }
             }
@@ -117,11 +117,11 @@ namespace TMIAutomation.Model.Schedule.Templates
             for (int i = 0; i < beams.Count; i += 2)
             {
                 this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, upperPlan));
-                UpdateSchedulePlans(schedulePlans, beams[i], upperPlan.StructureSet.Image.ImagingOrientation);
+                UpdateSchedulePlanNames(schedulePlans, beams[i], upperPlan.StructureSet.Image.ImagingOrientation);
             }
         }
 
-        private void UpdateSchedulePlans(IEnumerable<PlanSetup> schedulePlans, Beam currentBeam, PatientOrientation orientation)
+        private void UpdateSchedulePlanNames(IEnumerable<PlanSetup> schedulePlans, Beam currentBeam, PatientOrientation orientation)
         {
             foreach (var schedulePlan in schedulePlans)
             {
