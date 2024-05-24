@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMIAutomation.Language;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-using TMIAutomation.Language;
 
 namespace TMIAutomation.Model.Schedule.Templates
 {
@@ -15,11 +15,11 @@ namespace TMIAutomation.Model.Schedule.Templates
         private readonly List<VVector> upperIsocenters = new List<VVector> { };
         private readonly List<string> scheduleUpperPlanName = new List<string> { };
         private static readonly List<string> upperIsoLocation = new List<string> { Resources.Head, Resources.Shoulders, Resources.Thorax, Resources.Abdomen, Resources.Pelvis };
-        private readonly string upperMarkersLocation;
+        private readonly string upperMarkersLocation = Resources.DefaultUpperMarkerLocationMsg;
 
         private readonly List<VVector> lowerIsocenters = new List<VVector> { };
         private readonly List<string> scheduleLowerPlanName = new List<string> { };
-        private readonly string lowerMarkersLocation;
+        private readonly string lowerMarkersLocation = Resources.DefaultLowerMarkerLocationMsg;
 
         public DisplacementsPage(ExternalPlanSetup upperPlan,
                                  ExternalPlanSetup lowerPlan,
@@ -135,7 +135,7 @@ namespace TMIAutomation.Model.Schedule.Templates
                         }
                         else if (orientation == PatientOrientation.FeetFirstSupine)
                         {
-                             scheduleLowerPlanName.Add(schedulePlan.Id);
+                            scheduleLowerPlanName.Add(schedulePlan.Id);
                         }
                         else
                         {
