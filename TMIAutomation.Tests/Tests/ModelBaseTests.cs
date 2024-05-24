@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMIAutomation.Language;
 using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.Types;
 using Xunit;
@@ -34,10 +35,10 @@ namespace TMIAutomation.Tests
         {
 #if ESAPI16
             yield return new object[] { false, new List<string> { "CDemoTest", "CScheduling", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt" } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt", Resources.NewCourseListBox } };
 #else
             yield return new object[] { false, new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CDemo", "CJunction", "CNoPlan", "LowerAuto" } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CDemo", "CJunction", "CNoPlan", "LowerAuto", Resources.NewCourseListBox } };
 #endif
         }
 
