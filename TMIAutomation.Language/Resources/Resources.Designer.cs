@@ -97,6 +97,24 @@ namespace TMIAutomation.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;user origin distance &gt; 12 cm from nearest isocenter&gt;.
+        /// </summary>
+        public static string DefaultLowerMarkerLocationMsg {
+            get {
+                return ResourceManager.GetString("DefaultLowerMarkerLocationMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;user origin distance &gt; 10 cm from nearest isocenter&gt;.
+        /// </summary>
+        public static string DefaultUpperMarkerLocationMsg {
+            get {
+                return ResourceManager.GetString("DefaultUpperMarkerLocationMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displacements: Isocenters.
         /// </summary>
         public static string DisplacementsHeader {
@@ -174,6 +192,15 @@ namespace TMIAutomation.Language {
         public static string MoveBy {
             get {
                 return ResourceManager.GetString("MoveBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;new course...&gt;.
+        /// </summary>
+        public static string NewCourseListBox {
+            get {
+                return ResourceManager.GetString("NewCourseListBox", resourceCulture);
             }
         }
         

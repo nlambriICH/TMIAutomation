@@ -195,4 +195,13 @@
   <data name="IsoOnRightArm" xml:space="preserve">
     <value>su braccio DESTRO</value>
   </data>
+  <data name="DefaultUpperMarkerLocationMsg" xml:space="preserve">
+    <value>&lt;distanza user origin &gt; 10 cm dall'isocentro più vicino&gt;</value>
+  </data>
+  <data name="DefaultLowerMarkerLocationMsg" xml:space="preserve">
+    <value>&lt;distanza user origin &gt; 12 cm dall'isocentro più vicino&gt;</value>
+  </data>
+  <data name="NewCourseListBox" xml:space="preserve">
+    <value>&lt;nuovo corso...&gt;</value>
+  </data>
 </root>

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using TMIAutomation.Language;
 using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel
@@ -187,29 +188,35 @@ namespace TMIAutomation.ViewModel
 
             try
             {
-                List<string> ssStudySeriesId = await this.modelBase.GetSSStudySeriesIdAsync();
-                StructureSetSelectionViewModel ssSelectionViewModel = new StructureSetSelectionViewModel(ssStudySeriesId);
-                StructureSetSelection ssSelectionWindow = new StructureSetSelection(ssSelectionViewModel);
-                ssSelectionWindow.ShowDialog();
-
-                if (ssSelectionWindow.userClosing)
+                if (this.selectedScheduleCourseId == Resources.NewCourseListBox)
                 {
-                    throw new InvalidOperationException(); // window closed by user
+                    List<string> ssStudySeriesId = await this.modelBase.GetSSStudySeriesIdAsync();
+                    StructureSetSelectionViewModel ssSelectionViewModel = new StructureSetSelectionViewModel(ssStudySeriesId);
+                    StructureSetSelection ssSelectionWindow = new StructureSetSelection(ssSelectionViewModel);
+                    ssSelectionWindow.ShowDialog();
+
+                    if (ssSelectionWindow.userClosing)
+                    {
+                        throw new InvalidOperationException(); // window closed by user
+                    }
+
+                    List<string> scheduleSSStudySeriesId = ssSelectionViewModel.ItemSelection.Where(s => s.IsChecked)
+                            .Select(s => s.ItemName)
+                            .ToList();
+
+                    await this.modelBase.CreateScheduleCourseAsync();
+                    ScheduleCourses = await this.modelBase.GetCoursesAsync();
+
+                    await this.modelBase.SchedulePlansAsync(this.selectedCourseId,
+                                                            this.selectedUpperPlanId,
+                                                            this.selectedLowerPlanId,
+                                                            this.selectedScheduleCourseId,
+                                                            this.isIsoOnArmsChecked,
+                                                            scheduleSSStudySeriesId,
+                                                            progress,
+                                                            message);
                 }
 
-                List<string> scheduleSSStudySeriesId = ssSelectionViewModel.ItemSelection.Where(s => s.IsChecked)
-                        .Select(s => s.ItemName)
-                        .ToList();
-
-                await this.modelBase.SchedulePlansAsync(this.selectedCourseId,
-                                                        this.selectedUpperPlanId,
-                                                        this.selectedLowerPlanId,
-                                                        this.isIsoOnArmsChecked,
-                                                        scheduleSSStudySeriesId,
-                                                        progress,
-                                                        message);
-
-                // TODO: Fix selected schedule course Id
                 await this.modelBase.ComputeDisplacementsAsync(this.selectedCourseId,
                                                                this.selectedUpperPlanId,
                                                                this.selectedLowerPlanId,

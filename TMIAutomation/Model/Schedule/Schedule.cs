@@ -18,6 +18,7 @@ namespace TMIAutomation
         private readonly string courseId;
         private readonly string upperPlanId;
         private readonly string lowerPlanId;
+        private readonly string scheduleCourseId;
         private readonly bool isocentersOnArms;
         private readonly List<string> scheduleSSStudySeriesId;
         private static readonly string SCHEDULE_PLAN_NAME = "TMLI_ISO";
@@ -26,6 +27,7 @@ namespace TMIAutomation
                         string courseId,
                         string upperPlanId,
                         string lowerPlanId,
+                        string scheduleCourseId,
                         bool isocentersOnArms,
                         List<string> scheduleSSStudySeriesId)
         {
@@ -33,6 +35,7 @@ namespace TMIAutomation
             this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.lowerPlanId = lowerPlanId;
+            this.scheduleCourseId = scheduleCourseId;
             this.isocentersOnArms = isocentersOnArms;
             this.scheduleSSStudySeriesId = scheduleSSStudySeriesId;
         }
@@ -42,19 +45,17 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
                 logger.Information("Schedule context: {@context}",
-                                   new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.isocentersOnArms.ToString(), string.Join(";", this.scheduleSSStudySeriesId) });
+                                   new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.scheduleCourseId, this.isocentersOnArms.ToString(), string.Join(";", this.scheduleSSStudySeriesId) });
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
+                Course scheduleCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.scheduleCourseId);
                 List<StructureSet> scheduleSS = scriptContext.Patient.StructureSets.Where(ss => IsMatchingStructure(ss)).OrderBy(ss => ss.Id).ToList();
 
-                Course newCourse = scriptContext.Patient.AddCourse();
-                newCourse.Id = "CScheduleAuto";
-
                 message.Report("Generating schedule plans...");
-                AddSchedulePlans(upperPlan, newCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
+                AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
                 progress.Report(0.4);
-                AddSchedulePlans(lowerPlan, newCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
+                AddSchedulePlans(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
                 progress.Report(0.4);
             });
         }
@@ -112,7 +113,11 @@ namespace TMIAutomation
                 List<Beam> newPlanBeams = newPlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) <= 100)
                                                        .OrderByDescending(b => b.IsocenterPosition.z)
                                                        .ToList();
-                newPlanBeams.InsertRange(6, newPlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
+                if (ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
+                {
+                    newPlanBeams.InsertRange(6, newPlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
+                }
+
                 for (int i = 0; i < newPlanBeams.Count(); i += 2)
                 {
                     if (i != isoGroupKeep)

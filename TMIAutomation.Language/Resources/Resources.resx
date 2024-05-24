@@ -175,4 +175,13 @@
   <data name="IsoOnRightArm" xml:space="preserve">
     <value>on RIGHT arm</value>
   </data>
+  <data name="DefaultUpperMarkerLocationMsg" xml:space="preserve">
+    <value>&lt;user origin distance &gt; 10 cm from nearest isocenter&gt;</value>
+  </data>
+  <data name="DefaultLowerMarkerLocationMsg" xml:space="preserve">
+    <value>&lt;user origin distance &gt; 12 cm from nearest isocenter&gt;</value>
+  </data>
+  <data name="NewCourseListBox" xml:space="preserve">
+    <value>&lt;new course...&gt;</value>
+  </data>
 </root>

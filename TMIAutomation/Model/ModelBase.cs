@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMIAutomation.Async;
+using TMIAutomation.Language;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
@@ -27,14 +28,25 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext => GetCourses(scriptContext, schedule), isWriteable: false);
         }
 
-        public List<string> GetCourses(PluginScriptContext scriptContext, bool schedule = false)
+        public List<string> GetCourses(PluginScriptContext scriptContext, bool schedule)
         {
             List<Course> orderedCourses;
             if (schedule)
             {
-                orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.PlanSetups.Count(ps => ps.ApprovalStatus == PlanSetupApprovalStatus.PlanningApproved
-                || ps.ApprovalStatus == PlanSetupApprovalStatus.TreatmentApproved
-                || ps.ApprovalStatus == PlanSetupApprovalStatus.ExternallyApproved)).ToList();
+                orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.PlanSetups.Count(ps => IsPlanApproved(ps))).ToList();
+
+                // If no approved plan in any course, set first course Id in list to create new course
+                List<string> orderedCourseId = orderedCourses.Select(c => c.Id).ToList();
+                if (!orderedCourses.First().PlanSetups.Any(ps => IsPlanApproved(ps)))
+                {
+                    orderedCourseId.Insert(0, Resources.NewCourseListBox);
+                }
+                else
+                {
+                    orderedCourseId.Add(Resources.NewCourseListBox);
+                }
+
+                return orderedCourseId;
             }
             else
             {
@@ -44,9 +56,16 @@ namespace TMIAutomation
                 {
                     orderedCourses.Insert(0, courseInScope);
                 }
+
+                return orderedCourses.Select(c => c.Id).ToList();
             }
 
-            return orderedCourses.Select(c => c.Id).ToList();
+            bool IsPlanApproved(PlanSetup ps)
+            {
+                return ps.ApprovalStatus == PlanSetupApprovalStatus.PlanningApproved
+                       || ps.ApprovalStatus == PlanSetupApprovalStatus.TreatmentApproved
+                       || ps.ApprovalStatus == PlanSetupApprovalStatus.ExternallyApproved;
+            }
         }
 
         public Task<List<string>> GetPlansAsync(string courseId, PlanType planType)
@@ -305,9 +324,20 @@ namespace TMIAutomation
         }
 #endif
 
+        public Task CreateScheduleCourseAsync()
+        {
+            return this.esapiWorker.RunAsync(scriptContext =>
+            {
+                Course newCourse = scriptContext.Patient.AddCourse();
+                newCourse.Id = "CScheduleAuto";
+                scriptContext.Course = newCourse;
+            });
+        }
+
         public Task SchedulePlansAsync(string courseId,
                                        string upperPlanId,
                                        string lowerPlanId,
+                                       string scheduleCourseId,
                                        bool isocentersOnArms,
                                        List<string> scheduleSSStudySeriesId,
                                        IProgress<double> progress,
@@ -317,6 +347,7 @@ namespace TMIAutomation
                                              courseId,
                                              upperPlanId,
                                              lowerPlanId,
+                                             scheduleCourseId,
                                              isocentersOnArms,
                                              scheduleSSStudySeriesId);
             return schedule.ComputeAsync(progress, message);
