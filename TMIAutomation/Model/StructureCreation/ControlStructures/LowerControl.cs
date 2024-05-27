@@ -15,15 +15,13 @@ namespace TMIAutomation
         private readonly string courseId;
         private readonly string lowerPlanId;
         private readonly string lowerPTVId;
-        private readonly bool isBaseDose;
 
-        public LowerControl(EsapiWorker esapiWorker, string courseId, string lowerPlanId, string lowerPTVId, bool isBaseDose)
+        public LowerControl(EsapiWorker esapiWorker, string courseId, string lowerPlanId, string lowerPTVId)
         {
             this.esapiWorker = esapiWorker;
             this.courseId = courseId;
             this.lowerPlanId = lowerPlanId;
             this.lowerPTVId = lowerPTVId;
-            this.isBaseDose = isBaseDose;
         }
 
         public Task CreateAsync(IProgress<double> progress, IProgress<string> message)
@@ -43,7 +41,7 @@ namespace TMIAutomation
                 int bodyFreeSliceStart = bottomSlicePTVWithJunction + clearBodyFreeOffset;
                 int bodyFreeSliceRemove = lowerSS.Image.ZSize - bottomSlicePTVWithJunction - clearBodyFreeOffset;
 
-                lowerSS.CreateHealthyTissue(lowerPTV, logger, progress, message, this.isBaseDose);
+                lowerSS.CreateHealthyTissue(lowerPTV, logger, progress, message);
                 logger.Information("Structures created: {healthyTissue} {healthyTissue2}", StructureHelper.HEALTHY_TISSUE, StructureHelper.HEALTHY_TISSUE2);
 
                 lowerSS.CreateBodyFree(lowerPTV, bodyFreeSliceStart, bodyFreeSliceRemove, logger, progress, message);

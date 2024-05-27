@@ -191,9 +191,6 @@
     <Compile Include="View\StructureOpWindow.xaml.cs">
       <DependentUpon>StructureOpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\LowerPlanOptSelection.xaml.cs">
-      <DependentUpon>LowerPlanOptSelection.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\LowerTabItem.xaml.cs">
       <DependentUpon>LowerTabItem.xaml</DependentUpon>
     </Compile>
@@ -244,10 +241,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\StructureOpWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\LowerPlanOptSelection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

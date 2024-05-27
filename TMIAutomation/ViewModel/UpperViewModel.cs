@@ -190,7 +190,7 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isOptimizationChecked)
                 {
-                    await this.modelBase.OptimizeAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
+                    await this.modelBase.OptimizeUpperAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
                 }
             }
             catch (InvalidOperationException)

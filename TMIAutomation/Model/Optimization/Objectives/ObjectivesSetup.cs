@@ -24,23 +24,12 @@ namespace TMIAutomation
 
         public static void AddPointObjectives(
             this OptimizationSetup optSetup,
-            StructureSet ss,
-            bool isBaseDosePlanning = false
+            StructureSet ss
             )
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string pointObjPath = Path.Combine(assemblyDir, "Configuration", "PointOptimizationObjectives.txt");
             logger.Verbose("Reading PointObjectives from {pointObjPath}", pointObjPath);
-
-#if ESAPI15
-            List<string> junctionIds = new List<string> {
-                StructureHelper.PTV_JUNCTION25,
-                StructureHelper.PTV_JUNCTION50,
-                StructureHelper.PTV_JUNCTION75,
-                StructureHelper.PTV_JUNCTION100,
-                StructureHelper.DOSE_100
-            };
-#endif
 
             foreach (string line in File.ReadLines(pointObjPath).Skip(4))
             {
@@ -58,7 +47,15 @@ namespace TMIAutomation
                 }
 
 #if ESAPI15
-                if (isBaseDosePlanning && junctionIds.Contains(structure.Id))
+                List<string> junctionIds = new List<string> {
+                    StructureHelper.PTV_JUNCTION25,
+                    StructureHelper.PTV_JUNCTION50,
+                    StructureHelper.PTV_JUNCTION75,
+                    StructureHelper.PTV_JUNCTION100,
+                    StructureHelper.DOSE_100
+                };
+
+                if (ConfigOptOptions.BaseDosePlanning && junctionIds.Contains(structure.Id))
                 {
                     logger.Information("Base-dose planning is selected. Skip PointObjective for {structureId}", structure.Id);
                     continue;
@@ -99,6 +96,14 @@ namespace TMIAutomation
                                  "The following error occured during the script execution");
                     continue;
                 }
+
+#if ESAPI15
+                if (ConfigOptOptions.BaseDosePlanning && structure.Id == StructureHelper.REM)
+                {
+                    logger.Information("Base-dose planning is selected. Skip PointObjective for {structureId}", structure.Id);
+                    continue;
+                }
+#endif
 
                 var limit = (OptimizationObjectiveOperator)Enum.Parse(typeof(OptimizationObjectiveOperator), eudObjectiveParams[1], true);
                 if (double.TryParse(eudObjectiveParams[2], out double doseValue)

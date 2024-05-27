@@ -257,11 +257,10 @@ namespace TMIAutomation
                                               string lowerPlanId,
                                               string lowerPTVId,
                                               IProgress<double> progress,
-                                              IProgress<string> message,
-                                              bool isBaseDose = false
+                                              IProgress<string> message
                                               )
         {
-            LowerControl lowerControl = new LowerControl(this.esapiWorker, courseId, lowerPlanId, lowerPTVId, isBaseDose);
+            LowerControl lowerControl = new LowerControl(this.esapiWorker, courseId, lowerPlanId, lowerPTVId);
             return lowerControl.CreateAsync(progress, message);
         }
 
@@ -279,12 +278,12 @@ namespace TMIAutomation
                 : selectedPlan.Beams.Select(b => b.TreatmentUnit.Id).FirstOrDefault();
         }
 
-        public Task OptimizeAsync(string courseId,
-                                  string upperPlanId,
-                                  string upperPTVId,
-                                  List<string> oarIds,
-                                  IProgress<double> progress,
-                                  IProgress<string> message)
+        public Task OptimizeUpperAsync(string courseId,
+                                       string upperPlanId,
+                                       string upperPTVId,
+                                       List<string> oarIds,
+                                       IProgress<double> progress,
+                                       IProgress<string> message)
         {
             UpperOptimization optimization = new UpperOptimization(this.esapiWorker,
                                                                    courseId,
@@ -294,35 +293,20 @@ namespace TMIAutomation
             return optimization.ComputeAsync(progress, message);
         }
 
-#if ESAPI16
-        public Task OptimizeAsync(string courseId,
-                                  string upperPlanId,
-                                  string registrationId,
-                                  string lowerPlanId,
-                                  IProgress<double> progress,
-                                  IProgress<string> message)
-        {
-            LowerOptimization optimization = new LowerOptimization(this.esapiWorker, courseId, upperPlanId, registrationId, lowerPlanId);
-            return optimization.ComputeAsync(progress, message);
-        }
-#else
-        public Task OptimizeAsync(string courseId,
-                                  string upperPlanId,
-                                  string registrationId,
-                                  string lowerPlanId,
-                                  bool generateBaseDosePlanOnly,
-                                  IProgress<double> progress,
-                                  IProgress<string> message)
+        public Task OptimizeLowerAsync(string courseId,
+                                       string upperPlanId,
+                                       string registrationId,
+                                       string lowerPlanId,
+                                       IProgress<double> progress,
+                                       IProgress<string> message)
         {
             LowerOptimization optimization = new LowerOptimization(this.esapiWorker,
                                                                    courseId,
                                                                    upperPlanId,
                                                                    registrationId,
-                                                                   lowerPlanId,
-                                                                   generateBaseDosePlanOnly);
+                                                                   lowerPlanId);
             return optimization.ComputeAsync(progress, message);
         }
-#endif
 
         public Task CreateScheduleCourseAsync()
         {

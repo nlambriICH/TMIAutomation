@@ -17,11 +17,7 @@ namespace TMIAutomation
         private readonly string upperPlanId;
         private readonly string registrationId;
         private readonly string lowerPlanId;
-#if ESAPI15
-        private readonly bool generateBaseDosePlanOnly;
-#endif
 
-#if ESAPI16
         public LowerOptimization(EsapiWorker esapiWorker,
                             string courseId,
                             string upperPlanId,
@@ -34,41 +30,21 @@ namespace TMIAutomation
             this.registrationId = registrationId;
             this.lowerPlanId = lowerPlanId;
         }
-#else
-        public LowerOptimization(EsapiWorker esapiWorker,
-                            string courseId,
-                            string upperPlanId,
-                            string registrationId,
-                            string lowerPlanId,
-                            bool generateBaseDosePlanOnly)
-        {
-            this.esapiWorker = esapiWorker;
-            this.courseId = courseId;
-            this.upperPlanId = upperPlanId;
-            this.registrationId = registrationId;
-            this.lowerPlanId = lowerPlanId;
-            this.generateBaseDosePlanOnly = generateBaseDosePlanOnly;
-        }
-#endif
 
         public Task ComputeAsync(IProgress<double> progress, IProgress<string> message)
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-#if ESAPI16
                 logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId });
-#else
-                logger.Information("LowerOptimization context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.registrationId, this.lowerPlanId, this.generateBaseDosePlanOnly.ToString() });
-#endif
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 Registration registration = scriptContext.Patient.Registrations.FirstOrDefault(reg => reg.Id == this.registrationId);
 #if ESAPI15
-                if (this.generateBaseDosePlanOnly)
+                if (ConfigOptOptions.BaseDosePlanning)
                 {
                     GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
-                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message, isBaseDosePlanning: this.generateBaseDosePlanOnly);
+                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message);
                 }
                 else
                 {
@@ -220,8 +196,7 @@ namespace TMIAutomation
         private void ConfigureLowerPlanSetup(ExternalPlanSetup upperPlan,
                                              ExternalPlanSetup lowerPlan,
                                              IProgress<double> progress,
-                                             IProgress<string> message,
-                                             bool isBaseDosePlanning = false
+                                             IProgress<string> message
             )
         {
             progress.Report(0.05);
@@ -233,7 +208,7 @@ namespace TMIAutomation
             StructureSet lowerSS = lowerPlan.StructureSet;
 
             optSetup.ClearObjectives();
-            optSetup.AddPointObjectives(lowerSS, isBaseDosePlanning);
+            optSetup.AddPointObjectives(lowerSS);
             optSetup.AddEUDObjectives(lowerSS);
             optSetup.UseJawTracking = false;
             optSetup.AddAutomaticNormalTissueObjective(150);

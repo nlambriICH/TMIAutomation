@@ -20,11 +20,11 @@ namespace TMIAutomation
         private readonly string registrationId;
 
         public LowerJunction(EsapiWorker esapiWorker,
-                            string courseId,
-                            string upperPlanId,
-                            string lowerPlanId,
-                            string lowerPTVId,
-                            string registrationId)
+                             string courseId,
+                             string upperPlanId,
+                             string lowerPlanId,
+                             string lowerPTVId,
+                             string registrationId)
         {
             this.esapiWorker = esapiWorker;
             this.courseId = courseId;
@@ -53,12 +53,19 @@ namespace TMIAutomation
                 }
 
                 message.Report("Generating junction structures...");
-                progress.Report(0.3);
+                progress.Report(0.4);
                 CreateJunctionSubstructures(lowerSS);
 
                 message.Report($"Generating {StructureHelper.REM} optimization structure and crop {StructureHelper.DOSE_100}...");
-                progress.Report(0.3);
-                CreateREMStructure(lowerSS);
+                progress.Report(0.4);
+
+#if ESAPI15
+                if (!ConfigOptOptions.BaseDosePlanning)
+                {
+                    CreateREMStructure(lowerSS);
+                }
+#endif
+
                 CropIsodose100(lowerSS);
             });
         }
