@@ -58,7 +58,10 @@ namespace TMIAutomation.ViewModel
                 if (selectedUpperPlanId != value)
                 {
                     Set(ref selectedUpperPlanId, value);
-                    CheckIsocentersOnArms(selectedCourseId, selectedUpperPlanId);
+                    if (selectedUpperPlanId != string.Empty)
+                    {
+                        CheckIsocentersOnArms(selectedCourseId, selectedUpperPlanId);
+                    }
                 }
             }
         }
