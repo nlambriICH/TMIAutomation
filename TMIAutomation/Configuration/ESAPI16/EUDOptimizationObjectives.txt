@@ -5,3 +5,4 @@ Structure	Limit	DoseValue	DoseUnit	Priority	gEUD a
 HT_AUTO	upper	1.9	Gy	70	40
 HT2_AUTO	upper	1.5	Gy	70	40
 Body_Free_AUTO	upper	1.3	Gy	70	40
+Dose_100%	upper	2.1	Gy	70	40
