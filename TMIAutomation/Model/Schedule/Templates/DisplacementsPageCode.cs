@@ -43,6 +43,7 @@ namespace TMIAutomation.Model.Schedule.Templates
                 PrepareIsocentersWithoutArms(upperPlan, schedulePlans, beams);
             }
 
+            // Markers location found based on heuristic rule on distance iso - user origin
             for (int i = 0; i < upperIsocenters.Count; ++i)
             {
                 if (upperIsocenters[i].Length < 100)
@@ -60,6 +61,8 @@ namespace TMIAutomation.Model.Schedule.Templates
                 this.lowerIsocenters.Add(lowerPlan.StructureSet.Image.DicomToUser(beams[i].IsocenterPosition, lowerPlan));
                 UpdateSchedulePlanNames(schedulePlans, beams[i], lowerPlan.StructureSet.Image.ImagingOrientation);
             }
+
+            // Markers location found based on heuristic rule on distance iso - user origin
             for (int i = 0; i < lowerIsocenters.Count; ++i)
             {
                 if (lowerIsocenters[i].Length < 120)
@@ -103,10 +106,12 @@ namespace TMIAutomation.Model.Schedule.Templates
                 {
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamLeftArm.IsocenterPosition, upperPlan));
                     UpdateSchedulePlanNames(schedulePlans, beamLeftArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    // Append string to specify iso refers to left arm
                     scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnLeftArm);
 
                     this.upperIsocenters.Add(upperPlan.StructureSet.Image.DicomToUser(beamRightArm.IsocenterPosition, upperPlan));
                     UpdateSchedulePlanNames(schedulePlans, beamRightArm, upperPlan.StructureSet.Image.ImagingOrientation);
+                    // Append string to specify iso refers to right arm
                     scheduleUpperPlanName[scheduleUpperPlanName.Count - 1] = string.Join(" ", scheduleUpperPlanName.Last(), "–", Resources.IsoOnRightArm);
                 }
             }
