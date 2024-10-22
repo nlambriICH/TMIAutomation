@@ -13,7 +13,7 @@ namespace TMIAutomation
 {
     public class Schedule
     {
-        private readonly ILogger logger = Log.ForContext<Displacements>();
+        private readonly ILogger logger = Log.ForContext<Schedule>();
         private readonly EsapiWorker esapiWorker;
         private readonly string courseId;
         private readonly string upperPlanId;
@@ -52,9 +52,10 @@ namespace TMIAutomation
                 Course scheduleCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.scheduleCourseId);
                 List<StructureSet> scheduleSS = scriptContext.Patient.StructureSets.Where(ss => IsMatchingStructure(ss)).OrderBy(ss => ss.Id).ToList();
 
-                message.Report("Generating schedule plans...");
+                message.Report("Generating schedule plans upper-body...");
                 AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
                 progress.Report(0.4);
+                message.Report("Generating schedule plans lower-extremities...");
                 AddSchedulePlans(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
                 progress.Report(0.4);
             });
@@ -194,6 +195,7 @@ namespace TMIAutomation
             }
         }
 
+#if ESAPI16
         private static VRect<double> GetMaximumAperture(IEnumerable<ControlPoint> controlPoints)
         {
             double maxX1 = controlPoints.Min(cp => cp.JawPositions.X1);
@@ -203,5 +205,6 @@ namespace TMIAutomation
 
             return new VRect<double>(maxX1, maxY1, maxX2, maxY2);
         }
+#endif
     }
 }
