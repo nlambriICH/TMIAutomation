@@ -54,10 +54,13 @@ namespace TMIAutomation
 
                 message.Report("Generating schedule plans upper-body...");
                 AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
-                progress.Report(0.4);
+                progress.Report(0.2);
+                CalculateDoseSchedulePlans(upperPlan, scheduleCourse, progress, message);
+
                 message.Report("Generating schedule plans lower-extremities...");
                 AddSchedulePlans(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
-                progress.Report(0.4);
+                progress.Report(0.2);
+                CalculateDoseSchedulePlans(lowerPlan, scheduleCourse, progress, message);
             });
         }
 
@@ -206,5 +209,21 @@ namespace TMIAutomation
             return new VRect<double>(maxX1, maxY1, maxX2, maxY2);
         }
 #endif
+
+        private void CalculateDoseSchedulePlans(PlanSetup sourcePlan,
+                                                Course newCourse,
+                                                IProgress<double> progress,
+                                                IProgress<string> message)
+        {
+            List<ExternalPlanSetup> schedulePlans = newCourse.ExternalPlanSetups.Where(ps => ps.TreatmentOrientation == sourcePlan.TreatmentOrientation).ToList();
+            foreach (ExternalPlanSetup schedulePlan in schedulePlans)
+            {
+                progress.Report(0.2 / schedulePlans.Count);
+                message.Report($"Calculating dose of plan {schedulePlan.Id}. Progress: {schedulePlans.IndexOf(schedulePlan) + 1}/{schedulePlans.Count}");
+                schedulePlan.SetupOptimization();
+                schedulePlan.CalculatePlanDose();
+                schedulePlan.PlanNormalizationValue = sourcePlan.PlanNormalizationValue;
+            }
+        }
     }
 }
