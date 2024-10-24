@@ -64,11 +64,12 @@ namespace TMIAutomation
             externalPlanSetup.SetPrescription(int.Parse(ConfigOptOptions.NumberOfFractions), new DoseValue(double.Parse(ConfigOptOptions.DosePerFraction), DoseValue.DoseUnit.Gy), 1.0);
 #if ESAPI16
             StringBuilder errorHint = new StringBuilder();
-            bool success = externalPlanSetup.SetTargetStructureIfNoDose(externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION),
+            string targetId = externalPlanSetup.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine ? StructureHelper.UPPER_PTV_NO_JUNCTION : StructureHelper.LOWER_PTV_NO_JUNCTION;
+            bool success = externalPlanSetup.SetTargetStructureIfNoDose(externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == targetId),
                                                                         errorHint);
             if (!success)
             {
-                logger.Warning($"Could not set target structure {StructureHelper.LOWER_PTV_NO_JUNCTION}.\n{errorHint}");
+                logger.Warning("Could not set target structure {targetId}.\n{errorHint}", targetId, errorHint);
             }
 #endif
         }
