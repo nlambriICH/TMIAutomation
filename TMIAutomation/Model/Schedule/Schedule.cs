@@ -219,7 +219,8 @@ namespace TMIAutomation
             foreach (ExternalPlanSetup schedulePlan in schedulePlans)
             {
                 progress.Report(0.2 / schedulePlans.Count);
-                message.Report($"Calculating dose of plan {schedulePlan.Id}. Progress: {schedulePlans.IndexOf(schedulePlan) + 1}/{schedulePlans.Count}");
+                string planType = schedulePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine ? "upper" : "lower";
+                message.Report($"Calculating dose of {planType} plan {schedulePlan.Id}. Progress: {schedulePlans.IndexOf(schedulePlan) + 1}/{schedulePlans.Count}");
                 schedulePlan.SetupOptimization();
                 schedulePlan.CalculatePlanDose();
                 schedulePlan.PlanNormalizationValue = sourcePlan.PlanNormalizationValue;

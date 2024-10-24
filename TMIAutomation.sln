@@ -13,6 +13,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMIAutomation.Runner", "TMIAutomation.Runner\TMIAutomation.Runner.csproj", "{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6} = {29868CDC-424E-4E86-974E-635A1FBFD3D6}
+		{6902AFEE-6620-49BC-AC98-91D494B019A1} = {6902AFEE-6620-49BC-AC98-91D494B019A1}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMIAutomation.Tests", "TMIAutomation.Tests\TMIAutomation.Tests.csproj", "{BDCE0C89-6913-4AE2-973B-F15DC6851F88}"
