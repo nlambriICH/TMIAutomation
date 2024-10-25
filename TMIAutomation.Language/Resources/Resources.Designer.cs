@@ -313,7 +313,7 @@ namespace TMIAutomation.Language {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to With respect to markers near.
+        ///   Looks up a localized string similar to With respect to markers.
         /// </summary>
         public static string WrtMarkersNear {
             get {
