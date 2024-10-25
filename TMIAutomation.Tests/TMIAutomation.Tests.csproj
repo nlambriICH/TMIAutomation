@@ -113,6 +113,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TMIAutomation.Language\TMIAutomation.Language.csproj">
+      <Project>{6902afee-6620-49bc-ac98-91d494b019a1}</Project>
+      <Name>TMIAutomation.Language</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TMIAutomation\TMIAutomation.csproj">
       <Project>{29868cdc-424e-4e86-974e-635a1fbfd3d6}</Project>
       <Name>TMIAutomation</Name>

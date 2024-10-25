@@ -22,25 +22,12 @@ namespace TMIAutomation
             }
         }
 
-        public static void AddPointObjectives(
-            this OptimizationSetup optSetup,
-            StructureSet ss,
-            bool isBaseDosePlanning = false
-            )
+        public static void AddPointObjectives(this OptimizationSetup optSetup,
+                                              StructureSet ss)
         {
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string pointObjPath = Path.Combine(assemblyDir, "Configuration", "PointOptimizationObjectives.txt");
             logger.Verbose("Reading PointObjectives from {pointObjPath}", pointObjPath);
-
-#if ESAPI15
-            List<string> junctionIds = new List<string> {
-                StructureHelper.PTV_JUNCTION25,
-                StructureHelper.PTV_JUNCTION50,
-                StructureHelper.PTV_JUNCTION75,
-                StructureHelper.PTV_JUNCTION100,
-                StructureHelper.DOSE_100
-            };
-#endif
 
             foreach (string line in File.ReadLines(pointObjPath).Skip(4))
             {
@@ -56,9 +43,16 @@ namespace TMIAutomation
                                  "The following error occured during the script execution");
                     continue;
                 }
-
 #if ESAPI15
-                if (isBaseDosePlanning && junctionIds.Contains(structure.Id))
+                List<string> skipIds = new List<string> {
+                    StructureHelper.DOSE_100,
+                    StructureHelper.PTV_JUNCTION25,
+                    StructureHelper.PTV_JUNCTION50,
+                    StructureHelper.PTV_JUNCTION75,
+                    StructureHelper.PTV_JUNCTION100,
+                };
+
+                if (ConfigOptOptions.BaseDosePlanning && skipIds.Contains(structure.Id))
                 {
                     logger.Information("Base-dose planning is selected. Skip PointObjective for {structureId}", structure.Id);
                     continue;
@@ -78,6 +72,17 @@ namespace TMIAutomation
                     logger.Error(new InvalidDataException($"Fail parsing PointObjectives: {line}"), "The following error occured during the script execution");
                 }
             }
+#if ESAPI15
+            // Add point objectives for junction in case user has not defined any with base-dose planning
+            if (ConfigOptOptions.BaseDosePlanning && !optSetup.Objectives.OfType<OptimizationPointObjective>()
+                                                                         .Any(obj => obj.StructureId == StructureHelper.LOWER_PTV_JUNCTION))
+            {
+                Structure structure = ss.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
+                optSetup.AddPointObjective(structure, OptimizationObjectiveOperator.Upper, new DoseValue(2.1, "Gy"), 0, 150);
+                optSetup.AddPointObjective(structure, OptimizationObjectiveOperator.Lower, new DoseValue(2.0, "Gy"), 100, 200);
+                logger.Warning("Add PoinObjectives not specified by the user for {junction}", StructureHelper.LOWER_PTV_JUNCTION);
+            }
+#endif
         }
 
         public static void AddEUDObjectives(this OptimizationSetup optSetup, StructureSet ss)
@@ -99,6 +104,13 @@ namespace TMIAutomation
                                  "The following error occured during the script execution");
                     continue;
                 }
+#if ESAPI15
+                if (ConfigOptOptions.BaseDosePlanning && structure.Id == StructureHelper.REM)
+                {
+                    logger.Information("Base-dose planning is selected. Skip EUDObjective for {structureId}", structure.Id);
+                    continue;
+                }
+#endif
 
                 var limit = (OptimizationObjectiveOperator)Enum.Parse(typeof(OptimizationObjectiveOperator), eudObjectiveParams[1], true);
                 if (double.TryParse(eudObjectiveParams[2], out double doseValue)
@@ -113,6 +125,24 @@ namespace TMIAutomation
                     logger.Error(new InvalidDataException($"Fail parsing EUDObjectives: {line}"), "The following error occured during the script execution");
                 }
             }
+#if ESAPI15
+            // Add EUD objective to Dose_100% if upper objective is not >= 2 Gy with base-dose planning
+            if (ConfigOptOptions.BaseDosePlanning && !optSetup.Objectives.OfType<OptimizationEUDObjective>()
+                                                                         .Any(obj => obj.StructureId == StructureHelper.DOSE_100
+                                                                             && obj.Operator == OptimizationObjectiveOperator.Upper
+                                                                             && obj.Dose >= new DoseValue(2, "Gy")))
+            {
+                foreach (OptimizationEUDObjective objective in optSetup.Objectives.OfType<OptimizationEUDObjective>()
+                                                                                  .Where(obj => obj.StructureId == StructureHelper.DOSE_100
+                                                                                      && obj.Operator == OptimizationObjectiveOperator.Upper))
+                {
+                    optSetup.RemoveObjective(objective);
+                }
+                Structure structure = ss.Structures.FirstOrDefault(s => s.Id == StructureHelper.DOSE_100);
+                optSetup.AddEUDObjective(structure, OptimizationObjectiveOperator.Upper, new DoseValue(2.1, "Gy"), 40, 70);
+                logger.Warning("Add EUDObjectives not specified by the user for {dose}", StructureHelper.DOSE_100);
+            }
+#endif
         }
 
         public static void AddPointObjectivesAdditionalOptCycle(this OptimizationSetup optSetup,

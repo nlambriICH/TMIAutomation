@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMIAutomation.Language;
 using TMIAutomation.Tests.Attributes;
 using VMS.TPS.Common.Model.Types;
 using Xunit;
@@ -22,16 +23,23 @@ namespace TMIAutomation.Tests
                 : this;
         }
 
-        [Fact]
-        private void GetCourses()
+        [Theory]
+        [MemberData(nameof(GetCourses_Data))]
+        private void GetCourses(bool schedule, List<string> expectedCourses)
+        {
+            List<string> courses = modelBase.GetCourses(scriptContext, schedule);
+            Assert.Equal(expectedCourses, courses);
+        }
+
+        public static IEnumerable<object[]> GetCourses_Data()
         {
 #if ESAPI16
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" };
+            yield return new object[] { false, new List<string> { "CDemoTest", "CScheduling", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt", Resources.NewCourseListBox } };
 #else
-            List<string> expectedCourses = new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" };
+            yield return new object[] { false, new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CDemo", "CJunction", "CNoPlan", "LowerAuto", Resources.NewCourseListBox } };
 #endif
-            List<string> courses = modelBase.GetCourses(scriptContext);
-            Assert.Equal(expectedCourses, courses);
         }
 
         [Theory]
@@ -56,6 +64,44 @@ namespace TMIAutomation.Tests
             yield return new object[] { ModelBase.PlanType.Up, 2, "RA_TMLIup3" };
             yield return new object[] { ModelBase.PlanType.Down, 0, "TMLIdownAuto" };
             yield return new object[] { ModelBase.PlanType.Down, 1, "TMLIdownAuto1" };
+        }
+
+        [Fact]
+        private void GetSSStudySeriesId()
+        {
+#if ESAPI16
+            List<string> expectedListId = new List<string>
+            {
+                "1\t5287 / Series5", "2\t5287 / Series5", "3\t5287 / Series5", "4\t5287 / Series5", "5\t5287 / Series5", "6\t5289 / Series1", "7\t5289 / Series1",
+                "Iso_1\t5287 / Series5", "Iso_2\t5287 / Series5", "Iso_3\t5287 / Series5", "Iso_4\t5287 / Series5", "Iso_5\t5287 / Series5", "Iso_6\t5289 / Series1", "Iso_7\t5289 / Series1",
+                "kVCBCT_01b01\t5287 / Series3", "kVCBCT_01c01\t5287 / Series4", "kVCBCT_01d01\t5287 / Series", "kVCBCT_01e01\t5287 / Series1", "kVCBCT_01f01\t5287 / Series2", "kVCBCT_01g01\t5289 / Series2", "kVCBCT_01h01\t5289 / Series",
+                "CT_1\t5289 / Series1", "CT_2\t5289 / Series1", "CT_1\t5289 / Series1",
+                "Junction_Auto\t5289 / Series1", "Lower_demo\t5289 / Series1", "LowerAuto\t5289 / Series1",
+                "CLowerAutoAddOpt\t5289 / Series1", "LowerAuto1\t5289 / Series1", "LowerBaseDose\t5289 / Series1",
+                "CT_2\t5287 / Series5", "CT_1\t5287 / Series5", "CT_1\t5287 / Series5",
+                "Upper_test\t5287 / Series5", "TEST\t5287 / Series5",
+            };
+#else
+            List<string> expectedListId = new List<string>
+            {
+                "1\t5287 / Series5", "2\t5287 / Series5", "3\t5287 / Series5", "4\t5287 / Series5", "5\t5287 / Series5", "6\t5289 / Series2", "7\t5289 / Series2",
+                "Iso_1\t5287 / Series5", "Iso_2\t5287 / Series5", "Iso_3\t5287 / Series5", "Iso_4\t5287 / Series5", "Iso_5\t5287 / Series5", "Iso_6\t5289 / Series2", "Iso_7\t5289 / Series2",
+                "kVCBCT_01b01\t5287 / Series4", "kVCBCT_01c01\t5287 / Series3", "kVCBCT_01d01\t5287 / Series1", "kVCBCT_01e01\t5287 / Series2", "kVCBCT_01f01\t5287 / Series", "kVCBCT_01g01\t5289 / Series1", "kVCBCT_01h01\t5289 / Series",
+                "Lower_video_rec\t5289 / Series2", "CT_1\t5289 / Series2", "CT_2\t5289 / Series2", "CT_1\t5289 / Series2",
+                "Junction_Auto\t5289 / Series2", "Lower_demo\t5289 / Series2", "LowerAuto\t5289 / Series2",
+                "CT_2\t5287 / Series5", "CT_1\t5287 / Series5", "Upper_test\t5287 / Series5", "CT_1\t5287 / Series5", "TEST\t5287 / Series5",
+            };
+#endif
+
+            List<string> listId = modelBase.GetSSStudySeriesId(scriptContext);
+            try
+            {
+                Assert.Equal(expectedListId, listId);
+            }
+            catch (EqualException e)
+            {
+                throw new Exception("Unexpected upper field configuration", e);
+            }
         }
 
         [Theory]
@@ -102,11 +148,6 @@ namespace TMIAutomation.Tests
         public static IEnumerable<object[]> GetPTVsFromImgOrientation_Data()
         {
             yield return new object[] { PatientOrientation.HeadFirstSupine, 0, "PTV_totFIN" };
-#if ESAPI16
-            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "UpperPTVNoJ" };
-#else
-            yield return new object[] { PatientOrientation.HeadFirstSupine, 1, "PTV_totFIN_Crop" };
-#endif
             yield return new object[] { PatientOrientation.FeetFirstSupine, 0, "PTV_Tot_Start" };
             yield return new object[] { PatientOrientation.FeetFirstSupine, 1, "PTV_Total" };
         }

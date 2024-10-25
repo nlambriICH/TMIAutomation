@@ -225,15 +225,6 @@ namespace TMIAutomation.ViewModel
 
             try
             {
-#if ESAPI15
-                bool generateBaseDosePlanOnly = false;
-                if (this.isOptimizationChecked)
-                {
-                    LowerPlanOptSelection lowerPlanOptSelWindow = new LowerPlanOptSelection();
-                    lowerPlanOptSelWindow.ShowDialog();
-                    generateBaseDosePlanOnly = lowerPlanOptSelWindow.GenerateBaseDosePlanOnly() ?? false;
-                }
-#endif
                 await this.modelBase.SetInContextOrCreateAutoPlanAsync(this.selectedCourseId, ModelBase.PlanType.Down);
                 LowerPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Down);
 
@@ -260,41 +251,21 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isControlChecked)
                 {
-#if ESAPI16
                     await this.modelBase.GenerateLowerControlAsync(this.selectedCourseId,
                                                                    this.selectedLowerPlanId,
                                                                    this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
                                                                    progress,
-                                                                   message,
-                                                                   isBaseDose: true);
-#else
-                    await this.modelBase.GenerateLowerControlAsync(this.selectedCourseId,
-                                                                   this.selectedLowerPlanId,
-                                                                   this.isJunctionChecked ? StructureHelper.PTV_TOTAL : this.selectedLowerPTVId,
-                                                                   progress,
-                                                                   message,
-                                                                   generateBaseDosePlanOnly);
-#endif
+                                                                   message);
                 }
 
                 if (this.isOptimizationChecked)
                 {
-#if ESAPI16
-                    await this.modelBase.OptimizeAsync(this.selectedCourseId,
-                                                       this.selectedUpperPlanId,
-                                                       this.selectedRegistrationId,
-                                                       this.selectedLowerPlanId,
-                                                       progress,
-                                                       message);
-#else
-                    await this.modelBase.OptimizeAsync(this.selectedCourseId,
-                                                       this.selectedUpperPlanId,
-                                                       this.selectedRegistrationId,
-                                                       this.selectedLowerPlanId,
-                                                       generateBaseDosePlanOnly,
-                                                       progress,
-                                                       message);
-#endif
+                    await this.modelBase.OptimizeLowerAsync(this.selectedCourseId,
+                                                            this.selectedUpperPlanId,
+                                                            this.selectedRegistrationId,
+                                                            this.selectedLowerPlanId,
+                                                            progress,
+                                                            message);
                 }
             }
             catch (Exception e)

@@ -27,7 +27,7 @@ namespace TMIAutomation
                 exportSettings.Add(exportConfig[0], exportConfig[1]);
             }
 
-            if (isFirstExecution)
+            if (ExportType == "Automatic" && isFirstExecution)
             {
                 DICOMServices.Init();
                 DICOMServices.CreateSCP();

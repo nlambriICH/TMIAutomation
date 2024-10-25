@@ -368,3 +368,4 @@ TMIAutomation/Library/
 Docs/*
 !Docs/*.pdf
 TMIAutomation.Tests/Dicoms/
+TMIAutomation.Language/Library/

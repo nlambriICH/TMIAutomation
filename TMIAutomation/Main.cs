@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -35,7 +36,7 @@ namespace VMS.TPS
 #else
                 .MinimumLevel.Debug()
 #endif
-                .WriteTo.File(Path.Combine(logPath, "TMIJunction.log"),
+                .WriteTo.File(Path.Combine(logPath, "TMIAutomation.log"),
                               rollingInterval: RollingInterval.Day,
                               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
                               shared: true)
@@ -43,7 +44,7 @@ namespace VMS.TPS
 
             this.logger = Log.ForContext<Script>();
 
-            logger.Verbose("TMIJunction script instance created");
+            logger.Verbose("TMIAutomation script instance created");
 
             // Load settings to avoid null refs when static members are called from UI thread 
             ConfigExport.Init();
@@ -62,12 +63,22 @@ namespace VMS.TPS
             // The ESAPI worker needs to be created in the main thread
             EsapiWorker esapiWorker = new EsapiWorker(context);
 
-            logger.Information("TMIJunction script context patient: {lastName}, {firstName} ({patientId})",
+            logger.Information("TMIAutomation script context patient: {lastName}, {firstName} ({patientId})",
                                context.Patient.LastName,
                                context.Patient.FirstName,
                                context.Patient.Id
                                );
-            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine;
+
+            bool schedule = false;
+            foreach (Course course in context.Patient.Courses)
+            {
+                var upperBodyPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine);
+                var lowerExtremitiesPlans = course.PlanSetups.Where(ps => ps.IsDoseValid && ps.StructureSet.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine);
+                schedule = upperBodyPlans.Any() && lowerExtremitiesPlans.Any();
+                if (schedule) break;
+            }
+            bool feetFirstSupine = context.Image?.ImagingOrientation == PatientOrientation.FeetFirstSupine; // false if image == null
+
             context.Patient.BeginModifications();
 
             // Create and show the main window on a separate thread
@@ -79,14 +90,9 @@ namespace VMS.TPS
 
                     MainViewModel viewModel = new MainViewModel(esapiWorker);
                     MainWindow mainWindow = new MainWindow(viewModel);
-                    if (feetFirstSupine)
-                    {
-                        mainWindow.LowerTabItem.IsSelected = true;
-                    }
-                    else
-                    {
-                        mainWindow.UpperTabItem.IsSelected = true;
-                    }
+                    mainWindow.ScheduleTabItem.IsSelected = schedule;
+                    mainWindow.LowerTabItem.IsSelected = !schedule && feetFirstSupine;
+                    mainWindow.UpperTabItem.IsSelected = !schedule && !feetFirstSupine;
                     mainWindow.ShowDialog();
                 }
                 catch (Exception exc)

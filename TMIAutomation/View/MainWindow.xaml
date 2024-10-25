@@ -70,6 +70,22 @@
 
             </TabItem>
 
+            <TabItem Width="100"
+                     Background="#FDFDFD"
+                     DataContext="{Binding ScheduleVM}"
+                     x:Name="ScheduleTabItem">
+
+                <TabItem.Header>
+                    <TextBlock Text="Schedule"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
+
+                <uc:ScheduleTabItem/>
+
+            </TabItem>
+
         </TabControl>
         
     </Grid>

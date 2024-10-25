@@ -7,3 +7,6 @@ MLCID	MLC0010
 DosePerFraction	2
 NumberOfFractions	1
 TreatmentMachine	TrueBeamSN1015
+
+# Accepted values for BaseDosePlanning: "Yes" or "No"
+BaseDosePlanning	Yes

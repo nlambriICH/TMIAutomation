@@ -172,8 +172,8 @@ namespace TMIAutomation.ViewModel
                         throw new InvalidOperationException(); // window closed by user
                     }
 
-                    oarIds = oarSelectionViewModel.StructureSelection.Where(s => s.IsChecked)
-                        .Select(s => s.StructureName)
+                    oarIds = oarSelectionViewModel.ItemSelection.Where(s => s.IsChecked)
+                        .Select(s => s.ItemName)
                         .ToList();
                 }
 
@@ -190,7 +190,7 @@ namespace TMIAutomation.ViewModel
 
                 if (this.isOptimizationChecked)
                 {
-                    await this.modelBase.OptimizeAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
+                    await this.modelBase.OptimizeUpperAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
                 }
             }
             catch (InvalidOperationException)

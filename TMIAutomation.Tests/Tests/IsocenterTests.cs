@@ -130,17 +130,23 @@ namespace TMIAutomation.Tests
             {
                 foreach (Beam beam in upperPlan.Beams)
                 {
-                    if (beam.BeamNumber % 2 != 0)
+                    switch (beam.BeamNumber)
                     {
-                        Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
-                    }
-                    else
-                    {
-                        Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                        case 9:
+                            Assert.Equal(Client.collPelvis ? 355.0 : 90, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+                            break;
+                        case 10:
+                            Assert.Equal(Client.collPelvis ? 5 : 90, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                            break;
+                        default:
+                            CheckOtherBeams(beam);
+                            break;
                     }
                 }
             }
@@ -216,33 +222,35 @@ namespace TMIAutomation.Tests
             {
                 foreach (Beam beam in upperPlan.Beams)
                 {
-                    if (beam.BeamNumber == 7) // right arm iso
+                    switch (beam.BeamNumber)
                     {
-                        Assert.Equal(355.0, beam.ControlPoints.First().CollimatorAngle);
-                        Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(355.0, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
-                    }
-                    else if (beam.BeamNumber == 8) // left arm iso
-                    {
-                        Assert.Equal(5, beam.ControlPoints.First().CollimatorAngle);
-                        Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(5, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
-                    }
-                    else if (beam.BeamNumber % 2 != 0)
-                    {
-                        Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
-                        Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
-                    }
-                    else
-                    {
-                        Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
-                        Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
-                        Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
-                        Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                        case 7: // right arm iso
+                            Assert.Equal(355.0, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(355.0, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+                            break;
+                        case 8: // left arm iso
+                            Assert.Equal(5, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(5, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                            break;
+                        case 9:  // pelvis iso
+                            Assert.Equal(Client.collPelvis ? 355.0 : 90, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+                            break;
+                        case 10: // pelvis iso
+                            Assert.Equal(Client.collPelvis ? 5 : 90, beam.ControlPoints.First().CollimatorAngle);
+                            Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                            Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
+                            Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+                            break;
+                        default:
+                            CheckOtherBeams(beam);
+                            break;
                     }
                 }
             }
@@ -256,5 +264,23 @@ namespace TMIAutomation.Tests
                 upperPlan.Beams.ToList().ForEach(beam => planInContext.RemoveBeam(beam));
             }
         }
+        private static void CheckOtherBeams(Beam beam)
+        {
+            if (beam.BeamNumber % 2 != 0)
+            {
+                Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
+                Assert.Equal(179.9, beam.ControlPoints.First().GantryAngle);
+                Assert.Equal(180.1, beam.ControlPoints.Last().GantryAngle);
+                Assert.Equal(GantryDirection.CounterClockwise, beam.GantryDirection);
+            }
+            else
+            {
+                Assert.Equal(90, beam.ControlPoints.First().CollimatorAngle);
+                Assert.Equal(180.1, beam.ControlPoints.First().GantryAngle);
+                Assert.Equal(179.9, beam.ControlPoints.Last().GantryAngle);
+                Assert.Equal(GantryDirection.Clockwise, beam.GantryDirection);
+            }
+        }
+
     }
 }

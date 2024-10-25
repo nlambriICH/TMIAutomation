@@ -32,5 +32,12 @@ namespace TMIAutomation
         public static string DosePerFraction => optSettings["DosePerFraction"];
         public static string NumberOfFractions => optSettings["NumberOfFractions"];
         public static string TreatmentMachine => optSettings["TreatmentMachine"];
+        public static bool BaseDosePlanning =>
+#if ESAPI15
+                optSettings.ContainsKey("BaseDosePlanning") && optSettings["BaseDosePlanning"] == "Yes";
+#else
+                true; // Always true for ESAPI16
+#endif
+
     }
 }

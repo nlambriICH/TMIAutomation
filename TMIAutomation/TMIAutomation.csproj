@@ -22,6 +22,7 @@
     <DefineConstants>TRACE;DEBUG;ESAPI15</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-15.6|x64' ">
     <AllowedReferenceRelatedFileExtensions>
@@ -35,6 +36,7 @@
     <DefineConstants>TRACE;ESAPI15</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-16.1|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -86,6 +88,9 @@
       <HintPath>..\packages\SerilogTraceListener.3.2.0\lib\net46\SerilogTraceListener.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.CodeDom, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CodeDom.8.0.0\lib\net462\System.CodeDom.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
@@ -136,6 +141,15 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
+    <Compile Include="Helper\Converters\UnderscoreConverter.cs" />
+    <Compile Include="Model\Schedule\Displacements.cs" />
+    <Compile Include="Model\Schedule\Schedule.cs" />
+    <Compile Include="Model\Schedule\Templates\DisplacementsPage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DisplacementsPage.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Schedule\Templates\DisplacementsPageCode.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\DICOMServices.cs" />
     <Compile Include="Helper\Configuration\ConfigExport.cs" />
@@ -160,19 +174,22 @@
     <Compile Include="Main.cs" />
     <Compile Include="Helper\StructureHelper.cs" />
     <Compile Include="ViewModel\OARSelectionViewModel.cs" />
+    <Compile Include="ViewModel\ScheduleViewModel.cs" />
+    <Compile Include="ViewModel\SelectionViewModel.cs" />
     <Compile Include="ViewModel\StructureOpViewModel.cs" />
     <Compile Include="ViewModel\LowerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ProgressBarViewModel.cs" />
+    <Compile Include="ViewModel\StructureSetSelectionViewModel.cs" />
     <Compile Include="ViewModel\UpperViewModel.cs" />
     <Compile Include="View\OARSelection.xaml.cs">
       <DependentUpon>OARSelection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\ScheduleTabItem.xaml.cs">
+      <DependentUpon>ScheduleTabItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\StructureOpWindow.xaml.cs">
       <DependentUpon>StructureOpWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\LowerPlanOptSelection.xaml.cs">
-      <DependentUpon>LowerPlanOptSelection.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\LowerTabItem.xaml.cs">
       <DependentUpon>LowerTabItem.xaml</DependentUpon>
@@ -182,6 +199,9 @@
     </Compile>
     <Compile Include="View\ProgressBarWindow.xaml.cs">
       <DependentUpon>ProgressBarWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\StructureSetSelection.xaml.cs">
+      <DependentUpon>StructureSetSelection.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\UpperTabItem.xaml.cs">
       <DependentUpon>UpperTabItem.xaml</DependentUpon>
@@ -193,6 +213,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Theme\ComboBoxTheme.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Theme\DatePickerTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -212,11 +236,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\StructureOpWindow.xaml">
+    <Page Include="View\ScheduleTabItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\LowerPlanOptSelection.xaml">
+    <Page Include="View\StructureOpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -229,6 +253,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ProgressBarWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\StructureSetSelection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -261,6 +289,21 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Configuration\DCMExport.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Model\Schedule\Templates\DisplacementsPage.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DisplacementsPage.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TMIAutomation.Language\TMIAutomation.Language.csproj">
+      <Project>{6902afee-6620-49bc-ac98-91d494b019a1}</Project>
+      <Name>TMIAutomation.Language</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
