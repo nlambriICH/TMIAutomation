@@ -1,6 +1,6 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Linq;
+using Serilog;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
@@ -27,10 +27,10 @@ namespace TMIAutomation
             externalPlanSetup.PlanNormalizationValue = 100.0 * doseValue.Dose / doseValueNormTarget.Dose;
         }
 
-        public static bool NeedAdditionalOptimizationCycle(this PlanningItem planninItem, OptimizationCycleTarget optCycleTarget)
+        public static bool NeedAdditionalOptimizationCycle(this PlanningItem planningItem, OptimizationCycleTarget optCycleTarget)
         {
             DoseValue totalDose;
-            switch (planninItem)
+            switch (planningItem)
             {
                 case ExternalPlanSetup externalPlanSetup:
                     externalPlanSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
@@ -49,8 +49,8 @@ namespace TMIAutomation
             switch (optCycleTarget)
             {
                 case OptimizationCycleTarget.LowerPTVNoJ:
-                    Structure lowerPTVNoJ = planninItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
-                    DoseValue meanDose = planninItem.GetDVHCumulativeData(lowerPTVNoJ,
+                    Structure lowerPTVNoJ = planningItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_NO_JUNCTION);
+                    DoseValue meanDose = planningItem.GetDVHCumulativeData(lowerPTVNoJ,
                                                                           DoseValuePresentation.Relative,
                                                                           VolumePresentation.Relative,
                                                                           0.001).MeanDose;
@@ -67,8 +67,8 @@ namespace TMIAutomation
                         return false;
                     }
                 case OptimizationCycleTarget.LowerPTV_J:
-                    Structure lowerPTVJ = planninItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
-                    double lowerPTVJVolumeCoverage = planninItem.GetVolumeAtDose(lowerPTVJ,
+                    Structure lowerPTVJ = planningItem.StructureSet.Structures.FirstOrDefault(s => s.Id == StructureHelper.LOWER_PTV_JUNCTION);
+                    double lowerPTVJVolumeCoverage = planningItem.GetVolumeAtDose(lowerPTVJ,
                                                                                  totalDose,
                                                                                  VolumePresentation.Relative);
                     if (lowerPTVJVolumeCoverage < 98.0)

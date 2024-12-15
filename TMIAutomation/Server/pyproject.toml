@@ -1,0 +1,7 @@
+[project]
+name = "tmi-isocenter-server"
+version = "0.0.1"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+packages = ["src"]

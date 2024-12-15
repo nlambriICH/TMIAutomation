@@ -12,20 +12,32 @@ jobs:
     runs-on: windows-2019
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+            python-version: '3.11'
+      - name: Setup env
+        run: |
+            cd TMIAutomation\Server
+            pip install . -r requirements.txt
+      - name: Build server app
+        run: |
+            cd TMIAutomation\Server
+            pyinstaller --clean --noconfirm --add-data "models;models" --add-data "config.yml;." --collect-submodules=pydicom src/app.py
       - name: Add nuget to PATH
-        uses: nuget/setup-nuget@v1
+        uses: nuget/setup-nuget@v2
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v2
       - name: Install nuget packages
         run: nuget restore TMIAutomation\TMIAutomation.csproj -PackagesDirectory packages
       - name: Build app for release ESAPI-v15.6
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-15.6 -p:Platform=x64
       - name: Build app for release ESAPI-v16.1
-        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1
+        run: msbuild TMIAutomation\TMIAutomation.csproj -t:Rebuild -p:Configuration=Release-16.1 -p:Platform=x64
       - name: Upload artifacts for release
         if: ${{ inputs.upload-artifacts }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Library
           path: |

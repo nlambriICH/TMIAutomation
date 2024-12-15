@@ -19,11 +19,11 @@ namespace TMIAutomation.Tests
 
         [Theory]
         [InlineData("LowerBase")]
-        [InlineData("LowerBase1")]
-        private void AddBaseDosePlan(string expectedPlanId)
+        [InlineData("LowerBase")]
+        private void GetOrCreateBaseDosePlan(string expectedPlanId)
         {
             Course targetCourse = externalPlanSetup.Course;
-            ExternalPlanSetup newPlan = targetCourse.AddBaseDosePlan(externalPlanSetup.StructureSet);
+            ExternalPlanSetup newPlan = targetCourse.GetOrCreateBaseDosePlan(externalPlanSetup.StructureSet);
             try
             {
                 Assert.Equal(expectedPlanId, newPlan.Id);

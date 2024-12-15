@@ -1,5 +1,12 @@
 ﻿# Values must be tab separated
 # Lines starting with a hash sign '#' are ignored
 # Empty lines are ignored
-OptimizationAlgorithm	DoseAlgorithm	MLCID	DosePerFraction	NumberOfFractions
-PO_15.6.06	AAA 15.06.06	MLC0010	2	1
+OptimizationAlgorithm	PO_15.6.06
+DoseAlgorithm	AAA 15.06.06
+MLCID	MLC0010
+DosePerFraction	2
+NumberOfFractions	1
+TreatmentMachine	TrueBeamSN1015
+
+# Accepted values for BaseDosePlanning: "Yes" or "No"
+BaseDosePlanning	Yes

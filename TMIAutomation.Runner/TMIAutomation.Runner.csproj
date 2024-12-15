@@ -158,7 +158,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include=".editorconfig" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -179,6 +178,12 @@
     <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-15.6 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI15 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Configuration $(TargetDir)Configuration OARNames.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Configuration $(TargetDir)Configuration DCMExport.txt
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+robocopy $(SolutionDir)$(SolutionName)\Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 exit 0</PostBuildEvent>
   </PropertyGroup>

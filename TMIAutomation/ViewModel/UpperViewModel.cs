@@ -1,16 +1,41 @@
-﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.CommandWpf;
 using TMIAutomation.View;
 
 namespace TMIAutomation.ViewModel
 {
     public class UpperViewModel : ViewModelBase
     {
+        private List<string> courses;
+        public List<string> Courses
+        {
+            get => courses;
+            set
+            {
+                Set(ref courses, value);
+                SelectedCourseId = this.courses.Count != 0 ? this.courses[0] : string.Empty;
+            }
+        }
+
+        private string selectedCourseId;
+        public string SelectedCourseId
+        {
+            get => selectedCourseId;
+            set
+            {
+                if (selectedCourseId != value)
+                {
+                    Set(ref selectedCourseId, value);
+                    RetrieveUpperPlans(selectedCourseId);
+                }
+            }
+        }
+
         private List<string> upperPlans;
         public List<string> UpperPlans
         {
@@ -68,6 +93,13 @@ namespace TMIAutomation.ViewModel
             set => Set(ref isControlChecked, value);
         }
 
+        private bool isOptimizationChecked;
+        public bool IsOptimizationChecked
+        {
+            get => isOptimizationChecked;
+            set => Set(ref isOptimizationChecked, value);
+        }
+
         private readonly ModelBase modelBase;
 
         public ICommand StartExecutionCommand { get; }
@@ -84,18 +116,29 @@ namespace TMIAutomation.ViewModel
             this.modelBase = modelBase;
             IsJunctionChecked = true;
             IsControlChecked = true;
+            IsOptimizationChecked = true;
             StartExecutionCommand = new RelayCommand(StartExecution);
-            RetrieveUpperPlans();
+            RetrieveCourses();
         }
 
-        private async void RetrieveUpperPlans()
+        /*
+         * Async void methods used only to set properties:
+         * they cannot return a Task and need to be async to run on the ESAPI thread
+         * Warning: there is no guarantee that these methods will be awaited
+        */
+        private async void RetrieveCourses()
         {
-            UpperPlans = await this.modelBase.GetPlansAsync(ModelBase.PlanType.Up);
+            Courses = await this.modelBase.GetCoursesAsync();
+        }
+
+        private async void RetrieveUpperPlans(string courseId)
+        {
+            UpperPlans = await this.modelBase.GetPlansAsync(courseId, ModelBase.PlanType.Up);
         }
 
         private async void RetrieveUpperPTVs(string planId)
         {
-            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(planId);
+            UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, planId);
         }
 
         private async void StartExecution()
@@ -106,23 +149,53 @@ namespace TMIAutomation.ViewModel
             ProgressBarWindow pbWindow = new ProgressBarWindow(pbViewModel);
             pbWindow.Show();
 
-            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked };
+            bool[] checkedOptions = new bool[] { this.isJunctionChecked, this.IsControlChecked, this.IsOptimizationChecked };
             int rescaleProgress = checkedOptions.Count(c => c); // count how many CheckBox are checked
             pbViewModel.NumOperations += rescaleProgress - 1; // rescale the progress bar update
             bool success = true; // show "Complete" message box
 
             try
             {
+                await this.modelBase.SetInContextOrCreateAutoPlanAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+                UpperPlans = await this.modelBase.GetPlansAsync(this.selectedCourseId, ModelBase.PlanType.Up);
+
+                List<string> oarIds = new List<string> { };
+                if (this.isOptimizationChecked)
+                {
+                    List<string> structureNames = await this.modelBase.GetOARNamesAsync(this.selectedCourseId, this.selectedPlanId);
+                    OARSelectionViewModel oarSelectionViewModel = new OARSelectionViewModel(structureNames);
+                    OARSelection oarSelectionWindow = new OARSelection(oarSelectionViewModel);
+                    oarSelectionWindow.ShowDialog();
+
+                    if (oarSelectionWindow.userClosing)
+                    {
+                        throw new InvalidOperationException(); // window closed by user
+                    }
+
+                    oarIds = oarSelectionViewModel.ItemSelection.Where(s => s.IsChecked)
+                        .Select(s => s.ItemName)
+                        .ToList();
+                }
+
                 if (this.isJunctionChecked)
                 {
-                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
-                    RetrieveUpperPTVs(this.selectedPlanId);
+                    await this.modelBase.GenerateUpperJunctionAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
+                    UpperPTVs = await this.modelBase.GetPTVsFromPlanAsync(this.selectedCourseId, this.selectedPlanId);
                 }
 
                 if (this.isControlChecked)
                 {
-                    await this.modelBase.GenerateUpperControlAsync(this.selectedPlanId, this.selectedPTVId, progress, message);
+                    await this.modelBase.GenerateUpperControlAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, progress, message);
                 }
+
+                if (this.isOptimizationChecked)
+                {
+                    await this.modelBase.OptimizeUpperAsync(this.selectedCourseId, this.selectedPlanId, this.selectedPTVId, oarIds, progress, message);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                success = false;
             }
             catch (Exception e)
             {

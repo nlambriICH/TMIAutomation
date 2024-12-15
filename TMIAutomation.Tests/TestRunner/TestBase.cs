@@ -46,6 +46,7 @@ namespace TMIAutomation.Tests
                 object testInstance = factTests.Key;
                 foreach (MethodInfo factTest in factTests.Value)
                 {
+                    Console.WriteLine($"Executing {factTest.Name}...");
                     try
                     {
                         TestReporter.TotalTests++;
@@ -63,6 +64,7 @@ namespace TMIAutomation.Tests
                 object testInstance = theoryTests.Key;
                 foreach (MethodInfo theoryTest in theoryTests.Value)
                 {
+                    Console.WriteLine($"Executing {theoryTest.Name}...");
                     foreach (InlineDataAttribute attribute in theoryTest.GetCustomAttributes(typeof(InlineDataAttribute)))
                     {
                         try

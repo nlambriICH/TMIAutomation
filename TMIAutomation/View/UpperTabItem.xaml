@@ -25,11 +25,26 @@
                    VerticalAlignment="Top"
                    Margin="230,55,0,0"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="Select Upper Plan"/>
+                   Text="Select Course"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
                   Margin="430,55,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding Courses}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedCourseId}"/>
+        
+        <TextBlock Width="130"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="230,95,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Select Upper Plan"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="430,95,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding UpperPlans}"
                   IsSynchronizedWithCurrentItem="True"
@@ -37,13 +52,13 @@
 
         <TextBlock VerticalAlignment="Top"
                    HorizontalAlignment="Left"
-                   Margin="230,95,0,0"
+                   Margin="230,135,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Select Upper PTV"/>
 
         <ComboBox HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="430,95,0,0"
+                  Margin="430,135,0,0"
                   Style="{StaticResource ComboBoxTheme}"
                   ItemsSource="{Binding UpperPTVs}"
                   IsSynchronizedWithCurrentItem="True"
@@ -62,6 +77,14 @@
                   Content="Control Structures"
                   Style="{StaticResource CheckBoxTheme}"
                   IsChecked="{Binding Path=IsControlChecked, Mode=TwoWay}"/>
+
+        <CheckBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="550,245,0,0"
+                  Content="Optimization"
+                  Style="{StaticResource CheckBoxTheme}"
+                  x:Name="Optimization"
+                  IsChecked="{Binding Path=IsOptimizationChecked, Mode=TwoWay}"/>
 
         <Button HorizontalAlignment="Left"
                 VerticalAlignment="Top"

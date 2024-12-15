@@ -1,8 +1,8 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 
@@ -12,12 +12,14 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<LowerControl>();
         private readonly EsapiWorker esapiWorker;
+        private readonly string courseId;
         private readonly string lowerPlanId;
         private readonly string lowerPTVId;
 
-        public LowerControl(EsapiWorker esapiWorker, string lowerPlanId, string lowerPTVId)
+        public LowerControl(EsapiWorker esapiWorker, string courseId, string lowerPlanId, string lowerPTVId)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.lowerPlanId = lowerPlanId;
             this.lowerPTVId = lowerPTVId;
         }
@@ -26,12 +28,12 @@ namespace TMIAutomation
         {
             return esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("LowerControl context: {@context}", new List<string> { this.lowerPlanId, this.lowerPTVId });
+                logger.Information("LowerControl context: {@context}", new List<string> { this.courseId, this.lowerPlanId, this.lowerPTVId });
 
                 /*
                  * Create Healthy Tissue (HT), Healthy Tissue 2 (HT2), and Body Free (Body_free)
                  */
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 StructureSet lowerSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId).StructureSet;
                 Structure lowerPTV = lowerSS.Structures.FirstOrDefault(s => s.Id == this.lowerPTVId);
                 int bottomSlicePTVWithJunction = lowerSS.GetStructureSlices(lowerPTV).LastOrDefault();

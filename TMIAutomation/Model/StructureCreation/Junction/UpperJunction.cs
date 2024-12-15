@@ -1,8 +1,8 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
 using TMIAutomation.Async;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
@@ -13,12 +13,14 @@ namespace TMIAutomation
     {
         private readonly ILogger logger = Log.ForContext<UpperJunction>();
         private readonly EsapiWorker esapiWorker;
+        private readonly string courseId;
         private readonly string upperPlanId;
         private readonly string upperPTVId;
 
-        public UpperJunction(EsapiWorker esapiWorker, string upperPlanId, string upperPTVId)
+        public UpperJunction(EsapiWorker esapiWorker, string courseId, string upperPlanId, string upperPTVId)
         {
             this.esapiWorker = esapiWorker;
+            this.courseId = courseId;
             this.upperPlanId = upperPlanId;
             this.upperPTVId = upperPTVId;
         }
@@ -27,12 +29,12 @@ namespace TMIAutomation
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("UpperJunction context: {@context}", new List<string> { this.upperPlanId, this.upperPTVId });
+                logger.Information("UpperJunction context: {@context}", new List<string> { this.courseId, this.upperPlanId, this.upperPTVId });
 
                 /*
                  * Create junction structures upper CT
                  */
-                Course targetCourse = scriptContext.Course ?? scriptContext.Patient.Courses.OrderBy(c => c.HistoryDateTime).Last();
+                Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 StructureSet upperSS = targetCourse.PlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId).StructureSet;
 
                 Structure upperPTV = upperSS.Structures.FirstOrDefault(s => s.Id == this.upperPTVId);
@@ -115,8 +117,6 @@ namespace TMIAutomation
                 rem.SegmentVolume = rem.Sub(upperJunction.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 10, 10, 0, 10, 10, 0)));
 
                 logger.Information("Structure created: {rem}", rem.Id);
-                progress.Report(0.4);
-                message.Report("Done!");
             });
         }
     }

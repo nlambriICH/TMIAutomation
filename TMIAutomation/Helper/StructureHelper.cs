@@ -1,8 +1,8 @@
-﻿using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
+using Serilog;
 using TMIAutomation.View;
 using TMIAutomation.ViewModel;
 using VMS.TPS.Common.Model.API;
@@ -129,7 +129,17 @@ namespace TMIAutomation
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT_AUTO...");
             Structure healthyTissue = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE, logger);
-            healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
+
+            if (ConfigOptOptions.BaseDosePlanning)
+            {
+                AxisAlignedMargins ptvAsymmMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 15, 15, 15, 15, 15, 20);
+                AxisAlignedMargins ptvAsymmMarginSub = new AxisAlignedMargins(StructureMarginGeometry.Outer, 3, 3, 3, 3, 3, 20);
+                healthyTissue.SegmentVolume = ptv.AsymmetricMargin(ptvAsymmMargin).Sub(ptv.AsymmetricMargin(ptvAsymmMarginSub)).And(body.Margin(-3));
+            }
+            else
+            {
+                healthyTissue.SegmentVolume = ptv.Margin(15).Sub(ptv.Margin(3)).And(body.Margin(-3));
+            }
 
             message.Report("Removing small contours from HT_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT}", HEALTHY_TISSUE);
@@ -138,7 +148,17 @@ namespace TMIAutomation
             progress.Report(0.25);
             message.Report("Generating healthy tissue structure HT2_AUTO...");
             Structure healthyTissue2 = ss.TryAddStructure("CONTROL", HEALTHY_TISSUE2, logger);
-            healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
+
+            if (ConfigOptOptions.BaseDosePlanning)
+            {
+                AxisAlignedMargins ptvAsymmMargin = new AxisAlignedMargins(StructureMarginGeometry.Outer, 30, 30, 30, 30, 30, 35);
+                AxisAlignedMargins ptvAsymmMarginSub = new AxisAlignedMargins(StructureMarginGeometry.Outer, 17, 17, 17, 17, 17, 35);
+                healthyTissue2.SegmentVolume = ptv.AsymmetricMargin(ptvAsymmMargin).Sub(ptv.AsymmetricMargin(ptvAsymmMarginSub)).And(body.Margin(-3));
+            }
+            else
+            {
+                healthyTissue2.SegmentVolume = ptv.Margin(30).Sub(ptv.Margin(17)).And(body.Margin(-3));
+            }
 
             message.Report("Removing small contours from HT2_AUTO. This may take a while...");
             logger.Information("RemoveSmallContoursFromStructure: {HT2}", HEALTHY_TISSUE2);
@@ -200,7 +220,13 @@ namespace TMIAutomation
                 case OptimizationCycleTarget.LowerPTV_J:
                     message.Report("Generating isodose Dose_100%_PS...");
                     Structure isodose100PlanSum = ss.TryAddStructure("CONTROL", DOSE_100_PS, logger);
-                    isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, new DoseValue(2.0, DoseValue.DoseUnit.Gy));
+
+                    // Plan sum accepts only absolute dose
+                    PlanSum planSum = planningItem as PlanSum;
+                    PlanSetup planSetup = planSum.PlanSetups.FirstOrDefault();
+                    planSetup.DoseValuePresentation = DoseValuePresentation.Absolute;
+                    isodose100PlanSum.ConvertDoseLevelToStructure(planningItem.Dose, planSetup.TotalDose);
+
                     isodose100PlanSum.SegmentVolume = targetVolume.Sub(isodose100PlanSum);
                     logger.Information("RemoveSmallContoursFromStructure: {Dose_100_PS}", DOSE_100_PS);
                     ss.RemoveSmallContoursFromStructure(isodose100PlanSum, message);
@@ -241,20 +267,32 @@ namespace TMIAutomation
                 logger.Information("Found existing Sructure {Id} with Dicom type {dicomType} in current StructureSet {ssId}", id, dicomType, ss.Id);
                 Structure oldStructure = ss.Structures.FirstOrDefault(s => s.Id == id);
                 logger.Information("Asking the user to rename the Structure {Id}", id);
-                RenameStructureViewModel renameStructureViewModel = new RenameStructureViewModel(oldStructure, id, e.Message);
-                RenameStructureWindow renameStructureWindow = new RenameStructureWindow(renameStructureViewModel);
-                renameStructureWindow.ShowDialog();
-#if ESAPI15
-                /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
-                * ESAPI15 won't throw any error, although the structure Id doesn't change
-                */
-                if (oldStructure.Id == id)
+                StructureOpViewModel structureOpViewModel = new StructureOpViewModel(oldStructure, id, e.Message);
+                StructureOpWindow structureOpWindow = new StructureOpWindow(structureOpViewModel);
+                structureOpWindow.ShowDialog();
+                logger.Information("Structure operation {op}", structureOpViewModel.Operation);
+
+                if (structureOpViewModel.Operation == Operation.Rename)
                 {
-                    throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
-                        $"Please set its status to UnApproved in all StructureSets.");
-                }
+                    oldStructure.Id = structureOpViewModel.StructureId;
+#if ESAPI15
+                    /* With ESAPI15 a structure can't be renamed if it is approved in another structure set
+                    * ESAPI15 won't throw any error, although the structure Id doesn't change
+                    */
+                    if (oldStructure.Id == id)
+                    {
+                        throw new InvalidOperationException($"Could not change Id of the existing Structure {oldStructure.Id}. " +
+                            $"Please set its status to UnApproved in all StructureSets.");
+                    }
 #endif
-                logger.Information("Structure {Id} renamed to {oldId}", id, oldStructure.Id);
+                    logger.Information("Structure {Id} renamed to {oldId}", id, oldStructure.Id);
+                }
+                else
+                {
+                    // It is allowed to remove a structure that is approved in another structure set
+                    ss.RemoveStructure(oldStructure);
+                    logger.Information("Remove Structure {Id}", id);
+                }
             }
 
             logger.Information("Add new Structure {Id}", id);
