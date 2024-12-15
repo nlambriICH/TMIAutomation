@@ -1,10 +1,17 @@
 # TMIAutomation
 
+[![GitHub Release](https://img.shields.io/github/v/release/nlambriICH/TMIAutomation)](https://github.com/nlambriICH/TMIAutomation/releases/latest)
+[![Build](https://github.com/nlambriICH/TMIAutomation/actions/workflows/build.yml/badge.svg)](https://github.com/nlambriICH/TMIAutomation/actions/workflows/build.yml)
+[![GitHub License](https://img.shields.io/github/license/nlambriICH/TMIAutomation)](https://opensource.org/licenses/MIT)
+[![Static Badge](https://img.shields.io/badge/DOI-s00066--022--02014--0-007269)](https://doi.org/10.1007/s00066-022-02014-0)
+[![Static Badge](https://img.shields.io/badge/DOI-mp.17089-cc4e00)](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089)
+
 Plug-in script for the Eclipse Treatment Planning System to automate Total Marrow (Lymph-node) Irradiation (TMI/TMLI).
 
 The script was introduced and validated in [this paper](https://doi.org/10.1007/s00066-022-02014-0) on Strahlentherapie und Onkologie.
 
 The generation of the field geometry of TMI/TMLI with deep-learning was introduced in [this paper](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089) on Medical Physics.
+This paper was featured on the **cover** of the **Medical Physics** [Issue of June 2024](https://doi.org/10.1002/mp.15744).
 
 If you liked/used this project, don't forget to give it a star! :star:
 
