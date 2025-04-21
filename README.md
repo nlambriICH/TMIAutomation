@@ -5,13 +5,16 @@
 [![GitHub License](https://img.shields.io/github/license/nlambriICH/TMIAutomation)](https://opensource.org/licenses/MIT)
 [![Static Badge](https://img.shields.io/badge/DOI-s00066--022--02014--0-007269)](https://doi.org/10.1007/s00066-022-02014-0)
 [![Static Badge](https://img.shields.io/badge/DOI-mp.17089-cc4e00)](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089)
+[![Static Badge](https://img.shields.io/badge/DOI-j.ejmp.2025.104898-5cc7d4)](https://doi.org/10.1016/j.ejmp.2025.104898)
 
 Plug-in script for the Eclipse Treatment Planning System to automate Total Marrow (Lymph-node) Irradiation (TMI/TMLI).
 
 The script was introduced and validated in [this paper](https://doi.org/10.1007/s00066-022-02014-0) on Strahlentherapie und Onkologie.
 
-The generation of the field geometry of TMI/TMLI with deep-learning was introduced in [this paper](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089) on Medical Physics.
-This paper was featured on the **cover** of the **Medical Physics** [Issue of June 2024](https://doi.org/10.1002/mp.15744).
+The generation of the field geometry of TMI/TMLI with deep-learning models was introduced in [this paper](https://aapm.onlinelibrary.wiley.com/doi/10.1002/mp.17089) on Medical Physics.
+This paper was selected for the **cover** of the **Medical Physics** [Issue of June 2024](https://doi.org/10.1002/mp.15744).
+
+The base-dose planning approach was introduced in [this paper](https://doi.org/10.1016/j.ejmp.2025.104898) on Physica Medica.
 
 If you liked/used this project, don't forget to give it a star! :star:
 
