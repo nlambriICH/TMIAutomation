@@ -18,7 +18,7 @@ namespace TMIAutomation.Model.Schedule.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+    #line 1 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class DisplacementsPage : DisplacementsPageBase
     {
@@ -29,70 +29,70 @@ namespace TMIAutomation.Model.Schedule.Templates
         public virtual string TransformText()
         {
             
-            #line 7 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(patient.FirstName));
+            #line 7 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(upperPlan.Course.Patient.FirstName));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 7 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(patient.LastName));
+            #line 7 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(upperPlan.Course.Patient.LastName));
             
             #line default
             #line hidden
             this.Write(" TMLI ");
             
-            #line 7 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 7 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(treatmentDate.ToString("D")));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n\r\n");
             
-            #line 10 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 10 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.DisplacementsHeader));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 10 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 10 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Body));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 12 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 12 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.MostCaudalIsoFromMarkers));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 12 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 12 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(upperMarkersLocation));
             
             #line default
             #line hidden
             this.Write(": ");
             
-            #line 12 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 12 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Math.Abs(Math.Round(upperIsocenters.Last().z, 0)) / 10));
             
             #line default
             #line hidden
             this.Write(" cm\r\n");
             
-            #line 13 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 13 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Notes));
             
             #line default
             #line hidden
             this.Write(": ...\r\n");
             
-            #line 14 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 14 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 for (int i = 0; i < upperIsocenters.Count; ++i)
 {
@@ -126,35 +126,35 @@ double roundedDispZ = Math.Abs(Math.Round(displacement.z, 0)) / 10;
             #line hidden
             this.Write("\r\n");
             
-            #line 43 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 43 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Isocenter));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 43 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 43 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(i + 1));
             
             #line default
             #line hidden
             this.Write(": ");
             
-            #line 43 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 43 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(scheduleUpperPlanName[i]));
             
             #line default
             #line hidden
             this.Write("\r\n    ");
             
-            #line 44 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 44 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(explainDisp));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 45 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 45 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 if (displacement.x > 0)
 {
@@ -164,21 +164,21 @@ if (displacement.x > 0)
             #line hidden
             this.Write("        ");
             
-            #line 49 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 49 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispX));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 49 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 49 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardLeftOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 50 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 50 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.x < 0)
@@ -189,21 +189,21 @@ else if (displacement.x < 0)
             #line hidden
             this.Write("        ");
             
-            #line 55 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 55 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispX));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 55 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 55 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardRightOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 56 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 56 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 if (displacement.y > 0)
@@ -214,21 +214,21 @@ if (displacement.y > 0)
             #line hidden
             this.Write("        ");
             
-            #line 61 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 61 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispY));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 61 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 61 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardBackOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 62 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 62 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.y < 0)
@@ -239,21 +239,21 @@ else if (displacement.y < 0)
             #line hidden
             this.Write("        ");
             
-            #line 67 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 67 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispY));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 67 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 67 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardFrontOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 68 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 68 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 if (displacement.z > 0)
@@ -264,21 +264,21 @@ if (displacement.z > 0)
             #line hidden
             this.Write("        ");
             
-            #line 73 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 73 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispZ));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 73 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 73 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardHeadOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 74 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 74 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.z < 0)
@@ -289,21 +289,21 @@ else if (displacement.z < 0)
             #line hidden
             this.Write("        ");
             
-            #line 79 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 79 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispZ));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 79 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 79 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardFeetOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 80 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 80 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 if (isocentersOnArms && i == 2)
@@ -314,14 +314,14 @@ if (isocentersOnArms && i == 2)
             #line hidden
             this.Write("    ");
             
-            #line 85 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 85 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.IsoOnArmsMarkerWarning));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 86 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 86 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 }
@@ -331,49 +331,49 @@ if (isocentersOnArms && i == 2)
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 92 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 92 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.DisplacementsHeader));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 92 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 92 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Legs));
             
             #line default
             #line hidden
             this.Write("\r\n\r\n");
             
-            #line 94 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 94 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.MostCaudalIsoFromMarkers));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 94 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 94 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(lowerMarkersLocation));
             
             #line default
             #line hidden
             this.Write(": ");
             
-            #line 94 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 94 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Math.Abs(Math.Round(lowerIsocenters.Last().z, 0)) / 10));
             
             #line default
             #line hidden
             this.Write(" cm\r\n");
             
-            #line 95 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 95 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Notes));
             
             #line default
             #line hidden
             this.Write(": ...\r\n");
             
-            #line 96 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 96 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 for (int i = 0; i < lowerIsocenters.Count; ++i)
 {
@@ -390,35 +390,35 @@ string explainDisp = i == 0 ?
             #line hidden
             this.Write("\r\n");
             
-            #line 108 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 108 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.Isocenter));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 108 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 108 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(i + upperIsocenters.Count + 1));
             
             #line default
             #line hidden
             this.Write(": ");
             
-            #line 108 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 108 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(scheduleLowerPlanName[i]));
             
             #line default
             #line hidden
             this.Write("\r\n    ");
             
-            #line 109 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 109 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(explainDisp));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 110 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 110 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 if (displacement.x > 0)
 {
@@ -428,21 +428,21 @@ if (displacement.x > 0)
             #line hidden
             this.Write("        ");
             
-            #line 114 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 114 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispX));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 114 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 114 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardRightOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 115 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 115 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.x < 0)
@@ -453,21 +453,21 @@ else if (displacement.x < 0)
             #line hidden
             this.Write("        ");
             
-            #line 120 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 120 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispX));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 120 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 120 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardLeftOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 121 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 121 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 if (displacement.y > 0)
@@ -478,21 +478,21 @@ if (displacement.y > 0)
             #line hidden
             this.Write("        ");
             
-            #line 126 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 126 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispY));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 126 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 126 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardBackOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 127 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 127 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.y < 0)
@@ -503,21 +503,21 @@ else if (displacement.y < 0)
             #line hidden
             this.Write("        ");
             
-            #line 132 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 132 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispY));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 132 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 132 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardFrontOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 133 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 133 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 if (displacement.z > 0)
@@ -528,21 +528,21 @@ if (displacement.z > 0)
             #line hidden
             this.Write("        ");
             
-            #line 138 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 138 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispZ));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 138 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 138 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardFeetOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 139 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 139 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 else if (displacement.z < 0)
@@ -553,21 +553,21 @@ else if (displacement.z < 0)
             #line hidden
             this.Write("        ");
             
-            #line 144 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 144 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(roundedDispZ));
             
             #line default
             #line hidden
             this.Write(" cm ");
             
-            #line 144 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 144 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Resources.TowardHeadOfPatient));
             
             #line default
             #line hidden
             this.Write("\r\n");
             
-            #line 145 "E:\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
+            #line 145 "C:\Users\nlambri\Documents\TMIAutomation\TMIAutomation\Model\Schedule\Templates\DisplacementsPage.tt"
 
 }
 }

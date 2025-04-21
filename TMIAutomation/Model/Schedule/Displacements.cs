@@ -44,14 +44,17 @@ namespace TMIAutomation
         {
             return this.esapiWorker.RunAsync(scriptContext =>
             {
-                logger.Information("Displacements context: {@context}",
-                                   new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.scheduleCourseId, this.isocentersOnArms.ToString() });
+                logger.Information(
+                    "Displacements context: {@context}",
+                    new List<string> { this.courseId, this.upperPlanId, this.lowerPlanId, this.scheduleCourseId, this.treatmentDate.ToString("ddMMyyyy"), this.isocentersOnArms.ToString() });
+                
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.courseId);
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 IEnumerable<PlanSetup> schedulePlans = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.scheduleCourseId).PlanSetups;
 
                 DisplacementsPage page = new DisplacementsPage(upperPlan, lowerPlan, schedulePlans, this.treatmentDate, this.isocentersOnArms);
+                page.PopulateTemplate();
                 string content = page.TransformText();
 
                 this.SaveDisplacements(scriptContext.Patient.LastName, scriptContext.Patient.FirstName, content);
