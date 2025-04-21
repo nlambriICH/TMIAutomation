@@ -4,7 +4,7 @@
 <#@ import namespace="VMS.TPS.Common.Model.Types" #>
 <#@ import namespace="TMIAutomation.Language" #>
 <#@ output extension =".txt" #>
-<#= patient.FirstName #> <#= patient.LastName #> TMLI <#= treatmentDate.ToString("D") #>
+<#= upperPlan.Course.Patient.FirstName #> <#= upperPlan.Course.Patient.LastName #> TMLI <#= treatmentDate.ToString("D") #>
 
 
 <#= Resources.DisplacementsHeader #> <#= Resources.Body #>
