@@ -50,7 +50,7 @@ namespace TMIAutomation
                 ExternalPlanSetup upperPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.upperPlanId);
                 ExternalPlanSetup lowerPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == this.lowerPlanId);
                 Course scheduleCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == this.scheduleCourseId);
-                List<StructureSet> scheduleSS = scriptContext.Patient.StructureSets.Where(ss => IsMatchingStructure(ss)).OrderBy(ss => ss.Id).ToList();
+                IEnumerable<StructureSet> scheduleSS = scriptContext.Patient.StructureSets.Where(ss => IsMatchingStructureSet(ss)).OrderBy(ss => ss.Id);
 
                 message.Report("Generating schedule plans upper-body...");
                 AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
@@ -64,7 +64,7 @@ namespace TMIAutomation
             });
         }
 
-        private bool IsMatchingStructure(StructureSet ss)
+        private bool IsMatchingStructureSet(StructureSet ss)
         {
             bool match = false;
             foreach (string fullId in scheduleSSStudySeriesId)
@@ -73,7 +73,7 @@ namespace TMIAutomation
 
                 if (parts.Length != 2)
                 {
-                    logger.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
+                    logger.Error("Input string {fullId} is not in the expected format: StructureSetId\\tStudyId / SeriesId.", fullId);
                     continue;
                 }
 
@@ -81,15 +81,15 @@ namespace TMIAutomation
 
                 if (subParts.Length != 2)
                 {
-                    logger.Error("Input string {fullId} is not in the expected format: StructureId\\tStudyId / SeriesId.", fullId);
+                    logger.Error("Input string {fullId} is not in the expected format: StructureSetId\\tStudyId / SeriesId.", fullId);
                     continue;
                 }
 
-                string structureId = parts[0];
+                string structureSetId = parts[0];
                 string studyId = subParts[0].Trim();
                 string seriesId = subParts[1].Trim();
 
-                match |= ss.Id == structureId && ss.Image.Series.Study.Id == studyId && ss.Image.Series.Id == seriesId;
+                match |= ss.Id == structureSetId && ss.Image.Series.Study.Id == studyId && ss.Image.Series.Id == seriesId;
             }
 
             return match;
@@ -101,50 +101,59 @@ namespace TMIAutomation
             foreach (StructureSet ss in scheduleSS)
             {
                 StringBuilder outputDiagnostics = new StringBuilder();
-                ExternalPlanSetup newPlan = newCourse.CopyPlanSetup(sourcePlan, ss, outputDiagnostics) as ExternalPlanSetup;
+                ExternalPlanSetup schedulePlan = newCourse.CopyPlanSetup(sourcePlan, ss, outputDiagnostics) as ExternalPlanSetup;
                 string isoNumber = Regex.Match(ss.Id, @"\d").Value;
-                newPlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}";
+                schedulePlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}";
                 logger.Information("Copied source plan {sourcePlanId} using structure set {ssId} into course {newCourse}. "
                                 + "New plan {newPlanId}. "
                                 + "Output diagnostics: {diagnostics}",
                                 sourcePlan.Id,
                                 ss.Id,
                                 newCourse.Id,
-                                newPlan.Id,
+                                schedulePlan.Id,
                                 outputDiagnostics);
 
                 // Reorder beams: isocenters on arms after the first two isocenters groups
-                List<Beam> newPlanBeams = newPlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) <= 100)
+                List<Beam> schedulePlanBeams = schedulePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) <= 100)
                                                        .OrderByDescending(b => b.IsocenterPosition.z)
                                                        .ToList();
                 if (ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
                 {
-                    newPlanBeams.InsertRange(6, newPlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
+                    schedulePlanBeams.InsertRange(6, schedulePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
                 }
 
-                for (int i = 0; i < newPlanBeams.Count(); i += 2)
+                for (int i = 0; i < schedulePlanBeams.Count; i += 2)
                 {
                     if (i != isoGroupKeep)
                     {
-                        logger.Information("Remove beam {beam}", newPlanBeams[i].Id);
-                        newPlan.RemoveBeam(newPlanBeams[i]);
-                        logger.Information("Remove beam {beam}", newPlanBeams[i + 1].Id);
-                        newPlan.RemoveBeam(newPlanBeams[i + 1]);
+                        logger.Information("Remove beam {beam}", schedulePlanBeams[i].Id);
+                        schedulePlan.RemoveBeam(schedulePlanBeams[i]);
+
+                        /* Possible to have only one field in isocenter group
+                         * (e.g., one field only for the feet)
+                         */
+                        Beam nextBeam = schedulePlanBeams.ElementAtOrDefault(i + 1);
+                        if (nextBeam != null)
+                        {
+                            logger.Information("Remove beam {beam}", nextBeam.Id);
+                            schedulePlan.RemoveBeam(nextBeam);
+                        }
                     }
+#if ESAPI16
                     else
                     {
-#if ESAPI16
                         /*
                          * ESAPI v15 allows only to modify setup fields
                          * Copying params for last field in group like Eclipse
                          */
-                        ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(newPlanBeams[i + 1].TreatmentUnit.Id, "6X", 600, "STATIC", "");
-                        Beam cbct = newPlan.AddSetupBeam(beamMachineParams,
-                                                         GetMaximumAperture(newPlanBeams[i + 1].ControlPoints), 0, 0, 0,
-                                                         newPlanBeams[i + 1].IsocenterPosition);
+                        Beam lastBeam = schedulePlanBeams.ElementAtOrDefault(i + 1) ?? schedulePlanBeams.ElementAt(i);  // If only one field in isocenter group
+                        ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(lastBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
+                        Beam cbct = schedulePlan.AddSetupBeam(beamMachineParams,
+                                                         GetMaximumAperture(lastBeam.ControlPoints), 0, 0, 0,
+                                                         lastBeam.IsocenterPosition);
                         cbct.Id = "CBCT";
-#endif
                     }
+#endif
                 }
 
                 // Add isocenters on the arms
@@ -159,31 +168,32 @@ namespace TMIAutomation
                         string ending = isoLeftArm ? "SX" : "DX";
 
                         outputDiagnostics.Clear();
-                        newPlan = newCourse.CopyPlanSetup(sourcePlan, ss, outputDiagnostics) as ExternalPlanSetup;
+                        schedulePlan = newCourse.CopyPlanSetup(sourcePlan, ss, outputDiagnostics) as ExternalPlanSetup;
                         logger.Information("Copied source plan {sourcePlanId} using structure set {ssId} into course {newCourse}. "
                                         + "New plan {newPlanId}. "
                                         + "Output diagnostics: {diagnostics}",
                                         sourcePlan.Id,
                                         ss.Id,
                                         newCourse.Id,
-                                        newPlan.Id,
+                                        schedulePlan.Id,
                                         outputDiagnostics);
-                        newPlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}_{ending}";
+                        schedulePlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}_{ending}";
 
-                        List<Beam> beamsExceptArm = newPlan.Beams.Where(b => b.Id != beamArm.Id).ToList();
+                        // Need list to modify collection
+                        List<Beam> beamsExceptArm = schedulePlan.Beams.Where(b => b.Id != beamArm.Id).ToList();
                         foreach (Beam beam in beamsExceptArm)
                         {
                             logger.Information("Remove beam {beam}", beam.Id);
-                            newPlan.RemoveBeam(beam);
+                            schedulePlan.RemoveBeam(beam);
                         }
 #if ESAPI16
                         /*
                          * ESAPI v15 allows only to modify setup fields
                          * Copying params for last field in group like Eclipse
                          */
-                        Beam armBeam = newPlan.Beams.FirstOrDefault();
+                        Beam armBeam = schedulePlan.Beams.FirstOrDefault();
                         ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(armBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
-                        Beam drr = newPlan.AddSetupBeam(beamMachineParams,
+                        Beam drr = schedulePlan.AddSetupBeam(beamMachineParams,
                                                         GetMaximumAperture(armBeam.ControlPoints), 0,
                                                         armBeam.ControlPoints.First().GantryAngle, 0,
                                                         armBeam.IsocenterPosition);
