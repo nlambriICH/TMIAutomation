@@ -4,7 +4,7 @@ using System.Linq;
 using Serilog;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-#if ESAPI16
+#if ESAPI16 || ESAPI18
 using System.Text;
 #endif
 
@@ -37,7 +37,7 @@ namespace TMIAutomation
         {
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, ConfigOptOptions.OptimizationAlgorithm);
             // Calculation options: \\machinename\dcf$\client
-#if ESAPI16
+#if ESAPI16 || ESAPI18
             if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU", "No"))
             {
                 logger.Warning("Could not set UseGPU to No");
@@ -62,11 +62,10 @@ namespace TMIAutomation
 #endif
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVolumeDose, ConfigOptOptions.DoseAlgorithm);
             externalPlanSetup.SetPrescription(int.Parse(ConfigOptOptions.NumberOfFractions), new DoseValue(double.Parse(ConfigOptOptions.DosePerFraction), DoseValue.DoseUnit.Gy), 1.0);
-#if ESAPI16
+#if ESAPI16 || ESAPI18
             StringBuilder errorHint = new StringBuilder();
             string targetId = externalPlanSetup.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine ? StructureHelper.UPPER_PTV_NO_JUNCTION : StructureHelper.LOWER_PTV_NO_JUNCTION;
-            bool success = externalPlanSetup.SetTargetStructureIfNoDose(externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == targetId),
-                                                                        errorHint);
+            bool success = externalPlanSetup.SetTargetStructureIfNoDose(externalPlanSetup.StructureSet.Structures.FirstOrDefault(s => s.Id == targetId), errorHint);
             if (!success)
             {
                 logger.Warning("Could not set target structure {targetId}.\n{errorHint}", targetId, errorHint);

@@ -37,15 +37,21 @@ namespace TMIAutomation.Tests
         [Fact]
         private void OptimizationSetup_Algorithm()
         {
-#if ESAPI16
+#if ESAPI16 || ESAPI18
             string optionName = "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart";
-            string expectedOptAlgo = "PO 16.1.0";
             string expectedTargetVolumeId = StructureHelper.LOWER_PTV_NO_JUNCTION;
+#endif
+#if ESAPI18
+            string expectedOptAlgo = "PO_18.0.1";
+            string expectedDoseAlgo = "AAA_18.0.1";
+#elif ESAPI16
+            string expectedOptAlgo = "PO 16.1.0";
+            string expectedDoseAlgo = "AAA 15.06.06";
 #else
             string optionName = "/PhotonOptCalculationOptions/@MRLevelAtRestart";
             string expectedOptAlgo = "PO_15.6.06";
-#endif
             string expectedDoseAlgo = "AAA 15.06.06";
+#endif
             string expectedOptValue = "MR3";
             string expectedDoseValue = "2.000";
             string expectedDoseUnit = "Gy";
@@ -57,9 +63,6 @@ namespace TMIAutomation.Tests
             this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionName, out string optionValue);
             DoseValue dosePerFraction = this.externalPlanSetup.DosePerFraction;
             int? numFractions = this.externalPlanSetup.NumberOfFractions;
-#if ESAPI16
-            string targetVolumeId = this.externalPlanSetup.TargetVolumeID;
-#endif
 
             Assert.Equal(expectedOptAlgo, optAlgo);
             Assert.Equal(expectedDoseAlgo, doseAlgo);
@@ -67,7 +70,9 @@ namespace TMIAutomation.Tests
             Assert.Equal(expectedDoseValue, dosePerFraction.ValueAsString);
             Assert.Equal(expectedDoseUnit, dosePerFraction.UnitAsString);
             Assert.Equal(expectedNumFractions, numFractions);
-#if ESAPI16
+
+#if ESAPI16 || ESAPI18
+            string targetVolumeId = this.externalPlanSetup.TargetVolumeID;
             Assert.Equal(expectedTargetVolumeId, targetVolumeId);
 #endif
         }
