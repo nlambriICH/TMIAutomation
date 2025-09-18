@@ -40,14 +40,16 @@ jobs:
         run: |
           echo "ESAPI15_RELEASE_ZIP=ESAPI15_TMIAutomation-${{ needs.tag-on-PR.outputs.tag }}.zip" >> $env:GITHUB_ENV
           echo "ESAPI16_RELEASE_ZIP=ESAPI16_TMIAutomation-${{ needs.tag-on-PR.outputs.tag }}.zip" >> $env:GITHUB_ENV
+          echo "ESAPI18_RELEASE_ZIP=ESAPI18_TMIAutomation-${{ needs.tag-on-PR.outputs.tag }}.zip" >> $env:GITHUB_ENV
       - name: Zip artifacts
         run: |
           Compress-Archive -Path Release-15.6 -DestinationPath ${{ env.ESAPI15_RELEASE_ZIP }}
           Compress-Archive -Path Release-16.1 -DestinationPath ${{ env.ESAPI16_RELEASE_ZIP }}
+          Compress-Archive -Path Release-18.0 -DestinationPath ${{ env.ESAPI18_RELEASE_ZIP }}
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }}
+          artifacts: ${{ env.ESAPI15_RELEASE_ZIP }},${{ env.ESAPI16_RELEASE_ZIP }},${{ env.ESAPI18_RELEASE_ZIP }}
           draft: true
           name: ${{ needs.tag-on-PR.outputs.tag }}
           tag: ${{ needs.tag-on-PR.outputs.tag }}
