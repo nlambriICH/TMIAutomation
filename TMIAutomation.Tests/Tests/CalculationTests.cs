@@ -38,21 +38,26 @@ namespace TMIAutomation.Tests
         private void OptimizationSetup_Algorithm()
         {
 #if ESAPI16 || ESAPI18
-            string optionName = "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart";
+            string optionMRName = "/PhotonOptimizerCalculationOptions/VMAT/@MRLevelAtRestart";
+            string optionAFName = "/PhotonOptimizerCalculationOptions/General/AutoFeathering/@AutoFeathering";
             string expectedTargetVolumeId = StructureHelper.LOWER_PTV_NO_JUNCTION;
 #endif
 #if ESAPI18
             string expectedOptAlgo = "PO_18.0.1";
             string expectedDoseAlgo = "AAA_18.0.1";
+            string optionGPUName = "/PhotonOptimizerCalculationOptions/General/GpuSettings/@UseGPU";
 #elif ESAPI16
             string expectedOptAlgo = "PO 16.1.0";
             string expectedDoseAlgo = "AAA 15.06.06";
+            string optionGPUName = "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU";
 #else
-            string optionName = "/PhotonOptCalculationOptions/@MRLevelAtRestart";
+            string optionMRName = "/PhotonOptCalculationOptions/@MRLevelAtRestart";
+            string optionAFName = "/PhotonOptCalculationOptions/@AutoFeathering";
             string expectedOptAlgo = "PO_15.6.06";
             string expectedDoseAlgo = "AAA 15.06.06";
 #endif
-            string expectedOptValue = "MR3";
+            string expectedMRValue = "MR3";
+            string expectedAFValue = "Off";
             string expectedDoseValue = "2.000";
             string expectedDoseUnit = "Gy";
             int expectedNumFractions = 1;
@@ -60,20 +65,26 @@ namespace TMIAutomation.Tests
             this.externalPlanSetup.SetupOptimization();
             string optAlgo = this.externalPlanSetup.GetCalculationModel(CalculationType.PhotonVMATOptimization);
             string doseAlgo = this.externalPlanSetup.GetCalculationModel(CalculationType.PhotonVolumeDose);
-            this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionName, out string optionValue);
+            this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionMRName, out string optionMRValue);
+            this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionAFName, out string optionAFValue);
             DoseValue dosePerFraction = this.externalPlanSetup.DosePerFraction;
             int? numFractions = this.externalPlanSetup.NumberOfFractions;
 
             Assert.Equal(expectedOptAlgo, optAlgo);
             Assert.Equal(expectedDoseAlgo, doseAlgo);
-            Assert.Equal(expectedOptValue, optionValue);
+            Assert.Equal(expectedMRValue, optionMRValue);
+            Assert.Equal(expectedAFValue, optionAFValue);
             Assert.Equal(expectedDoseValue, dosePerFraction.ValueAsString);
             Assert.Equal(expectedDoseUnit, dosePerFraction.UnitAsString);
             Assert.Equal(expectedNumFractions, numFractions);
 
 #if ESAPI16 || ESAPI18
             string targetVolumeId = this.externalPlanSetup.TargetVolumeID;
+            string expectedGPUValue = "No";
+            this.externalPlanSetup.GetCalculationOption(expectedOptAlgo, optionGPUName, out string optionGPUValue);
+
             Assert.Equal(expectedTargetVolumeId, targetVolumeId);
+            Assert.Equal(expectedGPUValue, optionGPUValue);
 #endif
         }
     }

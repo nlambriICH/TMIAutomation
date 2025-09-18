@@ -37,11 +37,19 @@ namespace TMIAutomation
         {
             externalPlanSetup.SetCalculationModel(CalculationType.PhotonVMATOptimization, ConfigOptOptions.OptimizationAlgorithm);
             // Calculation options: \\machinename\dcf$\client
-#if ESAPI16 || ESAPI18
+#if ESAPI18
+            if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/GpuSettings/@UseGPU", "No"))
+            {
+                logger.Warning("Could not set UseGPU to No");
+            }
+#endif
+#if ESAPI16
             if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/OptimizerSettings/@UseGPU", "No"))
             {
                 logger.Warning("Could not set UseGPU to No");
             }
+#endif
+#if ESAPI16 || ESAPI18
             if (!externalPlanSetup.SetCalculationOption(ConfigOptOptions.OptimizationAlgorithm, "/PhotonOptimizerCalculationOptions/General/AutoFeathering/@AutoFeathering", "Off"))
             {
                 logger.Warning("Could not set Autofeathering to Off");
