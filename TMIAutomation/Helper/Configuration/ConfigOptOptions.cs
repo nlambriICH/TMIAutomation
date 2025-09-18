@@ -36,7 +36,7 @@ namespace TMIAutomation
 #if ESAPI15
                 optSettings.ContainsKey("BaseDosePlanning") && optSettings["BaseDosePlanning"] == "Yes";
 #else
-                true; // Always true for ESAPI16
+                true; // Always true for ESAPI16 and ESAPI18
 #endif
 
     }

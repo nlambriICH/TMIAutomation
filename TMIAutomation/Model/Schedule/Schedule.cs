@@ -139,7 +139,7 @@ namespace TMIAutomation
                             schedulePlan.RemoveBeam(nextBeam);
                         }
                     }
-#if ESAPI16
+#if ESAPI16 || ESAPI18
                     else
                     {
                         /*
@@ -186,7 +186,7 @@ namespace TMIAutomation
                             logger.Information("Remove beam {beam}", beam.Id);
                             schedulePlan.RemoveBeam(beam);
                         }
-#if ESAPI16
+#if ESAPI16 || ESAPI18
                         /*
                          * ESAPI v15 allows only to modify setup fields
                          * Copying params for last field in group like Eclipse
@@ -208,7 +208,7 @@ namespace TMIAutomation
             }
         }
 
-#if ESAPI16
+#if ESAPI16 || ESAPI18
         private static VRect<double> GetMaximumAperture(IEnumerable<ControlPoint> controlPoints)
         {
             double maxX1 = controlPoints.Min(cp => cp.JawPositions.X1);
