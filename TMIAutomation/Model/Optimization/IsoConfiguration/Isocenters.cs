@@ -351,7 +351,7 @@ namespace TMIAutomation
                     transformedGantryAngle,
                     transformedGantryStop,
                     beamParams.GantryDirection == GantryDirection.Clockwise ? GantryDirection.CounterClockwise : GantryDirection.Clockwise,
-                    0,
+                    beam.ControlPoints.First().PatientSupportAngle,
                     transformedIso
                 );
 
@@ -362,12 +362,14 @@ namespace TMIAutomation
                  * set expected MUs with weight factor
                  */
                 newBeamParams.WeightFactor = beam.WeightFactor;
-                VRect<double> jawPos = cpParams.First().JawPositions; // assuming no jaw tracking
-                newBeamParams.SetJawPositions(jawPos);
                 List<ControlPointParameters> newBeamCPParams = newBeamParams.ControlPoints.ToList();
                 foreach (ControlPointParameters cpUpperBeam in cpParams)
                 {
-                    newBeamCPParams.FirstOrDefault(cpNewBeam => cpNewBeam.Index == cpUpperBeam.Index).LeafPositions = cpUpperBeam.LeafPositions;
+                    newBeamCPParams.ElementAt(cpUpperBeam.Index).JawPositions = cpUpperBeam.JawPositions;
+                    newBeamCPParams.ElementAt(cpUpperBeam.Index).LeafPositions = cpUpperBeam.LeafPositions;
+#if ESAPI18
+                    newBeamCPParams.ElementAt(cpParams.Count() - 1 - cpUpperBeam.Index).GantryAngle = cpUpperBeam.GantryAngle;
+#endif
                 }
                 newBeam.ApplyParameters(newBeamParams);
                 logger.Information("Caudal field {beam} copied to lower dose-base plan", newBeam.Id);
