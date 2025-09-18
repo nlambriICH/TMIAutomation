@@ -8,7 +8,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>TMIAutomation.Tests</RootNamespace>
     <AssemblyName>TMIAutomation.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -22,6 +21,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-15.6|x64' ">
     <OutputPath>bin\x64\Release-15.6\</OutputPath>
@@ -32,6 +32,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-16.1|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +43,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-16.1|x64'">
     <OutputPath>bin\x64\Release-16.1\</OutputPath>
@@ -52,6 +54,18 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-18.0|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug-18.0\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ESAPI18</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -90,6 +104,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI16\VMS.TPS.Common.Model.API.dll</HintPath>
     </Reference>
+    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TMIAutomation\API\ESAPI18\VMS.TPS.Common.Model.API.dll</HintPath>
+    </Reference>
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-15.6' Or '$(Configuration)'=='Release-15.6'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI15\VMS.TPS.Common.Model.Types.dll</HintPath>
@@ -97,6 +115,10 @@
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.450.29, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-16.1' Or '$(Configuration)'=='Release-16.1'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI16\VMS.TPS.Common.Model.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TMIAutomation\API\ESAPI18\VMS.TPS.Common.Model.Types.dll</HintPath>
     </Reference>
     <Reference Include="xunit.assert, Version=2.4.2.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\packages\xunit.assert.2.4.2\lib\netstandard1.1\xunit.assert.dll</HintPath>
@@ -124,9 +146,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
+    <PostBuildEvent>IF $(ConfigurationName) == Debug-18.0 robocopy $(ProjectDir)Configuration\ESAPI18 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-15.6 robocopy $(ProjectDir)Configuration\ESAPI15 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(ProjectDir)Configuration $(TargetDir)Configuration PointOptimizationObjectives.txt EUDOptimizationObjectives.txt SensitiveData.txt OARNames.txt
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 robocopy $(SolutionDir)$(SolutionName)\Server\dist $(TargetDir)dist /mir /ns /nc /nfl /ndl

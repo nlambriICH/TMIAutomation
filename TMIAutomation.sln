@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31410.357
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TMIAutomation", "TMIAutomation\TMIAutomation.csproj", "{29868CDC-424E-4E86-974E-635A1FBFD3D6}"
 EndProject
@@ -24,6 +24,7 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug-15.6|x64 = Debug-15.6|x64
 		Debug-16.1|x64 = Debug-16.1|x64
+		Debug-18.0|x64 = Debug-18.0|x64
 		Release-15.6|x64 = Release-15.6|x64
 		Release-16.1|x64 = Release-16.1|x64
 	EndGlobalSection
@@ -32,6 +33,8 @@ Global
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Debug-15.6|x64.Build.0 = Debug-15.6|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Debug-16.1|x64.ActiveCfg = Debug-16.1|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Debug-16.1|x64.Build.0 = Debug-16.1|x64
+		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Debug-18.0|x64.ActiveCfg = Debug-18.0|x64
+		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Debug-18.0|x64.Build.0 = Debug-18.0|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Release-15.6|x64.ActiveCfg = Release-15.6|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Release-15.6|x64.Build.0 = Release-15.6|x64
 		{29868CDC-424E-4E86-974E-635A1FBFD3D6}.Release-16.1|x64.ActiveCfg = Release-16.1|x64
@@ -40,18 +43,24 @@ Global
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug-15.6|x64.Build.0 = Debug-15.6|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug-16.1|x64.ActiveCfg = Debug-16.1|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug-16.1|x64.Build.0 = Debug-16.1|x64
+		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug-18.0|x64.ActiveCfg = Debug-18.0|x64
+		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Debug-18.0|x64.Build.0 = Debug-18.0|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Release-15.6|x64.ActiveCfg = Release-15.6|x64
 		{2C07A0BA-5FE5-4E7B-9CB9-0095DF4DA06E}.Release-16.1|x64.ActiveCfg = Release-16.1|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-15.6|x64.ActiveCfg = Debug-15.6|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-15.6|x64.Build.0 = Debug-15.6|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-16.1|x64.ActiveCfg = Debug-16.1|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-16.1|x64.Build.0 = Debug-16.1|x64
+		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-18.0|x64.ActiveCfg = Debug-18.0|x64
+		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Debug-18.0|x64.Build.0 = Debug-18.0|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Release-15.6|x64.ActiveCfg = Release-15.6|x64
 		{BDCE0C89-6913-4AE2-973B-F15DC6851F88}.Release-16.1|x64.ActiveCfg = Release-16.1|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-15.6|x64.ActiveCfg = Debug-15.6|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-15.6|x64.Build.0 = Debug-15.6|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-16.1|x64.ActiveCfg = Debug-16.1|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-16.1|x64.Build.0 = Debug-16.1|x64
+		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-18.0|x64.ActiveCfg = Debug-18.0|x64
+		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Debug-18.0|x64.Build.0 = Debug-18.0|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-15.6|x64.ActiveCfg = Release-15.6|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-15.6|x64.Build.0 = Release-15.6|x64
 		{6902AFEE-6620-49BC-AC98-91D494B019A1}.Release-16.1|x64.ActiveCfg = Release-16.1|x64
