@@ -53,12 +53,20 @@ namespace TMIAutomation
                 IEnumerable<StructureSet> scheduleSS = scriptContext.Patient.StructureSets.Where(ss => IsMatchingStructureSet(ss)).OrderBy(ss => ss.Id);
 
                 message.Report("Generating schedule plans upper-body...");
-                AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine));
+#if ESAPI18
+                AddSchedulePlansV18(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == upperPlan.StructureSet.Image.ImagingOrientation));
+#else
+                AddSchedulePlans(upperPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == upperPlan.StructureSet.Image.ImagingOrientation));
+#endif
                 progress.Report(0.2);
                 CalculateDoseSchedulePlans(upperPlan, scheduleCourse, progress, message);
 
                 message.Report("Generating schedule plans lower-extremities...");
-                AddSchedulePlans(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == PatientOrientation.FeetFirstSupine));
+#if ESAPI18
+                AddSchedulePlansV18(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == lowerPlan.StructureSet.Image.ImagingOrientation));
+#else
+                AddSchedulePlans(lowerPlan, scheduleCourse, scheduleSS.Where(ss => ss.Image.ImagingOrientation == lowerPlan.StructureSet.Image.ImagingOrientation));
+#endif
                 progress.Report(0.2);
                 CalculateDoseSchedulePlans(lowerPlan, scheduleCourse, progress, message);
             });
@@ -93,6 +101,83 @@ namespace TMIAutomation
             }
 
             return match;
+        }
+
+        private void AddSchedulePlansV18(PlanSetup sourcePlan, Course newCourse, IEnumerable<StructureSet> scheduleSS)
+        {
+            /* VMAT beams are copied to the new plan
+            * Implementation works only with ESAPI V18,
+            * where the gantry angle can be copied for each CP
+            */ 
+
+            int isoGroupCopy = 0;
+            // Reorder beams: isocenters on arms after the first three isocenters groups
+            List<Beam> sourcePlanBeams = sourcePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) <= 100)
+                                                   .OrderByDescending(b => b.IsocenterPosition.z)
+                                                   .ToList();
+            if (this.isocentersOnArms && sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
+            {
+                sourcePlanBeams.InsertRange(6, sourcePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
+            }
+
+            foreach (StructureSet ss in scheduleSS)
+            {
+                string isoNumber = Regex.Match(ss.Id, @"\d").Value;
+                ReferencePoint refPoint = null;
+                try
+                {
+                    // In a plug-in script, it is not possible to add a reference point for the plan not currently opened.
+                    refPoint = sourcePlan.AddReferencePoint(true, null, $"PTV_ISO_{isoNumber}");
+                }
+                catch (ApplicationException exc)
+                {
+                    refPoint = sourcePlan.ReferencePoints.FirstOrDefault();
+                    logger.Warning("Cannot create reference point for plan {planId}. Assingning existing reference point {refPointId}",
+                                   sourcePlan.Id,
+                                   refPoint.Id,
+                                   exc);
+                }
+                Structure targetStructure = ss.Structures.FirstOrDefault(s => s.Id == sourcePlan.TargetVolumeID)
+                                            ?? ss.Structures.OrderByDescending(s => s.Volume).FirstOrDefault(s => s.IsTarget);
+
+                ExternalPlanSetup schedulePlan = newCourse.AddExternalPlanSetup(ss, targetStructure, refPoint);
+                schedulePlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}";
+                logger.Information("Created new plan {newPlanId} into course {newCourse} using structure set {ssId}.",
+                                   schedulePlan.Id,
+                                   ss.Id,
+                                   newCourse.Id);
+
+                foreach (Beam beam in sourcePlanBeams)
+                {
+                    int beamIndex = sourcePlanBeams.IndexOf(beam);
+                    if (beamIndex == isoGroupCopy || beamIndex == isoGroupCopy + 1)
+                    {
+                        schedulePlan.CopyBeam(beam);
+                    }
+                }
+
+                if (this.isocentersOnArms &&
+                    sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine &&
+                    isoGroupCopy == 4)
+                {
+                    foreach (Beam beamArm in sourcePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100))
+                    {
+                        bool isoLeftArm = beamArm.IsocenterPosition.x > 100;
+                        isoNumber = isoLeftArm ? "4" : "5";
+                        string ending = isoLeftArm ? "SX" : "DX";
+
+                        schedulePlan = newCourse.AddExternalPlanSetup(ss, targetStructure, refPoint);
+                        schedulePlan.Id = $"{SCHEDULE_PLAN_NAME}_{isoNumber}_{ending}";
+                        logger.Information("Created new plan {newPlanId} into course {newCourse} using structure set {ssId}.",
+                                           schedulePlan.Id,
+                                           ss.Id,
+                                           newCourse.Id);
+                        schedulePlan.CopyBeam(beamArm);
+                    }
+                    isoGroupCopy += 2; // skip isocenters on the arms in the next iteration
+                }
+                isoGroupCopy += 2;
+            }
         }
 
         private void AddSchedulePlans(PlanSetup sourcePlan, Course newCourse, IEnumerable<StructureSet> scheduleSS)

@@ -375,5 +375,42 @@ namespace TMIAutomation
                 logger.Information("Caudal field {beam} copied to lower dose-base plan", newBeam.Id);
             }
         }
+
+#if ESAPI18
+        public static void CopyBeam(this ExternalPlanSetup targetPlan, Beam beam)
+        {
+            VVector beamIso = beam.IsocenterPosition;
+            BeamParameters beamParams = beam.GetEditableParameters();
+            List<ControlPointParameters> cpParams = beamParams.ControlPoints.ToList();
+
+            Beam newBeam = targetPlan.AddVMATBeam(
+                new ExternalBeamMachineParameters(beam.TreatmentUnit.Id, beam.EnergyModeDisplayName, beam.DoseRate, beam.Technique.Id, ""),
+                cpParams.Select(cp => cp.MetersetWeight),
+                cpParams.First().CollimatorAngle,
+                cpParams.First().GantryAngle,
+                cpParams.Last().GantryAngle,
+                beamParams.GantryDirection,
+                beam.ControlPoints.First().PatientSupportAngle,
+                beamIso
+            );
+
+            newBeam.Id = beam.Id;
+
+            BeamParameters newBeamParams = newBeam.GetEditableParameters();
+            /* ISSUE: CalculateDoseWithPresetValues does not work for VMAT
+             * set expected MUs with weight factor
+             */
+            newBeamParams.WeightFactor = beam.WeightFactor;
+            List<ControlPointParameters> newBeamCPParams = newBeamParams.ControlPoints.ToList();
+            foreach (ControlPointParameters cpUpperBeam in cpParams)
+            {
+                newBeamCPParams.ElementAt(cpUpperBeam.Index).JawPositions = cpUpperBeam.JawPositions;
+                newBeamCPParams.ElementAt(cpUpperBeam.Index).LeafPositions = cpUpperBeam.LeafPositions;
+                newBeamCPParams.ElementAt(cpUpperBeam.Index).GantryAngle = cpUpperBeam.GantryAngle;
+            }
+            newBeam.ApplyParameters(newBeamParams);
+            logger.Information("Field {beam} copied to {newPlanId}", newBeam.Id, targetPlan.Id);
+        }
+#endif
     }
 }
