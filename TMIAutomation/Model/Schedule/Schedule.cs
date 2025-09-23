@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if !ESAPI18
 using System.Text;
+#endif
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Serilog;
@@ -22,6 +24,11 @@ namespace TMIAutomation
         private readonly bool isocentersOnArms;
         private readonly List<string> scheduleSSStudySeriesId;
         private static readonly string SCHEDULE_PLAN_NAME = "TMLI_ISO";
+        private enum SetupBeamType
+        {
+            CBCT,
+            DRR
+        }
 
         public Schedule(EsapiWorker esapiWorker,
                         string courseId,
@@ -103,12 +110,13 @@ namespace TMIAutomation
             return match;
         }
 
+#if ESAPI18
         private void AddSchedulePlansV18(PlanSetup sourcePlan, Course newCourse, IEnumerable<StructureSet> scheduleSS)
         {
             /* VMAT beams are copied to the new plan
             * Implementation works only with ESAPI V18,
             * where the gantry angle can be copied for each CP
-            */ 
+            */
 
             int isoGroupCopy = 0;
             // Reorder beams: isocenters on arms after the first three isocenters groups
@@ -155,6 +163,7 @@ namespace TMIAutomation
                         schedulePlan.CopyBeam(beam);
                     }
                 }
+                AddSetupBeamToSchedulePlan(schedulePlan, schedulePlan.Beams.Last(), SetupBeamType.CBCT);  // copying params for last field in group like Eclipse
 
                 if (this.isocentersOnArms &&
                     sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine &&
@@ -173,13 +182,14 @@ namespace TMIAutomation
                                            ss.Id,
                                            newCourse.Id);
                         schedulePlan.CopyBeam(beamArm);
+                        AddSetupBeamToSchedulePlan(schedulePlan, beamArm, SetupBeamType.DRR);
                     }
                     isoGroupCopy += 2; // skip isocenters on the arms in the next iteration
                 }
                 isoGroupCopy += 2;
             }
         }
-
+#else
         private void AddSchedulePlans(PlanSetup sourcePlan, Course newCourse, IEnumerable<StructureSet> scheduleSS)
         {
             int isoGroupKeep = 0;
@@ -198,11 +208,11 @@ namespace TMIAutomation
                                 schedulePlan.Id,
                                 outputDiagnostics);
 
-                // Reorder beams: isocenters on arms after the first two isocenters groups
+                // Reorder beams: isocenters on arms after the first three isocenters groups
                 List<Beam> schedulePlanBeams = schedulePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) <= 100)
                                                        .OrderByDescending(b => b.IsocenterPosition.z)
                                                        .ToList();
-                if (ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
+                if (this.isocentersOnArms && sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine)
                 {
                     schedulePlanBeams.InsertRange(6, schedulePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100));
                 }
@@ -224,26 +234,19 @@ namespace TMIAutomation
                             schedulePlan.RemoveBeam(nextBeam);
                         }
                     }
-#if ESAPI16 || ESAPI18
+#if ESAPI16
                     else
                     {
-                        /*
-                         * ESAPI v15 allows only to modify setup fields
-                         * Copying params for last field in group like Eclipse
-                         */
+                        // Copying params for last field in group like Eclipse
                         Beam lastBeam = schedulePlanBeams.ElementAtOrDefault(i + 1) ?? schedulePlanBeams.ElementAt(i);  // If only one field in isocenter group
-                        ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(lastBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
-                        Beam cbct = schedulePlan.AddSetupBeam(beamMachineParams,
-                                                         GetMaximumAperture(lastBeam.ControlPoints), 0, 0, 0,
-                                                         lastBeam.IsocenterPosition);
-                        cbct.Id = "CBCT";
+                        AddSetupBeamToSchedulePlan(schedulePlan, lastBeam, SetupBeamType.CBCT);
                     }
 #endif
                 }
 
                 // Add isocenters on the arms
                 if (this.isocentersOnArms &&
-                    ss.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine &&
+                    sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine &&
                     isoGroupKeep == 4)
                 {
                     foreach (Beam beamArm in sourcePlan.Beams.Where(b => Math.Abs(b.IsocenterPosition.x) > 100))
@@ -271,20 +274,8 @@ namespace TMIAutomation
                             logger.Information("Remove beam {beam}", beam.Id);
                             schedulePlan.RemoveBeam(beam);
                         }
-#if ESAPI16 || ESAPI18
-                        /*
-                         * ESAPI v15 allows only to modify setup fields
-                         * Copying params for last field in group like Eclipse
-                         */
-                        Beam armBeam = schedulePlan.Beams.FirstOrDefault();
-                        ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(armBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
-                        Beam drr = schedulePlan.AddSetupBeam(beamMachineParams,
-                                                        GetMaximumAperture(armBeam.ControlPoints), 0,
-                                                        armBeam.ControlPoints.First().GantryAngle, 0,
-                                                        armBeam.IsocenterPosition);
-                        drr.Id = "DRR";
-                        DRRCalculationParameters drrParams = new DRRCalculationParameters(500, 1.0, 100, 1000, -1000, 1000);
-                        drr.CreateOrReplaceDRR(drrParams);
+#if ESAPI16
+                        AddSetupBeamToSchedulePlan(schedulePlan, schedulePlan.Beams.FirstOrDefault(), SetupBeamType.DRR);
 #endif
                     }
                     isoGroupKeep += 2; // skip isocenters on the arms in the next iteration
@@ -292,8 +283,41 @@ namespace TMIAutomation
                 isoGroupKeep += 2;
             }
         }
+#endif
 
 #if ESAPI16 || ESAPI18
+        private void AddSetupBeamToSchedulePlan(ExternalPlanSetup schedulePlan, Beam referenceBeam, SetupBeamType type)
+        {
+            // ESAPI v15 allows only to modify setup fields
+            ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(referenceBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
+            if (type == SetupBeamType.DRR)
+            {
+                Beam drr = schedulePlan.AddSetupBeam(beamMachineParams,
+                                                     jawPositions: GetMaximumAperture(referenceBeam.ControlPoints),
+                                                     collimatorAngle: 0,
+                                                     referenceBeam.ControlPoints.First().GantryAngle,
+                                                     patientSupportAngle: 0,
+                                                     referenceBeam.IsocenterPosition);
+                drr.Id = "DRR";
+                DRRCalculationParameters drrParams = new DRRCalculationParameters(500, 1.0, 100, 1000, -1000, 1000); // bones parameters
+                drr.CreateOrReplaceDRR(drrParams);
+            }
+            else if (type == SetupBeamType.CBCT)
+            {
+                Beam cbct = schedulePlan.AddSetupBeam(beamMachineParams,
+                                                      jawPositions: GetMaximumAperture(referenceBeam.ControlPoints),
+                                                      collimatorAngle: 0,
+                                                      gantryAngle: 0,
+                                                      patientSupportAngle: 0,
+                                                      referenceBeam.IsocenterPosition);
+                cbct.Id = "CBCT";
+            }
+            else
+            {
+                logger.Warning("Cannot add setup beam for SetupBeamType {type}.", type);
+            }
+        }
+
         private static VRect<double> GetMaximumAperture(IEnumerable<ControlPoint> controlPoints)
         {
             double maxX1 = controlPoints.Min(cp => cp.JawPositions.X1);
