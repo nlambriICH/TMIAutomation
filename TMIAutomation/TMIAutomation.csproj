@@ -8,7 +8,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TMIAutomation</RootNamespace>
     <AssemblyName>TMIAutomation.esapi</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkProfile />
@@ -23,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-15.6|x64' ">
     <AllowedReferenceRelatedFileExtensions>
@@ -37,6 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-16.1|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -46,6 +47,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-16.1|x64'">
     <OutputPath>Library\Release-16.1\</OutputPath>
@@ -55,6 +57,27 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-18.0|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>Library\Debug-18.0\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;ESAPI18</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-18.0|x64'">
+    <OutputPath>Library\Release-18.0\</OutputPath>
+    <DefineConstants>TRACE;ESAPI18</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EvilDICOM, Version=2.0.5.0, Culture=neutral, processorArchitecture=MSIL">
@@ -124,6 +147,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>API\ESAPI16\VMS.TPS.Common.Model.API.dll</HintPath>
     </Reference>
+    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>API\ESAPI18\VMS.TPS.Common.Model.API.dll</HintPath>
+    </Reference>
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-15.6' Or '$(Configuration)'=='Release-15.6'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>API\ESAPI15\VMS.TPS.Common.Model.Types.dll</HintPath>
@@ -131,6 +158,10 @@
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.450.29, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-16.1' Or '$(Configuration)'=='Release-16.1'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>API\ESAPI16\VMS.TPS.Common.Model.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>API\ESAPI18\VMS.TPS.Common.Model.Types.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -142,6 +173,8 @@
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
     <Compile Include="Helper\Converters\UnderscoreConverter.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\LowerIsocenters.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\UpperIsocenters.cs" />
     <Compile Include="Model\Schedule\Displacements.cs" />
     <Compile Include="Model\Schedule\Schedule.cs" />
     <Compile Include="Model\Schedule\Templates\DisplacementsPage.cs">
@@ -291,6 +324,9 @@
     <Resource Include="Configuration\DCMExport.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Configuration\ESAPI18\EUDOptimizationObjectives.txt" />
+    <Resource Include="Configuration\ESAPI18\OptimizationOptions.txt" />
+    <Resource Include="Configuration\ESAPI18\PointOptimizationObjectives.txt" />
     <Content Include="Model\Schedule\Templates\DisplacementsPage.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DisplacementsPage.cs</LastGenOutput>
@@ -308,6 +344,10 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>IF NOT EXIST $(TargetDir)\Dicoms mkdir $(TargetDir)\Dicoms
+IF $(ConfigurationName) == Debug-18.0 robocopy $(ProjectDir)Configuration\ESAPI18 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Release-18.0 robocopy $(ProjectDir)Configuration\ESAPI18 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Release-16.1 robocopy $(ProjectDir)Configuration\ESAPI16 $(TargetDir)Configuration /mir

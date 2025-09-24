@@ -39,12 +39,13 @@ Example on Eclipse v15:
 
 ### Requirements
 
-Tested on **Eclipse v15** and **v16**.
+Tested on **Eclipse v15**, **v16**, and **v18**.
 
 Go to the latest release [page](https://github.com/nlambriICH/TMIAutomation/releases/latest):
 
 * for Eclipse v15: download the zip file `ESAPI15_TMIAutomation-vx.x.x.x.zip`
 * for Eclipse v16: download the zip file `ESAPI16_TMIAutomation-vx.x.x.x.zip`
+* for Eclipse v18: download the zip file `ESAPI18_TMIAutomation-vx.x.x.x.zip`
 
 If you are on a research workstation (_TBox_), you can immediately run the script `TMIAutomation.esapi.dll`
 by setting the database in research mode from the RT Administration module of Eclipse.

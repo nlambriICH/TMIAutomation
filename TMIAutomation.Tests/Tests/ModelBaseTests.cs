@@ -33,7 +33,10 @@ namespace TMIAutomation.Tests
 
         public static IEnumerable<object[]> GetCourses_Data()
         {
-#if ESAPI16
+#if ESAPI18
+            yield return new object[] { false, new List<string> { "CDemoTest", "CScheduleTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
+            yield return new object[] { true, new List<string> { "C1", "CScheduling", "CDemo", "CDemoTest", "CJunction", "CNoPlan", "CScheduleTest", "LowerAuto", Resources.NewCourseListBox } };
+#elif ESAPI16
             yield return new object[] { false, new List<string> { "CDemoTest", "CScheduling", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
             yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt", Resources.NewCourseListBox } };
 #else

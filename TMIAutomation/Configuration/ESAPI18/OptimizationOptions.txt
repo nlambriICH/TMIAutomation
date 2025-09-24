@@ -1,8 +1,8 @@
 ﻿# Values must be tab separated
 # Lines starting with a hash sign '#' are ignored
 # Empty lines are ignored
-OptimizationAlgorithm	PO 16.1.0
-DoseAlgorithm	AAA 15.06.06
+OptimizationAlgorithm	PO_18.0.1
+DoseAlgorithm	AAA_18.0.1
 MLCID	MLC0010
 DosePerFraction	2
 NumberOfFractions	1

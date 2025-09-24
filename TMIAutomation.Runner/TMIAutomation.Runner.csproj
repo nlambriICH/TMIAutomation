@@ -8,7 +8,6 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>TMIAutomation.Runner</RootNamespace>
     <AssemblyName>TMIAutomation.Runner</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -24,6 +23,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release-15.6|x64' ">
     <OutputPath>bin\x64\Release-15.6\</OutputPath>
@@ -34,6 +34,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-16.1|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-16.1|x64'">
     <OutputPath>bin\x64\Release-16.1\</OutputPath>
@@ -54,6 +56,30 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-18.0|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug-18.0\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-18.0|x64'">
+    <OutputPath>bin\x64\Release-18.0\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+	<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
@@ -90,6 +116,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI16\VMS.TPS.Common.Model.API.dll</HintPath>
     </Reference>
+    <Reference Include="VMS.TPS.Common.Model.API, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TMIAutomation\API\ESAPI8\VMS.TPS.Common.Model.API.dll</HintPath>
+    </Reference>
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.300.11, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-15.6' Or '$(Configuration)'=='Release-15.6'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI15\VMS.TPS.Common.Model.Types.dll</HintPath>
@@ -97,6 +127,10 @@
     <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.450.29, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-16.1' Or '$(Configuration)'=='Release-16.1'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\TMIAutomation\API\ESAPI16\VMS.TPS.Common.Model.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="VMS.TPS.Common.Model.Types, Version=1.0.600.194, Culture=neutral, PublicKeyToken=305b81e210ec4b89, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug-18.0' Or '$(Configuration)'=='Release-18.0'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\TMIAutomation\API\ESAPI18\VMS.TPS.Common.Model.Types.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -175,7 +209,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>IF $(ConfigurationName) == Debug-16.1 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI16 $(TargetDir)Configuration /mir
+    <PostBuildEvent>IF $(ConfigurationName) == Debug-18.0 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI18 $(TargetDir)Configuration /mir
+IF %25ERRORLEVEL%25 GEQ 8 exit 1
+IF $(ConfigurationName) == Debug-16.1 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI16 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1
 IF $(ConfigurationName) == Debug-15.6 robocopy $(SolutionDir)$(SolutionName)\Configuration\ESAPI15 $(TargetDir)Configuration /mir
 IF %25ERRORLEVEL%25 GEQ 8 exit 1

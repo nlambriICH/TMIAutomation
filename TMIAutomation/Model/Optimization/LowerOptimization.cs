@@ -53,6 +53,12 @@ namespace TMIAutomation
 #else
                 ExternalPlanSetup lowerPlanBase = GenerateBaseDosePlan(targetCourse, upperPlan, lowerPlan, registration, progress, message);
                 lowerPlan.BaseDosePlanningItem = lowerPlanBase;
+                if (!ConfigOptOptions.AutoPlanLowerExtremities)
+                {
+                    ConfigureLowerPlanSetup(upperPlan, lowerPlan, progress, message);
+                    logger.Information("Skipping lower plan optimization because configuration AutoPlanLowerExtremities={configAutoPlanLower}.", ConfigOptOptions.AutoPlanLowerExtremities);
+                    return;
+                }
                 ExternalPlanSetup optimizedLowerPlan = PerformLowerPlanOptimizationCommon(targetCourse, upperPlan, lowerPlan, progress, message);
                 PlanSum planSum = targetCourse.CreatePlanSum(new List<PlanSetup> { optimizedLowerPlan, upperPlan }, optimizedLowerPlan.StructureSet.Image);
                 planSum.Id = "PSAutoOpt1";
@@ -111,7 +117,7 @@ namespace TMIAutomation
         {
             progress.Report(0.10);
             message.Report("Copying caudal isocenter's fields of upper-body...");
-            /* CopyPlanSetup creates a plan with correct fields but in HFS
+            /* Course.CopyPlanSetup creates a plan with correct fields but in HFS
              * The dose is lost once the plan is changed to FFS
              */
             ExternalPlanSetup lowerPlanBase = targetCourse.GetOrCreateBaseDosePlan(lowerPlan.StructureSet);
