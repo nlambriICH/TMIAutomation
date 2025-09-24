@@ -76,7 +76,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
-	<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -136,6 +136,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Configuration\ESAPI18\OptimizationOptions.txt" />
     <Content Include="Configuration\EUDOptimizationObjectives.txt" />
     <Content Include="Configuration\ESAPI15\OptimizationOptions.txt" />
     <Content Include="Configuration\ESAPI16\OptimizationOptions.txt" />
