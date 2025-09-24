@@ -173,6 +173,8 @@
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
     <Compile Include="Helper\Converters\UnderscoreConverter.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\LowerIsocenters.cs" />
+    <Compile Include="Model\Optimization\IsoConfiguration\UpperIsocenters.cs" />
     <Compile Include="Model\Schedule\Displacements.cs" />
     <Compile Include="Model\Schedule\Schedule.cs" />
     <Compile Include="Model\Schedule\Templates\DisplacementsPage.cs">
