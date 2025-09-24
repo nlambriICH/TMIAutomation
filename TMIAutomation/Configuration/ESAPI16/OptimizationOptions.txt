@@ -7,3 +7,4 @@ MLCID	MLC0010
 DosePerFraction	2
 NumberOfFractions	1
 TreatmentMachine	TrueBeamSN1015
+AutoPlanLowerExtremities	No

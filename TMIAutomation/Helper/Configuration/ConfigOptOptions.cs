@@ -37,6 +37,7 @@ namespace TMIAutomation
                 optSettings.ContainsKey("BaseDosePlanning") && optSettings["BaseDosePlanning"] == "Yes";
 #else
                 true; // Always true for ESAPI16 and ESAPI18
+        public static bool AutoPlanLowerExtremities => optSettings["AutoPlanLowerExtremities"] == "Yes";
 #endif
 
     }
