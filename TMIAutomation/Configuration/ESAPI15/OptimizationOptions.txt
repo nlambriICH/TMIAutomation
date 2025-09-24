@@ -10,3 +10,6 @@ TreatmentMachine	TrueBeamSN1015
 
 # Accepted values for BaseDosePlanning: "Yes" or "No"
 BaseDosePlanning	Yes
+
+# Accepted values for LowerExtremitiesCollimator: "90" or "5355"
+LowerExtremitiesCollimator  5355
