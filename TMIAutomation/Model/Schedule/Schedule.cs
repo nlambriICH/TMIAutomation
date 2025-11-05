@@ -160,10 +160,14 @@ namespace TMIAutomation
                     int beamIndex = sourcePlanBeams.IndexOf(beam);
                     if (beamIndex == isoGroupCopy || beamIndex == isoGroupCopy + 1)
                     {
+                        if (!schedulePlan.Beams.Any(b => b.IsSetupField))
+                        {
+                            Beam refBeam = sourcePlanBeams.ElementAtOrDefault(isoGroupCopy + 1) ?? sourcePlanBeams.ElementAt(isoGroupCopy);  // if only one field in group
+                            AddSetupBeamToSchedulePlan(schedulePlan, refBeam, SetupBeamType.CBCT);  // copying params for last field in group like Eclipse
+                        }
                         schedulePlan.CopyBeam(beam);
                     }
                 }
-                AddSetupBeamToSchedulePlan(schedulePlan, schedulePlan.Beams.Last(), SetupBeamType.CBCT);  // copying params for last field in group like Eclipse
 
                 if (this.isocentersOnArms &&
                     sourcePlan.StructureSet.Image.ImagingOrientation == PatientOrientation.HeadFirstSupine &&
@@ -181,8 +185,8 @@ namespace TMIAutomation
                                            schedulePlan.Id,
                                            ss.Id,
                                            newCourse.Id);
-                        schedulePlan.CopyBeam(beamArm);
                         AddSetupBeamToSchedulePlan(schedulePlan, beamArm, SetupBeamType.DRR);
+                        schedulePlan.CopyBeam(beamArm);
                     }
                     isoGroupCopy += 2; // skip isocenters on the arms in the next iteration
                 }
@@ -298,7 +302,7 @@ namespace TMIAutomation
                                                      referenceBeam.ControlPoints.First().GantryAngle,
                                                      patientSupportAngle: 0,
                                                      referenceBeam.IsocenterPosition);
-                drr.Id = "DRR";
+                drr.Id = nameof(SetupBeamType.DRR);
                 DRRCalculationParameters drrParams = new DRRCalculationParameters(500, 1.0, 100, 1000, -1000, 1000); // bones parameters
                 drr.CreateOrReplaceDRR(drrParams);
             }
@@ -310,7 +314,7 @@ namespace TMIAutomation
                                                       gantryAngle: 0,
                                                       patientSupportAngle: 0,
                                                       referenceBeam.IsocenterPosition);
-                cbct.Id = "CBCT";
+                cbct.Id = nameof(SetupBeamType.CBCT);
             }
             else
             {
