@@ -40,167 +40,148 @@
                    Margin="60,45,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose per fraction [Gy]"
-                   ToolTip="Enter the dose per fraction in Gray (e.g., 2.0)"/>
+                   ToolTip="The dose per fraction in Gray (e.g., 2.0)"/>
 
-        <TextBox HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 Width="50"
-                 Margin="245,45,0,0"
-                 Style="{StaticResource TextBoxTheme}"
-                 PreviewTextInput="PositiveDecimalValidationTextBox"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="245,45,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding DosePerFraction}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,45,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Number of fractions"
-                   ToolTip="Enter the total number of fractions"/>
+                   ToolTip="The total number of fractions"/>
 
-        <TextBox HorizontalAlignment="Left"
-                 VerticalAlignment="Top"
-                 Width="50"
-                 Margin="600,45,0,0"
-                 Style="{StaticResource TextBoxTheme}"
-                 PreviewTextInput="PositiveIntegerValidationTextBox"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,45,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding NumberOfFractions}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="60,105,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Treatment machine"
-                   ToolTip="Select the treatment machine"/>
-
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="245,105,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding Machines}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedMachineId}"/>
+                   ToolTip="The treatment machine. Should match Eclipse machine names."/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,105,0,0"
+                   Margin="245,105,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding TreatmentMachine}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="63,145,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="MLC Identifier"
-                   ToolTip="Select the MLC identifier of the machine"/>
-
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="600,105,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding MLCs}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedMLCId}"/>
+                   ToolTip="The MLC identifier of the machine"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="60,145,0,0"
+                   Margin="245,145,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding MLCId}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,103,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Energy"
-                   ToolTip="Select the beam energy"/>
+                   ToolTip="The beam energy. Should match Eclipse energy names."/>
 
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="245,145,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding Energies}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedEnergy}"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,103,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding Energy}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,145,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose rate [MU/min]"
-                   ToolTip="Select the dose rate"/>
+                   ToolTip="The dose rate (e.g. 600)"/>
 
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="600,145,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding DoseRates}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedDoserate}"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,145,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding DoseRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="60,205,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Optimization algorithm"
-                   ToolTip="Select the optimizer"/>
+                   ToolTip="Optimization algorithm. Should match Eclipse optimizer names."/>
 
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="245,205,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding OptimizationAlgorithms}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedOptimizationAlgorithm}"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="245,205,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding OptimizationAlgorithm}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,205,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose algorithm"
-                   ToolTip="Select the dose engine"/>
+                   ToolTip="The dose algorithm. Should match Eclipse dose algorithm names."/>
 
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="600,205,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding DoseAlgorithms}"
-                  IsSynchronizedWithCurrentItem="True"
-                  SelectedItem="{Binding SelectedDoseAlgorithm}"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,205,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding DoseAlgorithm}"/>
 
-        <StackPanel HorizontalAlignment="Left"
-                    VerticalAlignment="Top"
-                    Orientation="Horizontal"
-                    Margin="60,265,0,0">
-            <Label Content="{Binding PlanningLabel}"
-                   VerticalAlignment="Center"
-                   FontFamily="Serif"
-                   FontSize="16"
-                   Padding="3"
-                   Foreground="#FDFDFD"
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="60,265,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding PlanningLabel}"
                    ToolTip="{Binding TooltipPlanningLabel}"/>
 
-            <RadioButton VerticalAlignment="Center"
-                 Margin="15,0,0,0"
-                 Content="Yes"
-                 Foreground="#FDFDFD"
-                 GroupName="TermsGroup"
-                 IsChecked="{Binding IsPlanningOptionSelected, Mode=TwoWay}"/>
-
-            <RadioButton VerticalAlignment="Center"
-                 Margin="15,0,0,0"
-                 Content="No"
-                 Foreground="#FDFDFD"
-                 GroupName="TermsGroup"
-                 IsChecked="{Binding IsPlanningOptionSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}"/>
-        </StackPanel>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="245,265,0,0"
+                   Background="#57537A"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="{Binding SelectedPlanningOption}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,265,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Collimator angle"
-                   ToolTip="Select the collimator angle of the fields in the lower-extremities plan"/>
+                   ToolTip="The collimator angle of the fields in the lower-extremities plan"/>
 
-        <ComboBox HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="600,265,0,0"
-                  Style="{StaticResource ComboBoxTheme}"
-                  ItemsSource="{Binding CollAngleOptions}"
-                  SelectedItem="{Binding SelectedCollAngleOption}"/>
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,265,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Background="#57537A"
+                   Text="{Binding LowerExtremitiesCollimator}"/>
 
         <Button HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 Margin="0,325,0,0"
-                Content="Update configuration"
+                Content="Reload configuration"
                 FontSize="20"
                 Width="250"
-                Command="{Binding UpdateConfigurationCommand}"/>
+                Command="{Binding ReloadConfigurationCommand}"/>
 
         <Button HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"

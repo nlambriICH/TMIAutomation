@@ -32,6 +32,8 @@ namespace TMIAutomation
         public static string DosePerFraction => optSettings["DosePerFraction"];
         public static string NumberOfFractions => optSettings["NumberOfFractions"];
         public static string TreatmentMachine => optSettings["TreatmentMachine"];
+        public static string Energy => optSettings["Energy"];
+        public static int DoseRate => int.Parse(optSettings["DoseRate"]);
         public static string LowerExtremitiesCollimator => optSettings.ContainsKey("LowerExtremitiesCollimator") ? optSettings["LowerExtremitiesCollimator"] : string.Empty;
         public static bool BaseDosePlanning =>
 #if ESAPI15

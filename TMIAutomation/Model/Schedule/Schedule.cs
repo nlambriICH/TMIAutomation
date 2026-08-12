@@ -293,7 +293,7 @@ namespace TMIAutomation
         private void AddSetupBeamToSchedulePlan(ExternalPlanSetup schedulePlan, Beam referenceBeam, SetupBeamType type)
         {
             // ESAPI v15 allows only to modify setup fields
-            ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(referenceBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
+            ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(referenceBeam.TreatmentUnit.Id, referenceBeam.EnergyModeDisplayName, referenceBeam.DoseRate, "STATIC", "");
             if (type == SetupBeamType.DRR)
             {
                 Beam drr = schedulePlan.AddSetupBeam(beamMachineParams,
