@@ -54,7 +54,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,45,0,0"
+                   Margin="60,90,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Number of fractions"
                    ToolTip="The total number of fractions"
@@ -62,7 +62,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="600,45,0,0"
+                   Margin="245,90,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding NumberOfFractions}"
@@ -70,7 +70,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="60,105,0,0"
+                   Margin="415,45,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Treatment machine"
                    ToolTip="The treatment machine. Should match Eclipse machine names."
@@ -78,7 +78,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="245,105,0,0"
+                   Margin="600,45,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding TreatmentMachine}"
@@ -86,7 +86,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="63,145,0,0"
+                   Margin="415,90,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="MLC Identifier"
                    ToolTip="The MLC identifier of the machine"
@@ -94,7 +94,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="245,145,0,0"
+                   Margin="600,90,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding MLCId}"
@@ -102,7 +102,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,103,0,0"
+                   Margin="415,135,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Energy"
                    ToolTip="The beam energy. Should match Eclipse energy names."
@@ -110,7 +110,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="600,103,0,0"
+                   Margin="600,135,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding Energy}"
@@ -118,7 +118,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,145,0,0"
+                   Margin="415,180,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose rate [MU/min]"
                    ToolTip="The dose rate (e.g. 600)"
@@ -126,7 +126,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="600,145,0,0"
+                   Margin="600,180,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding DoseRate}"
@@ -134,7 +134,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="60,205,0,0"
+                   Margin="60,135,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Optimization algorithm"
                    ToolTip="Optimization algorithm. Should match Eclipse optimizer names."
@@ -142,7 +142,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="245,205,0,0"
+                   Margin="245,135,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding OptimizationAlgorithm}"
@@ -150,7 +150,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,205,0,0"
+                   Margin="60,180,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose algorithm"
                    ToolTip="The dose algorithm. Should match Eclipse dose algorithm names."
@@ -158,7 +158,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="600,205,0,0"
+                   Margin="245,180,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding DoseAlgorithm}"
@@ -166,7 +166,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="60,265,0,0"
+                   Margin="60,225,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding PlanningLabel}"
                    ToolTip="{Binding TooltipPlanningLabel}"
@@ -174,7 +174,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="245,265,0,0"
+                   Margin="245,225,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding SelectedPlanningOption}"
@@ -182,7 +182,7 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="440,265,0,0"
+                   Margin="60,270,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Collimator angle"
                    ToolTip="The collimator angle of the fields in the lower-extremities plan"
@@ -190,11 +190,27 @@
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Margin="600,265,0,0"
+                   Margin="245,270,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Background="#57537A"
                    Text="{Binding LowerExtremitiesCollimator}"
                    helpers:HighlightHelper.Value="{Binding LowerExtremitiesCollimator}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="415,225,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Name prefix"
+                   ToolTip="The prefix used to name plans and courses"
+                   helpers:HighlightHelper.Value="{Binding NamePrefix}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="600,225,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Background="#57537A"
+                   Text="{Binding NamePrefix}"
+                   helpers:HighlightHelper.Value="{Binding NamePrefix}"/>
 
         <Button HorizontalAlignment="Center"
                 VerticalAlignment="Top"
@@ -203,7 +219,7 @@
                 FontSize="20"
                 Width="250"
                 Command="{Binding OpenConfigurationCommand}"/>
-        
+
         <Border HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Margin="10,0,0,10"

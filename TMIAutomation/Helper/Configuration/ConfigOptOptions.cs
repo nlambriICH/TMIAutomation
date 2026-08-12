@@ -26,6 +26,7 @@ namespace TMIAutomation
         }
 
         public static string OptOptionsPath => Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
+        public static string NamePrefix => optSettings.ContainsKey("NamePrefix") ? optSettings["NamePrefix"] : string.Empty;
         public static string OptimizationAlgorithm => optSettings["OptimizationAlgorithm"];
         public static string DoseAlgorithm => optSettings["DoseAlgorithm"];
         public static string MLCID => optSettings["MLCID"];

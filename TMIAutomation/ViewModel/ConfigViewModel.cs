@@ -124,6 +124,13 @@ namespace TMIAutomation.ViewModel
             set => Set(ref lowerExtremitiesCollimator, value);
         }
 
+        private string namePrefix = ConfigOptOptions.NamePrefix;
+        public string NamePrefix
+        {
+            get => namePrefix;
+            set => Set(ref namePrefix, value);
+        }
+
         public ConfigViewModel(ModelBase modelBase)
         {
             this.modelBase = modelBase;
@@ -210,6 +217,7 @@ namespace TMIAutomation.ViewModel
                     SelectedPlanningOption = ConfigOptOptions.AutoPlanLowerExtremities;
 #endif
                     LowerExtremitiesCollimator = ConfigOptOptions.LowerExtremitiesCollimator;
+                    NamePrefix = ConfigOptOptions.NamePrefix;
 
                     // Refresh all bindings on the UI
                     RaisePropertyChanged(string.Empty);

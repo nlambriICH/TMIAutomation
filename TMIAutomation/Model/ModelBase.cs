@@ -212,7 +212,7 @@ namespace TMIAutomation
             return this.esapiWorker.RunAsync(scriptContext =>
             {
                 PatientOrientation patientOrientation = planType == PlanType.Up ? PatientOrientation.HeadFirstSupine : PatientOrientation.FeetFirstSupine;
-                string planId = planType == PlanType.Up ? "TMLIupperAuto" : "TMLIdownAuto";
+                string planId = planType == PlanType.Up ? $"{ConfigOptOptions.NamePrefix}upperAuto" : $"{ConfigOptOptions.NamePrefix}downAuto";
 
                 Course targetCourse = scriptContext.Patient.Courses.FirstOrDefault(c => c.Id == courseId);
                 ExternalPlanSetup newPlan = targetCourse.ExternalPlanSetups.FirstOrDefault(p => p.Id == planId);

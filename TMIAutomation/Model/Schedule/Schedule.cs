@@ -23,7 +23,7 @@ namespace TMIAutomation
         private readonly string scheduleCourseId;
         private readonly bool isocentersOnArms;
         private readonly List<string> scheduleSSStudySeriesId;
-        private static readonly string SCHEDULE_PLAN_NAME = "TMLI_ISO";
+        private static readonly string SCHEDULE_PLAN_NAME = $"{ConfigOptOptions.NamePrefix}_ISO";
         private enum SetupBeamType
         {
             CBCT,
