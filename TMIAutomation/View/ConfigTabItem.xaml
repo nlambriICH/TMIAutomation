@@ -1,0 +1,214 @@
+﻿<UserControl x:Class="TMIAutomation.View.ConfigTabItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
+             xmlns:converters="clr-namespace:TMIAutomation.Converters"
+             d:DataContext="{d:DesignInstance Type=viewmodel:ConfigViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Theme/ButtonTheme.xaml"/>
+                <ResourceDictionary Source="../Theme/ComboBoxTheme.xaml"/>
+                <ResourceDictionary Source="../Theme/TextBlockTheme.xaml"/>
+                <ResourceDictionary Source="../Theme/TextBoxTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <Style TargetType="ToolTip">
+                <Setter Property="Background" Value="#3F3D56"/>
+                <Setter Property="Foreground" Value="#FDFDFD"/>
+                <Setter Property="BorderBrush" Value="#57537A"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="8,4"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="ToolTipService.InitialShowDelay" Value="200"/>
+                <Setter Property="ToolTipService.BetweenShowDelay" Value="100"/>
+                <Setter Property="ToolTipService.ShowDuration" Value="{x:Static sys:Int32.MaxValue}"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="#272537">
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="60,45,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Dose per fraction [Gy]"
+                   ToolTip="Enter the dose per fraction in Gray (e.g., 2.0)"/>
+
+        <TextBox HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Width="50"
+                 Margin="245,45,0,0"
+                 Style="{StaticResource TextBoxTheme}"
+                 PreviewTextInput="NumberValidationTextBox"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,45,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Number of fractions"
+                   ToolTip="Enter the total number of fractions"/>
+
+        <TextBox HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Width="50"
+                 Margin="600,45,0,0"
+                 Style="{StaticResource TextBoxTheme}"
+                 PreviewTextInput="NumberValidationTextBox"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="60,105,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Treatment machine"
+                   ToolTip="Select the treatment machine"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="245,105,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding Machines}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedMachineId}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,105,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="MLC Identifier"
+                   ToolTip="Select the MLC identifier of the machine"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="600,105,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding MLCs}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedMLCId}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="60,145,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Energy"
+                   ToolTip="Select the beam energy"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="245,145,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding Energies}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedEnergy}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,145,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Dose rate [MU/min]"
+                   ToolTip="Select the dose rate"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="600,145,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding DoseRates}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedDoserate}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="60,205,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Optimization algorithm"
+                   ToolTip="Select the optimizer"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="245,205,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding OptimizationAlgorithms}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedOptimizationAlgorithm}"/>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,205,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Dose algorithm"
+                   ToolTip="Select the dose engine"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="600,205,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding DoseAlgorithms}"
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectedItem="{Binding SelectedDoseAlgorithm}"/>
+
+        <StackPanel HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Orientation="Horizontal"
+                    Margin="60,265,0,0">
+            <Label Content="{Binding PlanningLabel}"
+                   VerticalAlignment="Center"
+                   FontFamily="Serif"
+                   FontSize="16"
+                   Padding="3"
+                   Foreground="#FDFDFD"
+                   ToolTip="{Binding TooltipPlanningLabel}"/>
+
+            <RadioButton VerticalAlignment="Center"
+                 Margin="15,0,0,0"
+                 Content="Yes"
+                 Foreground="#FDFDFD"
+                 GroupName="TermsGroup"
+                 IsChecked="{Binding IsPlanningOptionSelected, Mode=TwoWay}"/>
+
+            <RadioButton VerticalAlignment="Center"
+                 Margin="15,0,0,0"
+                 Content="No"
+                 Foreground="#FDFDFD"
+                 GroupName="TermsGroup"
+                 IsChecked="{Binding IsPlanningOptionSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}"/>
+        </StackPanel>
+
+        <TextBlock HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="440,265,0,0"
+                   Style="{StaticResource TextBlockTheme}"
+                   Text="Collimator angle"
+                   ToolTip="Select the collimator angle of the fields in the lower-extremities plan"/>
+
+        <ComboBox HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="600,265,0,0"
+                  Style="{StaticResource ComboBoxTheme}"
+                  ItemsSource="{Binding CollAngleOptions}"
+                  SelectedItem="{Binding SelectedCollAngleOption}"/>
+
+        <Button HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,325,0,0"
+                Content="Update configuration"
+                FontSize="20"
+                Width="250"
+                Command="{Binding UpdateConfigurationCommand}"/>
+
+        <Button HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,10,10"
+                Content="Open script configuration"
+                FontSize="12"
+                Width="160"
+                Command="{Binding OpenConfigurationCommand}"/>
+
+    </Grid>
+</UserControl>

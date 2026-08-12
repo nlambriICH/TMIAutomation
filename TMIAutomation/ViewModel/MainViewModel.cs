@@ -8,6 +8,7 @@ namespace TMIAutomation.ViewModel
         public UpperViewModel UpperVM { get; }
         public LowerViewModel LowerVM { get; }
         public ScheduleViewModel ScheduleVM { get; }
+        public ConfigViewModel ConfigVM { get; }
 
         public MainViewModel(EsapiWorker esapiWorker)
         {
@@ -15,6 +16,7 @@ namespace TMIAutomation.ViewModel
             UpperVM = new UpperViewModel(modelBase);
             LowerVM = new LowerViewModel(modelBase);
             ScheduleVM = new ScheduleViewModel(modelBase);
+            ConfigVM = new ConfigViewModel(modelBase);
         }
     }
 }

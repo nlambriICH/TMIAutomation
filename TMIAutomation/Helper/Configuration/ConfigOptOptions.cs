@@ -14,9 +14,8 @@ namespace TMIAutomation
         public static void Init()
         {
             optSettings = new Dictionary<string, string>();
-            string optOptionsPath = Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
-            logger.Verbose("Reading optimization options from {optOptionsPath}", optOptionsPath);
-            foreach (string line in File.ReadLines(optOptionsPath))
+            logger.Verbose("Reading optimization options from {optOptionsPath}", OptOptionsPath);
+            foreach (string line in File.ReadLines(OptOptionsPath))
             {
                 if (line.StartsWith("#") || string.IsNullOrEmpty(line)) continue;
                 string[] optSetup = line.Split('\t');
@@ -26,6 +25,7 @@ namespace TMIAutomation
             }
         }
 
+        public static string OptOptionsPath => Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
         public static string OptimizationAlgorithm => optSettings["OptimizationAlgorithm"];
         public static string DoseAlgorithm => optSettings["DoseAlgorithm"];
         public static string MLCID => optSettings["MLCID"];

@@ -86,6 +86,22 @@
 
             </TabItem>
 
+            <TabItem Width="160"
+                     Background="#FDFDFD"
+                     DataContext="{Binding ConfigVM}"
+                     x:Name="ConfigTabItem">
+
+                <TabItem.Header>
+                    <TextBlock Text="Script Configuration"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
+
+                <uc:ConfigTabItem/>
+
+            </TabItem>
+
         </TabControl>
         
     </Grid>
