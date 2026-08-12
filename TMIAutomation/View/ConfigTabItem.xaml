@@ -47,7 +47,7 @@
                  Width="50"
                  Margin="245,45,0,0"
                  Style="{StaticResource TextBoxTheme}"
-                 PreviewTextInput="NumberValidationTextBox"/>
+                 PreviewTextInput="PositiveDecimalValidationTextBox"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
@@ -61,7 +61,7 @@
                  Width="50"
                  Margin="600,45,0,0"
                  Style="{StaticResource TextBoxTheme}"
-                 PreviewTextInput="NumberValidationTextBox"/>
+                 PreviewTextInput="PositiveIntegerValidationTextBox"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
