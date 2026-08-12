@@ -6,6 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
              xmlns:converters="clr-namespace:TMIAutomation.Converters"
+             xmlns:helpers="clr-namespace:TMIAutomation.Helpers"
              d:DataContext="{d:DesignInstance Type=viewmodel:ConfigViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -40,156 +41,191 @@
                    Margin="60,45,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose per fraction [Gy]"
-                   ToolTip="The dose per fraction in Gray (e.g., 2.0)"/>
+                   ToolTip="The dose per fraction in Gray (e.g., 2.0)"
+                   helpers:HighlightHelper.Value="{Binding DosePerFraction}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="245,45,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding DosePerFraction}"/>
+                   Text="{Binding DosePerFraction}"
+                   helpers:HighlightHelper.Value="{Binding DosePerFraction}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,45,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Number of fractions"
-                   ToolTip="The total number of fractions"/>
+                   ToolTip="The total number of fractions"
+                   helpers:HighlightHelper.Value="{Binding NumberOfFractions}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="600,45,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding NumberOfFractions}"/>
+                   Text="{Binding NumberOfFractions}"
+                   helpers:HighlightHelper.Value="{Binding NumberOfFractions}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="60,105,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Treatment machine"
-                   ToolTip="The treatment machine. Should match Eclipse machine names."/>
+                   ToolTip="The treatment machine. Should match Eclipse machine names."
+                   helpers:HighlightHelper.Value="{Binding TreatmentMachine}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="245,105,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding TreatmentMachine}"/>
+                   Text="{Binding TreatmentMachine}"
+                   helpers:HighlightHelper.Value="{Binding TreatmentMachine}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="63,145,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="MLC Identifier"
-                   ToolTip="The MLC identifier of the machine"/>
+                   ToolTip="The MLC identifier of the machine"
+                   helpers:HighlightHelper.Value="{Binding MLCId}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="245,145,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding MLCId}"/>
+                   Text="{Binding MLCId}"
+                   helpers:HighlightHelper.Value="{Binding MLCId}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,103,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Energy"
-                   ToolTip="The beam energy. Should match Eclipse energy names."/>
+                   ToolTip="The beam energy. Should match Eclipse energy names."
+                   helpers:HighlightHelper.Value="{Binding Energy}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="600,103,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding Energy}"/>
+                   Text="{Binding Energy}"
+                   helpers:HighlightHelper.Value="{Binding Energy}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,145,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose rate [MU/min]"
-                   ToolTip="The dose rate (e.g. 600)"/>
+                   ToolTip="The dose rate (e.g. 600)"
+                   helpers:HighlightHelper.Value="{Binding DoseRate}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="600,145,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding DoseRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                   Text="{Binding DoseRate}"
+                   helpers:HighlightHelper.Value="{Binding DoseRate}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="60,205,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Optimization algorithm"
-                   ToolTip="Optimization algorithm. Should match Eclipse optimizer names."/>
+                   ToolTip="Optimization algorithm. Should match Eclipse optimizer names."
+                   helpers:HighlightHelper.Value="{Binding OptimizationAlgorithm}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="245,205,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding OptimizationAlgorithm}"/>
+                   Text="{Binding OptimizationAlgorithm}"
+                   helpers:HighlightHelper.Value="{Binding OptimizationAlgorithm}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,205,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Dose algorithm"
-                   ToolTip="The dose algorithm. Should match Eclipse dose algorithm names."/>
+                   ToolTip="The dose algorithm. Should match Eclipse dose algorithm names."
+                   helpers:HighlightHelper.Value="{Binding DoseAlgorithm}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="600,205,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding DoseAlgorithm}"/>
+                   Text="{Binding DoseAlgorithm}"
+                   helpers:HighlightHelper.Value="{Binding DoseAlgorithm}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="60,265,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="{Binding PlanningLabel}"
-                   ToolTip="{Binding TooltipPlanningLabel}"/>
+                   ToolTip="{Binding TooltipPlanningLabel}"
+                   helpers:HighlightHelper.Value="{Binding SelectedPlanningOption}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="245,265,0,0"
                    Background="#57537A"
                    Style="{StaticResource TextBlockTheme}"
-                   Text="{Binding SelectedPlanningOption}"/>
+                   Text="{Binding SelectedPlanningOption}"
+                   helpers:HighlightHelper.Value="{Binding SelectedPlanningOption}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="440,265,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Text="Collimator angle"
-                   ToolTip="The collimator angle of the fields in the lower-extremities plan"/>
+                   ToolTip="The collimator angle of the fields in the lower-extremities plan"
+                   helpers:HighlightHelper.Value="{Binding LowerExtremitiesCollimator}"/>
 
         <TextBlock HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Margin="600,265,0,0"
                    Style="{StaticResource TextBlockTheme}"
                    Background="#57537A"
-                   Text="{Binding LowerExtremitiesCollimator}"/>
+                   Text="{Binding LowerExtremitiesCollimator}"
+                   helpers:HighlightHelper.Value="{Binding LowerExtremitiesCollimator}"/>
 
         <Button HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 Margin="0,325,0,0"
-                Content="Reload configuration"
+                Content="Open script configuration"
                 FontSize="20"
                 Width="250"
-                Command="{Binding ReloadConfigurationCommand}"/>
-
-        <Button HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Margin="0,0,10,10"
-                Content="Open script configuration"
-                FontSize="12"
-                Width="160"
                 Command="{Binding OpenConfigurationCommand}"/>
+        
+        <Border HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="10,0,0,10"
+                Background="#1E3A2B"
+                BorderBrush="#4CAF50"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="10,5"
+                Visibility="{Binding StatusVisibility}">
+            <StackPanel Orientation="Horizontal">
+                <!-- Checkmark icon / indicator -->
+                <TextBlock Text="✓ "
+                           Foreground="#81C784"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center" />
+
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="#E8F5E9"
+                           FontSize="13"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
 
     </Grid>
 </UserControl>
