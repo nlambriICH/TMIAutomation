@@ -172,7 +172,6 @@
     <Compile Include="Async\CurrentThreadWorker.cs" />
     <Compile Include="Async\EsapiWorker.cs" />
     <Compile Include="Async\StaThreadFactory.cs" />
-    <Compile Include="Helper\Converters\InverseBooleanConverter.cs" />
     <Compile Include="Helper\Converters\UnderscoreConverter.cs" />
     <Compile Include="Helper\HighlightHelper.cs" />
     <Compile Include="Model\Optimization\IsoConfiguration\LowerIsocenters.cs" />

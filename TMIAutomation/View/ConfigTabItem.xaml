@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:viewmodel="clr-namespace:TMIAutomation.ViewModel"
-             xmlns:converters="clr-namespace:TMIAutomation.Converters"
              xmlns:helpers="clr-namespace:TMIAutomation.Helpers"
              d:DataContext="{d:DesignInstance Type=viewmodel:ConfigViewModel}"
              mc:Ignorable="d" 
@@ -20,7 +19,6 @@
                 <ResourceDictionary Source="../Theme/TextBoxTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <Style TargetType="ToolTip">
                 <Setter Property="Background" Value="#3F3D56"/>
                 <Setter Property="Foreground" Value="#FDFDFD"/>
