@@ -38,7 +38,7 @@ namespace TMIAutomation.Tests
             yield return new object[] { true, new List<string> { "CScheduling", "C1", "CScheduleTest", "CDemoTest", "CNoPlan", "CDemo", "LowerAuto", "CJunction", Resources.NewCourseListBox } };
 #elif ESAPI16
             yield return new object[] { false, new List<string> { "CDemoTest", "CScheduling", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt", Resources.NewCourseListBox } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1", Resources.NewCourseListBox } };
 #else
             yield return new object[] { false, new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
             yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "CNoPlan", "CDemo", "LowerAuto", "CJunction", "C1", Resources.NewCourseListBox } };
