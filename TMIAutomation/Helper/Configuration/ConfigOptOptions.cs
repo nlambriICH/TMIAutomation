@@ -27,21 +27,21 @@ namespace TMIAutomation
 
         public static string OptOptionsPath => Path.Combine(assemblyDir, "Configuration", "OptimizationOptions.txt");
         public static string NamePrefix => optSettings.ContainsKey("NamePrefix") ? optSettings["NamePrefix"] : string.Empty;
-        public static string OptimizationAlgorithm => optSettings["OptimizationAlgorithm"];
-        public static string DoseAlgorithm => optSettings["DoseAlgorithm"];
-        public static string MLCID => optSettings["MLCID"];
-        public static string DosePerFraction => optSettings["DosePerFraction"];
-        public static string NumberOfFractions => optSettings["NumberOfFractions"];
-        public static string TreatmentMachine => optSettings["TreatmentMachine"];
-        public static string Energy => optSettings["Energy"];
-        public static int DoseRate => int.TryParse(optSettings["DoseRate"], out int doseRate) ? doseRate : 600;
+        public static string OptimizationAlgorithm => optSettings.ContainsKey("OptimizationAlgorithm") ? optSettings["OptimizationAlgorithm"] : string.Empty;
+        public static string DoseAlgorithm => optSettings.ContainsKey("DoseAlgorithm") ? optSettings["DoseAlgorithm"] : string.Empty;
+        public static string MLCID => optSettings.ContainsKey("MLCID") ? optSettings["MLCID"] : string.Empty;
+        public static string DosePerFraction => optSettings.ContainsKey("DosePerFraction") ? optSettings["DosePerFraction"] : "2";
+        public static string NumberOfFractions => optSettings.ContainsKey("NumberOfFractions") ? optSettings["NumberOfFractions"] : "1";
+        public static string TreatmentMachine => optSettings.ContainsKey("TreatmentMachine") ? optSettings["TreatmentMachine"] : string.Empty;
+        public static string Energy => optSettings.ContainsKey("Energy") ? optSettings["Energy"] : string.Empty;
+        public static int DoseRate => optSettings.ContainsKey("DoseRate") && int.TryParse(optSettings["DoseRate"], out int doseRate) ? doseRate : 600;
         public static string LowerExtremitiesCollimator => optSettings.ContainsKey("LowerExtremitiesCollimator") ? optSettings["LowerExtremitiesCollimator"] : string.Empty;
         public static bool BaseDosePlanning =>
 #if ESAPI15
                 optSettings.ContainsKey("BaseDosePlanning") && optSettings["BaseDosePlanning"] == "Yes";
 #else
                 true; // Always true for ESAPI16 and ESAPI18
-        public static bool AutoPlanLowerExtremities => optSettings["AutoPlanLowerExtremities"] == "Yes";
+        public static bool AutoPlanLowerExtremities => optSettings.ContainsKey("AutoPlanLowerExtremities") && optSettings["AutoPlanLowerExtremities"] == "Yes";
 #endif
     }
 }
