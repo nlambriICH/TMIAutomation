@@ -37,8 +37,8 @@ namespace TMIAutomation
             }
 
             ExternalBeamMachineParameters sourcePlanBeamParams = new ExternalBeamMachineParameters(ConfigOptOptions.TreatmentMachine,
-                                                                                                   "6X",
-                                                                                                   600,
+                                                                                                   ConfigOptOptions.Energy,
+                                                                                                   ConfigOptOptions.DoseRate,
                                                                                                    "ARC",
                                                                                                    "");
             logger.Information("Using beam machine parameters: {@sourcePlanBeamParams}", sourcePlanBeamParams);

@@ -35,13 +35,13 @@ namespace TMIAutomation.Tests
         {
 #if ESAPI18
             yield return new object[] { false, new List<string> { "CDemoTest", "CScheduleTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "C1", "CScheduling", "CDemo", "CDemoTest", "CJunction", "CNoPlan", "CScheduleTest", "LowerAuto", Resources.NewCourseListBox } };
+            yield return new object[] { true, new List<string> { "CScheduling", "C1", "CScheduleTest", "CDemoTest", "CNoPlan", "CDemo", "LowerAuto", "CJunction", Resources.NewCourseListBox } };
 #elif ESAPI16
             yield return new object[] { false, new List<string> { "CDemoTest", "CScheduling", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CJunction", "CLowerAuto", "CDemo", "CBaseDoseAF", "CBaseDose", "CBaseDoseAddOpt_", "TEst", "CLowerAutoAddOpt", "CBaseDoseAddOpt", Resources.NewCourseListBox } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "CBaseDoseAddOpt", "CBaseDoseAddOpt_", "CLowerAutoAddOpt", "TEst", "CBaseDoseAF", "CBaseDose", "CLowerAuto", "CDemo", "CJunction", "C1", Resources.NewCourseListBox } };
 #else
             yield return new object[] { false, new List<string> { "CDemoTest", "CNoPlan", "CScheduling", "CDemo", "LowerAuto", "CJunction", "C1" } };
-            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "C1", "CDemo", "CJunction", "CNoPlan", "LowerAuto", Resources.NewCourseListBox } };
+            yield return new object[] { true, new List<string> { "CScheduling", "CDemoTest", "CNoPlan", "CDemo", "LowerAuto", "CJunction", "C1", Resources.NewCourseListBox } };
 #endif
         }
 
@@ -92,7 +92,13 @@ namespace TMIAutomation.Tests
                 "kVCBCT_01b01\t5287 / Series4", "kVCBCT_01c01\t5287 / Series3", "kVCBCT_01d01\t5287 / Series1", "kVCBCT_01e01\t5287 / Series2", "kVCBCT_01f01\t5287 / Series", "kVCBCT_01g01\t5289 / Series1", "kVCBCT_01h01\t5289 / Series",
                 "Lower_video_rec\t5289 / Series2", "CT_1\t5289 / Series2", "CT_2\t5289 / Series2", "CT_1\t5289 / Series2",
                 "Junction_Auto\t5289 / Series2", "Lower_demo\t5289 / Series2", "LowerAuto\t5289 / Series2",
-                "CT_2\t5287 / Series5", "CT_1\t5287 / Series5", "Upper_test\t5287 / Series5", "CT_1\t5287 / Series5", "TEST\t5287 / Series5",
+                "CT_2\t5287 / Series5",
+#if ESAPI18
+                "Upper_test\t5287 / Series5", "CT_1\t5287 / Series5",
+#elif ESAPI15
+                "CT_1\t5287 / Series5", "Upper_test\t5287 / Series5",
+#endif
+                "CT_1\t5287 / Series5", "TEST\t5287 / Series5",
             };
 #endif
 
@@ -103,7 +109,7 @@ namespace TMIAutomation.Tests
             }
             catch (EqualException e)
             {
-                throw new Exception("Unexpected upper field configuration", e);
+                throw new Exception("Unexpected structure set, study, and series identifiers", e);
             }
         }
 

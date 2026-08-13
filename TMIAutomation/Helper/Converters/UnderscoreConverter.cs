@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace TMIAutomation.Helper
+namespace TMIAutomation.Converters
 {
     // This converter duplicates all underscores
     // because WPF doesn't display single underscores

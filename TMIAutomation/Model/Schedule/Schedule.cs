@@ -23,7 +23,7 @@ namespace TMIAutomation
         private readonly string scheduleCourseId;
         private readonly bool isocentersOnArms;
         private readonly List<string> scheduleSSStudySeriesId;
-        private static readonly string SCHEDULE_PLAN_NAME = "TMLI_ISO";
+        private static readonly string SCHEDULE_PLAN_NAME = $"{ConfigOptOptions.NamePrefix}_ISO";
         private enum SetupBeamType
         {
             CBCT,
@@ -293,7 +293,7 @@ namespace TMIAutomation
         private void AddSetupBeamToSchedulePlan(ExternalPlanSetup schedulePlan, Beam referenceBeam, SetupBeamType type)
         {
             // ESAPI v15 allows only to modify setup fields
-            ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(referenceBeam.TreatmentUnit.Id, "6X", 600, "STATIC", "");
+            ExternalBeamMachineParameters beamMachineParams = new ExternalBeamMachineParameters(referenceBeam.TreatmentUnit.Id, referenceBeam.EnergyModeDisplayName, referenceBeam.DoseRate, "STATIC", "");
             if (type == SetupBeamType.DRR)
             {
                 Beam drr = schedulePlan.AddSetupBeam(beamMachineParams,

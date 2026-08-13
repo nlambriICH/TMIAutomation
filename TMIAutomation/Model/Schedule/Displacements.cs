@@ -66,7 +66,7 @@ namespace TMIAutomation
         {
             Directory.CreateDirectory(SCHEDULE_DIR);
 
-            string savePath = Path.Combine(SCHEDULE_DIR, $"{patientLastName}_{patientFirstName}_TMLI_{this.treatmentDate:ddMMyyyy}.txt");
+            string savePath = Path.Combine(SCHEDULE_DIR, $"{patientLastName}_{patientFirstName}_{ConfigOptOptions.NamePrefix}_{this.treatmentDate:ddMMyyyy}.txt");
             File.WriteAllText(savePath, content);
         }
     }

@@ -26,15 +26,24 @@
     <Grid Background="#272537">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="70"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="TMIAutomation"
-				   VerticalAlignment="Center"
-				   Margin="10,5,5,10"
+				   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+				   Margin="10,0,0,0"
                    FontSize="22"
                    Style="{StaticResource TextBlockTheme}"/>
+
+        <Button HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,0,10,0"
+                Content="Script documentation"
+                FontSize="14"
+                Width="150"
+                Command="{Binding OpenDocumentationCommand}"/>
 
         <TabControl Grid.Row="1">
 
@@ -83,6 +92,22 @@
                 </TabItem.Header>
 
                 <uc:ScheduleTabItem/>
+
+            </TabItem>
+
+            <TabItem Width="160"
+                     Background="#FDFDFD"
+                     DataContext="{Binding ConfigVM}"
+                     x:Name="ConfigTabItem">
+
+                <TabItem.Header>
+                    <TextBlock Text="Script Configuration"
+                               FontSize="16"
+                               FontFamily="Serif"
+                               Foreground="#272537"/>
+                </TabItem.Header>
+
+                <uc:ConfigTabItem/>
 
             </TabItem>
 
