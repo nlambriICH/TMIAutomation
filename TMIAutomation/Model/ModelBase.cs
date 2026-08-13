@@ -33,7 +33,9 @@ namespace TMIAutomation
             List<Course> orderedCourses;
             if (schedule)
             {
-                orderedCourses = scriptContext.Patient.Courses.OrderByDescending(c => c.PlanSetups.Count(ps => IsPlanApproved(ps))).ToList();
+                orderedCourses = scriptContext.Patient.Courses
+                    .OrderByDescending(c => c.PlanSetups.Count(ps => IsPlanApproved(ps)))
+                    .ThenByDescending(c => c.HistoryDateTime).ToList();
 
                 // If no approved plan in any course, set first course Id in list to create new course
                 List<string> orderedCourseId = orderedCourses.Select(c => c.Id).ToList();
